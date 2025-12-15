@@ -113,11 +113,17 @@
         </div>
     </div>
 
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
         function addMessage(text, type) {
             const msg = document.createElement('div');
             msg.className = 'message ' + type;
-            msg.textContent = text;
+
+            if (type === 'assistant') {
+                msg.innerHTML = marked.parse(text);
+            } else {
+                msg.textContent = text;
+            }
+
             document.getElementById('messages').appendChild(msg);
             document.getElementById('messages').scrollTop = 999999;
         }
