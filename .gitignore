@@ -62,3 +62,8 @@ source_code/chroma/
 node_modules/
 .next/
 out/
+
+# Data (local only)
+source_code/data/
+source_code/data - Copy/
+
