@@ -92,6 +92,31 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+        
+        .assistant pre {
+            background: #1a202c;
+            color: #f7fafc;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-top: 8px;
+        }
+
+        .assistant code {
+            background: #edf2f7;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .assistant ul {
+            padding-left: 20px;
+        }
+
+        .assistant li {
+            margin-bottom: 6px;
+        }
+
     </style>
 </head>
 <body>
@@ -113,7 +138,9 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
         function addMessage(text, type) {
             const msg = document.createElement('div');
             msg.className = 'message ' + type;
@@ -125,7 +152,7 @@
             }
 
             document.getElementById('messages').appendChild(msg);
-            document.getElementById('messages').scrgit ollTop = 999999;
+            document.getElementById('messages').scrollTop = 999999;
         }
 
         async function send() {
