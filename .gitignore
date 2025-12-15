@@ -1,0 +1,64 @@
+# ======================
+# Virtual environment
+# ======================
+.venv/
+
+# ======================
+# Secrets
+# ======================
+.env
+
+# ======================
+# Python
+# ======================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# ======================
+# Django
+# ======================
+db.sqlite3
+media/
+staticfiles/
+*.log
+
+# ======================
+# Editors / IDEs
+# ======================
+.vscode/
+.idea/
+
+# ======================
+# OS junk
+# ======================
+.DS_Store
+Thumbs.db
+
+# ======================
+# Testing
+# ======================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ======================
+# Vector DB (Chroma)
+# ======================
+source_code/chroma/
+
+# ======================
+# OCR / extracted text
+# ======================
+*.txt
+
+# ======================
+# Frontend / Vercel
+# ======================
+node_modules/
+.next/
+out/
