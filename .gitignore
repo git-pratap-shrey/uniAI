@@ -52,11 +52,6 @@ htmlcov/
 source_code/chroma/
 
 # ======================
-# OCR / extracted text
-# ======================
-*.txt
-
-# ======================
 # Frontend / Vercel
 # ======================
 node_modules/
