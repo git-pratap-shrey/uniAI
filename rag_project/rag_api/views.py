@@ -74,7 +74,7 @@ def detect_unit_query(query: str) -> str | None:
     return f"unit{match.group(1)}" if match else None
 
 
-def retrieve_context(query: str, n_results: int = 5) -> list[dict]:
+def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> list[dict]:
     """
     Retrieve relevant chunks from ChromaDB.
     - Uses metadata filtering for unit-specific queries
@@ -83,19 +83,24 @@ def retrieve_context(query: str, n_results: int = 5) -> list[dict]:
     collection = get_collection()
     unit = detect_unit_query(query)
 
+    where_clause = {}
+
     if unit:
-        # Metadata filtering - search within unit
-        results = collection.query(
-            query_embeddings=[embed([query])[0]],  # Embed the query properly
-            n_results=20,
-            where={"unit": unit},
-        )
-    else:
-        query_embedding = embed([query])
-        results = collection.query(
-            query_embeddings=query_embedding,
-            n_results=n_results,
-        )
+        where_clause["unit"] = unit
+
+    if mode == "syllabus":
+        where_clause["type"] = {"$in": ["notes", "pyq"]}
+
+    # In generic mode → no type restriction
+
+    query_embedding = embed([query])[0]
+
+    results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=20 if unit else n_results,
+        where=where_clause if where_clause else None,
+    )
+
 
     if not results or not results.get("documents"):
         return []
@@ -113,7 +118,7 @@ def retrieve_context(query: str, n_results: int = 5) -> list[dict]:
     ]
 
 
-def generate_answer(query: str, contexts: list[dict]) -> str:
+def generate_answer(query: str, contexts: list[dict], mode: str) -> str:
     """
     Generate an answer using Gemini constrained to retrieved context.
     """
@@ -127,21 +132,37 @@ def generate_answer(query: str, contexts: list[dict]) -> str:
         f"[Source: {c['source']} - {c['unit']}]\n{c['text']}"
         for c in contexts
     )
+    if mode == "syllabus":
+        system_prompt = """
+    You are a syllabus-aware exam assistant.
+
+    Rules:
+    - Answer ONLY from the provided notes and PYQs.
+    - Use definitions and exam keywords.
+    - Write in a "what to write in exam" tone.
+    - Do NOT add extra theory.
+    - If something is outside the syllabus, clearly say so.
+    """
+    else:
+        system_prompt = """
+    The following question is outside the syllabus.
+
+    You are now acting as a generic AI tutor.
+    You may use general knowledge.
+    Explain clearly, but mention that this is not syllabus-bound.
+    """
+
 
     prompt = f"""
-You are a helpful AI assistant for a student studying Python programming.
+                {system_prompt}
 
-Answer the question using ONLY the provided course notes.
-If the context is insufficient, clearly say so.
+                Context:
+                {context_block}
 
-Context:
-{context_block}
+                Question:
+                {query}
+            """
 
-Question:
-{query}
-
-Provide a clear, well-structured answer. Include code examples if relevant.
-"""
 
     try:
         response = model.generate_content(prompt)
@@ -161,21 +182,39 @@ def query_view(request):
     try:
         data = json.loads(request.body)
         query = data.get("query", "").strip()
+        
+        GENERIC_TRIGGERS = [
+            "explain in detail",
+            "implementation",
+            "code",
+            "algorithm",
+            "beyond syllabus",
+            "why does",
+            "how does",
+        ]
+
+        mode = "syllabus"
+        if any(t in query for t in GENERIC_TRIGGERS):
+            mode = "generic"
+        
+        print("MODE:", mode)
 
         if not query:
             return JsonResponse({"error": "No query provided"}, status=400)
 
-        contexts = retrieve_context(query)
-        answer = generate_answer(query, contexts)
+        contexts = retrieve_context(query, mode=mode)
+        answer = generate_answer(query, contexts, mode)
 
         return JsonResponse({
             "query": query,
             "answer": answer,
+            "mode": mode,
             "sources": [
                 {"source": c["source"], "unit": c["unit"]}
                 for c in contexts[:3]
             ],
         })
+
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
