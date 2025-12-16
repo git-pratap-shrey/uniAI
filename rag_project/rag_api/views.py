@@ -162,11 +162,25 @@ def query_view(request):
         data = json.loads(request.body)
         query = data.get("query", "").strip()
 
+        print("\n--- NEW REQUEST ---")
+        print("QUERY:", query)
+
+
+
         if not query:
             return JsonResponse({"error": "No query provided"}, status=400)
 
         contexts = retrieve_context(query)
+        print(f"RETRIEVED {len(contexts)} CHUNKS")
+        for i, c in enumerate(contexts[:2]):  # limit to first 2
+            print(f"CHUNK {i+1} | unit={c['unit']} | source={c['source']}")
+            print(c["text"][:200], "...\n")
+        
         answer = generate_answer(query, contexts)
+        print("ANSWER (first 300 chars):")
+        print(answer[:300])
+        print("--- END REQUEST ---\n")
+        
 
         return JsonResponse({
             "query": query,
