@@ -7,6 +7,37 @@ import io
 # If on Windows, need to specify Tesseract path:
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
+def parse_metadata_from_path(pdf_path: str) -> dict:
+    """
+    Extract year, subject, category, unit from folder structure.
+    Expected structure:
+    data/year_x/subject/{notes|pyqs|syllabus}/unitY/*.pdf
+    
+    ->locking filesystem into the data model.
+    """
+    parts = pdf_path.replace("\\", "/").split("/")
+
+    meta = {
+        "year": None,
+        "subject": None,
+        "category": None,
+        "unit": None,
+        "source_file": os.path.basename(pdf_path),
+    }
+
+    for i, p in enumerate(parts):
+        if p.startswith("year_"):
+            meta["year"] = p
+            meta["subject"] = parts[i + 1]
+            meta["category"] = parts[i + 2]
+
+            if meta["category"] == "notes":
+                meta["unit"] = parts[i + 3]
+            else:
+                meta["unit"] = "syllabus"
+
+    return meta
+
 
 def page_has_meaningful_text(text: str, min_chars: int = 50) -> bool:
     return len(text.strip()) >= min_chars
@@ -61,7 +92,8 @@ def process_folder(main_folder: str, output_in_same_folder: bool = True):
 
                 print(f"\n>>> Extracting: {pdf_path}")
 
-                extracted_text = extract_text_hybrid(pdf_path)
+                use_ocr = "syllabus" not in root.lower()
+                extracted_text = extract_text_hybrid(pdf_path, use_ocr=use_ocr)
 
                 # Output file path
                 if output_in_same_folder:
@@ -72,12 +104,27 @@ def process_folder(main_folder: str, output_in_same_folder: bool = True):
                     os.makedirs(out_root, exist_ok=True)
                     txt_path = os.path.join(out_root, file.replace(".pdf", ".txt"))
 
+                meta = parse_metadata_from_path(pdf_path)
+
+                header = (
+                    f"YEAR: {meta['year']}\n"
+                    f"SUBJECT: {meta['subject']}\n"
+                    f"CATEGORY: {meta['category']}\n"
+                    f"UNIT: {meta['unit']}\n"
+                    f"SOURCE_FILE: {meta['source_file']}\n"
+                    "----------------------------------------\n\n"
+                )
+
                 with open(txt_path, "w", encoding="utf-8") as f:
+                    f.write(header)
                     f.write(extracted_text)
+
 
                 print(f"✔ Saved → {txt_path}")
 
 
 if __name__ == "__main__":
-    MAIN_FOLDER = r"D:\CODE-workingBuild\uniAI\source_code\data\year_2\python"   # YOUR MAIN FOLDER HERE
+    MAIN_FOLDER = r"D:\CODE-workingBuild\uniAI\source_code\data\year_2"
+    
+    # MAIN FOLDER HERE
     process_folder(MAIN_FOLDER)

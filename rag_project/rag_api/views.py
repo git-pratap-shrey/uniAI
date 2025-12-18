@@ -69,6 +69,7 @@ FOLLOWUP_TRIGGERS = [
     "summarize",
 ]
 
+
 def is_followup(query: str) -> bool:
     q = query.strip().lower()
     words = q.split()
@@ -82,6 +83,7 @@ def is_followup(query: str) -> bool:
 
 
 MAX_HISTORY_TURNS = 4  # user+assistant pairs
+
 
 def trim_history(history: list[dict]) -> list[dict]:
     if not history:
@@ -141,7 +143,6 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
     ]
 
 
-
 # ------------------------------------------------------------------
 # GENERATION
 # ------------------------------------------------------------------
@@ -151,23 +152,24 @@ def generate_answer(query: str, contexts: list[dict], mode: str, history: list[d
 
     if mode == "syllabus":
         system_prompt = """
-You are uniAI, a syllabus-aware exam assistant.
+            You are uniAI, a syllabus-aware exam assistant.
 
-Rules:
-- Answer ONLY from provided notes or previous assistant responses.
-- Use definitions and exam keywords.
-- Write in a "what to write in exam" tone.
-- If the question refers to previous explanation, repeat or rephrase it.
-- If something is outside the syllabus, clearly say so.
-"""
+            Rules:
+            - Answer ONLY from provided notes or previous assistant responses.
+            - Use definitions and exam keywords.
+            - Write in a "what to write in exam" tone.
+            - If the question refers to previous explanation, repeat or rephrase it.
+            - If something is outside the syllabus, clearly say so.
+        """
+    
     else:
         system_prompt = """
-[GENERIC AI TUTOR MODE]
+            [GENERIC AI TUTOR MODE]
 
-This question is outside the syllabus.
-You may use general knowledge.
-Mention clearly that this is not syllabus-bound.
-"""
+            This question is outside the syllabus.
+            You may use general knowledge.
+            Mention clearly that this is not syllabus-bound.
+        """
 
     memory_block = ""
     if history:
@@ -182,15 +184,15 @@ Mention clearly that this is not syllabus-bound.
             context_block += f"[{c['source']} - {c['unit']}]\n{c['text']}\n\n"
 
     prompt = f"""
-{system_prompt}
+                {system_prompt}
 
-{memory_block}
+                {memory_block}
 
-{context_block}
+                {context_block}
 
-User question:
-{query}
-"""
+                User question:
+                {query}
+            """
 
     try:
         response = model.generate_content(prompt)
