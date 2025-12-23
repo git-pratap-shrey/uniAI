@@ -69,7 +69,7 @@ def extract_and_save_by_page(pdf_path: str):
                     ),
                     images=[img_data],
                     stream=False,
-                    keep_alive=0
+                    keep_alive=-1
                 )
 
                 page_text = response.get("response", "").strip()
