@@ -1,225 +1,144 @@
 import os
+import json
 import re
+from pathlib import Path
 
-import fitz  # PyMuPDF
-import chromadb
-from pipeline.embeddings.local_mxbai import embed # pyright: ignore[reportMissingImports]
+# ---------------- CONFIG ---------------- #
 
-from dotenv import load_dotenv
-load_dotenv()
-# ------------------------------------------------------------------
-# CONFIG
-# ------------------------------------------------------------------
+BASE_PATH = r"D:\CODE-workingBuild\uniAI\source_code\data\year_2"
+OUTPUT_FILE = "chunks_ready_for_embedding.jsonl"
 
-CHROMA_PATH = os.getenv("CHROMA_PATH")
-COLLECTION_NAME = os.getenv("COLLECTION_NAME")
-BASE_PATH = r"D:\CODE-workingBuild\uniAI\source_code\data\year_2\python"
+MIN_CHUNK_LEN = 120   # characters
+MAX_CHUNK_LEN = 1200  # soft cap
 
+# ---------------- HELPERS ---------------- #
 
-# ------------------------------------------------------------------
-# TEXT CLEANING
-# ------------------------------------------------------------------
+def infer_metadata_from_path(txt_path: Path) -> dict:
+    parts = txt_path.as_posix().split("/")
 
-BULLET_CHARS = {
-    "", "•", "●", "▪", "◦", "■", "□",
-    "\u2022", "\uf0b7", "\uf0d8", "\uf0a7",
-}
+    return {
+        "year": parts[-6],
+        "subject": parts[-5],
+        "source": parts[-4],     # notes | pyqs | syllabus
+        "unit": parts[-3],
+        "topic": txt_path.stem.lower(),
+    }
 
 
-def clean_text(text: str) -> str:
+def detect_chunk_type(text: str) -> str:
+    t = text.lower()
+
+    if re.search(r"\bdefinition\b|\bis defined as\b|\bmeans\b", t):
+        return "definition"
+    if re.search(r"\badvantages?\b", t):
+        return "advantages"
+    if re.search(r"\bdisadvantages?\b", t):
+        return "disadvantages"
+    if re.search(r"\bsteps?\b|\bprocedure\b", t):
+        return "steps"
+    if re.search(r"\balgorithm\b", t):
+        return "algorithm"
+    if re.search(r"\bcompare\b|\bdifferentiate\b|\bvs\b", t):
+        return "comparison"
+    if re.search(r"\bexample\b", t):
+        return "example"
+    if re.search(r"\bexplain\b|\bworking\b|\boverview\b", t):
+        return "explanation"
+    if re.search(r"\bformula\b|=", t):
+        return "formula"
+
+    return "general"
+
+
+def exam_priority(chunk_type: str) -> str:
+    if chunk_type in {"definition", "algorithm", "steps", "comparison", "formula"}:
+        return "high"
+    if chunk_type in {"advantages", "disadvantages", "explanation"}:
+        return "medium"
+    return "low"
+
+
+def split_by_structure(text: str) -> list[str]:
     """
-    Normalize extracted text:
-    - remove common bullet symbols
-    - collapse excessive whitespace
+    Split text using academic signals instead of token count
     """
-    if not text:
-        return ""
-
-    for bullet in BULLET_CHARS:
-        text = text.replace(bullet, " ")
-
-    text = re.sub(r"\s+", " ", text)
-    return text.strip()
-
-
-# ------------------------------------------------------------------
-# PDF TEXT EXTRACTION
-# ------------------------------------------------------------------
-
-def extract_pdf_text(pdf_path: str) -> str:
-    """
-    Prefer sidecar .txt file (from OCR pipeline).
-    Fallback to direct PDF extraction if not available.
-    """
-    txt_path = os.path.splitext(pdf_path)[0] + ".txt"
-
-    if os.path.exists(txt_path):
-        try:
-            with open(txt_path, "r", encoding="utf-8") as f:
-                return clean_text(f.read())
-        except Exception as e:
-            print(f"⚠ Failed to read {txt_path}: {e}")
-
-    # Fallback: extract directly from PDF
-    doc = fitz.open(pdf_path)
-    pages = []
-
-    for page in doc:
-        text = clean_text(page.get_text("text"))
-        if text:
-            pages.append(text)
-
-    doc.close()
-    return "\n\n".join(pages)
-
-
-# ------------------------------------------------------------------
-# LOAD PDFS + METADATA
-# ------------------------------------------------------------------
-
-def load_pdfs(folder_path: str) -> list[dict]:
-    """
-    Walk BASE_PATH and load all PDFs with metadata:
-    - category: notes / pyq / syllabus
-    - unit: unit1..unit5 (only for notes)
-    - filename
-    - relative path
-    - full extracted text
-    """
-    docs = []
-
-    for root, _, files in os.walk(folder_path):
-        for file in files:
-            if not file.lower().endswith(".pdf"):
-                continue
-
-            full_path = os.path.join(root, file)
-            rel_path = os.path.relpath(full_path, folder_path)
-            parts = rel_path.split(os.sep)
-
-            category = parts[0] if parts else "unknown"
-            unit = "unknown"
-
-            if category.lower() == "notes" and len(parts) > 1:
-                if parts[1].lower().startswith("unit"):
-                    unit = parts[1].lower()
-
-            filename = os.path.splitext(file)[0]
-
-            print(f"📄 Extracting: {rel_path}")
-            try:
-                text = extract_pdf_text(full_path)
-            except Exception as e:
-                print(f"❌ Failed: {rel_path} → {e}")
-                continue
-
-            if not text:
-                print(f"⚠ No text found: {rel_path}")
-                continue
-
-            print(f"   → {len(text)} characters extracted")
-
-            docs.append({
-                "text": text,
-                "category": category,
-                "unit": unit,
-                "filename": filename,
-                "path": rel_path,
-            })
-
-    return docs
-
-
-# ------------------------------------------------------------------
-# CHUNKING
-# ------------------------------------------------------------------
-
-def chunk_text(text: str, chunk_size: int = 150) -> list[str]:
-    """
-    Split text into fixed-size word chunks.
-    """
-    words = text.split()
-    return [
-        " ".join(words[i:i + chunk_size])
-        for i in range(0, len(words), chunk_size)
-        if words[i:i + chunk_size]
-    ]
-
-
-# ------------------------------------------------------------------
-# STORE IN CHROMA
-# ------------------------------------------------------------------
-
-def store_to_chroma(docs: list[dict]) -> None:
-    if not docs:
-        print("❌ No documents to store.")
-        return
-
-    client = chromadb.PersistentClient(path=CHROMA_PATH)
-
-    # Reset collection if it exists
-    try:
-        client.delete_collection(COLLECTION_NAME)
-        print(f"🧹 Deleted collection '{COLLECTION_NAME}'")
-    except Exception:
-        pass
-
-    collection = client.create_collection(
-        COLLECTION_NAME,
-        metadata={"hnsw:space": "cosine"},
+    splits = re.split(
+        r"\n(?=\d+\.\d+|\d+\s+|definition\b|advantages\b|disadvantages\b|explain\b)",
+        text,
+        flags=re.IGNORECASE
     )
-
-    chunks, metadatas, ids = [], [], []
-
-    for doc in docs:
-        doc_chunks = chunk_text(doc["text"])
-        print(
-            f"\n📘 {doc['filename']} "
-            f"({doc['category']}, {doc['unit']}) → {len(doc_chunks)} chunks"
-        )
-
-        for idx, chunk in enumerate(doc_chunks):
-            chunks.append(chunk)
-            metadatas.append({
-                "category": doc["category"],
-                "unit": doc["unit"],
-                "source": doc["filename"],
-                "path": doc["path"],
-                "chunk_index": idx,
-            })
-            ids.append(f"{doc['filename']}_chunk_{idx}")
-
-    if not chunks:
-        print("❌ No chunks generated.")
-        return
-
-    print(f"🔍 Embedding {len(chunks)} chunks...")
-    embeddings = embed(chunks)
-
-    print("💾 Writing to ChromaDB...")
-    collection.add(
-        documents=chunks,
-        embeddings=embeddings,
-        metadatas=metadatas,
-        ids=ids,
-    )
-
-    print(f"✅ Stored {len(chunks)} chunks at {CHROMA_PATH}")
+    return [s.strip() for s in splits if s.strip()]
 
 
-# ------------------------------------------------------------------
-# MAIN
-# ------------------------------------------------------------------
+def merge_weak_chunks(chunks: list[dict]) -> list[dict]:
+    merged = []
+    buffer = None
 
-if __name__ == "__main__":
-    print(f"📂 Loading PDFs from: {BASE_PATH}")
-    docs = load_pdfs(BASE_PATH)
+    for chunk in chunks:
+        if len(chunk["text"]) < MIN_CHUNK_LEN:
+            if buffer:
+                buffer["text"] += "\n" + chunk["text"]
+            else:
+                buffer = chunk
+        else:
+            if buffer:
+                merged.append(buffer)
+                buffer = None
+            merged.append(chunk)
 
-    print(f"\n📑 Documents ready: {len(docs)}")
-    for d in docs:
-        print(f"  → {d['filename']} ({d['category']}, unit={d['unit']})")
+    if buffer:
+        merged.append(buffer)
 
-    print("\n🔧 Storing embeddings...")
-    store_to_chroma(docs)
+    return merged
 
-    print("\n✔ Pipeline complete.")
+
+# ---------------- MAIN LOGIC ---------------- #
+
+all_chunks = []
+
+for root, _, files in os.walk(BASE_PATH):
+    for file in files:
+        if not file.endswith(".txt"):
+            continue
+
+        txt_path = Path(root) / file
+        metadata = infer_metadata_from_path(txt_path)
+
+        with open(txt_path, "r", encoding="utf-8", errors="ignore") as f:
+            raw_text = f.read().strip()
+
+        if len(raw_text) < 50:
+            continue  # skip junk pages
+
+        structured_blocks = split_by_structure(raw_text)
+
+        page_chunks = []
+
+        for block in structured_blocks:
+            if len(block) > MAX_CHUNK_LEN:
+                block = block[:MAX_CHUNK_LEN]
+
+            ctype = detect_chunk_type(block)
+
+            chunk = {
+                "text": block,
+                **metadata,
+                "chunk_type": ctype,
+                "exam_priority": exam_priority(ctype),
+                "confidence": "high",
+            }
+
+            page_chunks.append(chunk)
+
+        page_chunks = merge_weak_chunks(page_chunks)
+        all_chunks.extend(page_chunks)
+
+
+# ---------------- SAVE OUTPUT ---------------- #
+
+with open(OUTPUT_FILE, "w", encoding="utf-8") as out:
+    for chunk in all_chunks:
+        out.write(json.dumps(chunk, ensure_ascii=False) + "\n")
+
+print(f"✅ Done. Generated {len(all_chunks)} high-quality chunks.")
+print(f"📄 Output file: {OUTPUT_FILE}")
