@@ -100,6 +100,8 @@ def detect_unit_query(query: str) -> str | None:
     return f"unit{match.group(1)}" if match else None
 
 
+
+
 def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> list[dict]:
     collection = get_collection()
     unit = detect_unit_query(query)
@@ -109,8 +111,11 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
     if unit:
         filters.append({"unit": unit})
 
-    if mode == "syllabus":
-        filters.append({"category": {"$in": ["notes", "pyq"]}})
+    # Adjust filter for multimodal if needed
+    # START CHANGE: handling metadata flexibility
+    # if mode == "syllabus":
+    #     filters.append({"category": {"$in": ["notes", "pyq"]}})
+    # END CHANGE
 
     where_clause = None
     if filters:
@@ -121,9 +126,10 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
 
     query_embedding = embed([query])[0]
 
+    # Increase N for multimodal as we want to find the best page visuals
     results = collection.query(
         query_embeddings=[query_embedding],
-        n_results=20 if unit else n_results,
+        n_results=3, # Fewer results because each result is now a CHUNK (5 pages)
         where=where_clause,
     )
 
@@ -135,9 +141,10 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
 
     return [
         {
-            "text": doc,
+            "text": doc,  # Full OCR text + metadata
             "source": meta.get("source", "unknown"),
             "unit": meta.get("unit", "unknown"),
+            "title": meta.get("title", "unknown"),
         }
         for doc, meta in zip(documents, metadatas)
     ]
@@ -154,14 +161,17 @@ def generate_answer(query: str, contexts: list[dict], mode: str, history: list[d
         system_prompt = """
             You are uniAI, a syllabus-aware exam assistant.
 
+            You will be given OCR-extracted text from course notes along with a user question.
+
             Rules:
-            - Answer ONLY from provided notes or previous assistant responses.
-            - Use definitions and exam keywords.
+            - Answer ONLY from the provided notes or previous conversation.
+            - Use definitions and exam keywords from the notes.
             - Write in a "what to write in exam" tone.
-            - If the question refers to previous explanation, repeat or rephrase it.
-            - If something is outside the syllabus, clearly say so.
+            - If the answer spans multiple chunks, synthesize them.
+            - Use clear headings and structure.
+            - If the question refers to a previous explanation, repeat or rephrase it.
+            - If something is outside the provided notes, clearly say so.
         """
-    
     else:
         system_prompt = """
             [GENERIC AI TUTOR MODE]
@@ -177,30 +187,29 @@ def generate_answer(query: str, contexts: list[dict], mode: str, history: list[d
         for h in history:
             memory_block += f"{h['role'].upper()}: {h['content']}\n"
 
-    context_block = ""
+    # Context block from OCR text
+    context_text_block = ""
     if contexts:
-        context_block = "\nSyllabus context:\n"
+        context_text_block = "\nRelevant notes (OCR-extracted text):\n"
         for c in contexts:
-            context_block += f"[{c['source']} - {c['unit']}]\n{c['text']}\n\n"
+            context_text_block += f"\n[Source: {c['source']} | {c['unit']} | {c.get('title', '')}]\n"
+            context_text_block += f"{c['text']}\n"
 
-    prompt = f"""
-                {system_prompt}
-
-                {memory_block}
-
-                {context_block}
-
-                User question:
-                {query}
-            """
+    input_parts = [
+        system_prompt,
+        memory_block,
+        context_text_block,
+        f"\nUser question:\n{query}"
+    ]
 
     try:
-        response = model.generate_content(prompt)
+        response = model.generate_content(input_parts)
         if not response or not response.text:
             return "⚠ I couldn't generate a response. Please try again."
         return response.text
     except Exception as e:
         return f"Error generating answer: {e}"
+
 
 
 # ------------------------------------------------------------------
