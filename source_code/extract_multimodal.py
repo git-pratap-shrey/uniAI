@@ -5,24 +5,43 @@ import time
 from pathlib import Path
 from dotenv import load_dotenv
 import google.generativeai as genai
+import ollama
 from PIL import Image
 import io
+
+# --- Ensure imports work regardless of working directory ---
+import sys
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+import config
 
 # ------------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------------
 
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY not found in .env")
-
-genai.configure(api_key=GEMINI_API_KEY)
-
-BASE_PATH = r"D:\CODE-workingBuild\uniAI\source_code\data\year_2"
-MODEL_NAME = "gemini-2.5-flash"
+# Use configuration from config.py
+BASE_PATH = config.BASE_DATA_DIR
+MODEL_NAME = config.MODEL_VISION  # Defaults to "qwen3 vl 235b cloud"
 CHUNK_SIZE = 2  # Pages per chunk — kept small for OCR accuracy
+
+# Constants for model types
+MODEL_TYPE_OLLAMA = "ollama"
+MODEL_TYPE_GEMINI = "gemini"
+
+def get_model_type(model_name):
+    if "gemini" in model_name.lower():
+        return MODEL_TYPE_GEMINI
+    return MODEL_TYPE_OLLAMA
+
+# Configure Gemini if needed
+if get_model_type(MODEL_NAME) == MODEL_TYPE_GEMINI:
+    if not config.GEMINI_API_KEY:
+         print("⚠️ Gemini model selected but GEMINI_API_KEY not set in config/env.")
+    else:
+        genai.configure(api_key=config.GEMINI_API_KEY)
+
 
 # ------------------------------------------------------------------
 # HELPERS
@@ -31,7 +50,9 @@ CHUNK_SIZE = 2  # Pages per chunk — kept small for OCR accuracy
 def infer_metadata_from_path(pdf_path: Path) -> dict:
     parts = pdf_path.parts
     try:
-        year_idx = parts.index("year_2")
+        # Find 'year_2' in path to anchor specific folder structure
+        # Adjust index based on actual path structure if 'year_2' is not unique
+        year_idx = parts.index("year_2") 
         subject = parts[year_idx + 1]
         doc_type = parts[year_idx + 2]
         unit = parts[year_idx + 3]
@@ -46,14 +67,24 @@ def infer_metadata_from_path(pdf_path: Path) -> dict:
     }
 
 
-def render_pages_to_images(doc, start_page: int, end_page: int) -> list:
-    """Render PDF pages to PIL Images at 2x zoom (in-memory)."""
+def render_pages_to_images(doc, start_page: int, end_page: int, return_bytes=False) -> list:
+    """
+    Render PDF pages to images.
+    If using Ollama, we need raw bytes.
+    If using Gemini, we might use PIL Images.
+    """
     images = []
     for page_num in range(start_page, end_page):
         page = doc.load_page(page_num)
         pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
-        img = Image.open(io.BytesIO(pix.tobytes("png")))
-        images.append(img)
+        img_bytes = pix.tobytes("png")
+        
+        if return_bytes:
+            images.append(img_bytes)
+        else:
+            img = Image.open(io.BytesIO(img_bytes))
+            images.append(img)
+            
     return images
 
 
@@ -125,14 +156,27 @@ Return ONLY a valid JSON object (no markdown fences, no extra text):
 # CORE LOGIC
 # ------------------------------------------------------------------
 
-def process_pdf(pdf_path: Path, model):
+def process_pdf(pdf_path: Path):
     print(f"\n📄 Processing: {pdf_path.name}")
+    print(f"   Model: {MODEL_NAME}")
+    
+    model_type = get_model_type(MODEL_NAME)
 
     metadata_base = infer_metadata_from_path(pdf_path)
     output_dir = pdf_path.parent
     txt_path = pdf_path.with_suffix(".txt")
 
-    doc = fitz.open(pdf_path)
+    # Verify file exists before opening
+    if not pdf_path.exists():
+        print(f"❌ File not found: {pdf_path}")
+        return
+
+    try:
+        doc = fitz.open(str(pdf_path)) # Convert Path to string for PyMuPDF
+    except Exception as e:
+        print(f"❌ Failed to open PDF {pdf_path.name}: {e}")
+        return
+    
     total_pages = len(doc)
 
     # Accumulate full text for the .txt file
@@ -161,17 +205,42 @@ def process_pdf(pdf_path: Path, model):
         print(f"   -> Processing Chunk {start_page + 1}-{end_page}...", end="", flush=True)
 
         try:
-            images = render_pages_to_images(doc, start_page, end_page)
+            # Prepare Images
+            if model_type == MODEL_TYPE_OLLAMA:
+                # Ollama expects bytes
+                images = render_pages_to_images(doc, start_page, end_page, return_bytes=True)
+                
+                # Initialize client explicitly with config to avoid default host issues
+                client = ollama.Client(host=config.OLLAMA_BASE_URL)
 
-            response = model.generate_content(
-                [PROMPT] + images,
-                generation_config=genai.types.GenerationConfig(
-                    temperature=0.1,
-                    max_output_tokens=8192,
+                # Ollama chat/generate
+                response = client.chat(
+                    model=MODEL_NAME,
+                    messages=[{
+                        'role': 'user',
+                        'content': PROMPT,
+                        'images': images
+                    }]
                 )
-            )
+                raw_response = response['message']['content'].strip()
 
-            raw_response = response.text.strip()
+            elif model_type == MODEL_TYPE_GEMINI:
+                # Gemini expects PIL images
+                images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)
+                gemini_model = genai.GenerativeModel(MODEL_NAME)
+                
+                response = gemini_model.generate_content(
+                    [PROMPT] + images,
+                    generation_config=genai.types.GenerationConfig(
+                        temperature=0.1,
+                        max_output_tokens=8192,
+                    )
+                )
+                raw_response = response.text.strip()
+            
+            else:
+                 raise ValueError(f"Unsupported model type for {MODEL_NAME}")
+
             structured_data = extract_first_json(raw_response)
 
             if structured_data is None:
@@ -197,7 +266,11 @@ def process_pdf(pdf_path: Path, model):
                 json.dump(chunk_data, f, indent=2, ensure_ascii=False)
 
             print(" ✅ Done.")
-            time.sleep(4)  # Rate limit (Gemini free tier ~15 RPM)
+            
+            if model_type == MODEL_TYPE_GEMINI:
+                time.sleep(4)  # Rate limit for Gemini
+            else:
+                time.sleep(1) # Small pause for local/cloud ollama
 
         except Exception as e:
             print(f" ❌ Failed: {e}")
@@ -215,13 +288,12 @@ def process_pdf(pdf_path: Path, model):
 
 def process_all_folders(base_path_str: str):
     root_path = Path(base_path_str)
-    model = genai.GenerativeModel(MODEL_NAME)
-
+    
     pdfs = sorted(root_path.rglob("*.pdf"))
     print(f"Found {len(pdfs)} PDFs in {base_path_str}")
 
     for pdf in pdfs:
-        process_pdf(pdf, model)
+        process_pdf(pdf)
 
     print("\n--- All PDFs processed successfully ---")
 

@@ -22,12 +22,16 @@ MODEL_EMBEDDING = os.getenv("MODEL_EMBEDDING", "mxbai-embed-large")
 # Vision / OCR Model
 # Used for optical character recognition and image analysis
 # User requested "qwen3 vl 235b cloud"
-MODEL_VISION = os.getenv("MODEL_VISION", "qwen3 vl 235b cloud")
+MODEL_VISION = os.getenv("MODEL_VISION", "qwen3-vl:235b-cloud")
 
 # Chat / Generative Model
 # Used for RAG chat and general text generation
 # User requested "qwen3 vl 235b cloud"
-MODEL_CHAT = os.getenv("MODEL_CHAT", "qwen3 vl 235b cloud")
+MODEL_CHAT = os.getenv("MODEL_CHAT", "qwen3-vl:235b-cloud")
+
+# Gemini Configuration (Legacy / Option)
+MODEL_GEMINI = os.getenv("MODEL_GEMINI", "gemini-2.5-flash")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ------------------------------------------------------------------
 # PATH CONFIGURATION
