@@ -7,29 +7,47 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-import google.generativeai as genai
+import ollama
 import chromadb
 
-from pipeline.embeddings.local_mxbai import embed  # type: ignore
+# --- Ensure imports work regardless of working directory ---
+import sys
+# Add parent directory of 'rag_project' (which is 'uniAI') to path to find 'source_code'
+# Actual structure: .../uniAI/rag_project/rag_api/views.py
+# We want .../uniAI to be in path so we can do 'from source_code import config'
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# current: rag_api
+# parent: rag_project
+# grandparent: uniAI
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir))) 
+# Wait, let's just add the uniAI root.
+# The user's root is d:\CODE-workingBuild\uniAI
+# And source_code is d:\CODE-workingBuild\uniAI\source_code
+# rag_project is d:\CODE-workingBuild\uniAI\rag_project
+
+# Best bet:
+uni_ai_root = os.path.abspath(os.path.join(current_dir, "../../..")) 
+if uni_ai_root not in sys.path:
+    sys.path.append(uni_ai_root)
+
+# Now likely we can import source_code? 
+# Actually if we are in uniAI, we can import source_code.config
+try:
+    from source_code import config
+    from source_code.pipeline.embeddings.local_mxbai import embed
+except ImportError:
+    # Fallback if running relative to uniAI root directly
+    import config
+    from pipeline.embeddings.local_mxbai import embed
 
 # ------------------------------------------------------------------
 # CONFIG & INITIALIZATION
 # ------------------------------------------------------------------
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-CHROMA_PATH = os.getenv("CHROMA_PATH")
-COLLECTION_NAME = os.getenv("COLLECTION_NAME")
-
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable not set")
-if not CHROMA_PATH:
-    raise ValueError("CHROMA_PATH environment variable not set")
-if not COLLECTION_NAME:
-    raise ValueError("COLLECTION_NAME environment variable not set")
-
-# Gemini
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.5-flash")
+# Use Config
+CHROMA_PATH = config.CHROMA_DB_PATH
+COLLECTION_NAME = config.CHROMA_COLLECTION_NAME
+MODEL_CHAT = config.MODEL_CHAT
 
 # ChromaDB
 client = chromadb.PersistentClient(path=CHROMA_PATH)
@@ -44,7 +62,7 @@ def get_collection():
         except chromadb.errors.NotFoundError:
             raise RuntimeError(
                 f"Collection '{COLLECTION_NAME}' not found. "
-                f"Run 'python ingest_python.py' first."
+                f"Run 'python source_code/ingest_multimodal.py' first."
             )
     return _collection
 
@@ -181,13 +199,15 @@ def generate_answer(query: str, contexts: list[dict], mode: str, history: list[d
             Mention clearly that this is not syllabus-bound.
         """
 
+    # Build Context
     memory_block = ""
     if history:
         memory_block = "\nPrevious conversation:\n"
         for h in history:
-            memory_block += f"{h['role'].upper()}: {h['content']}\n"
+            role = h.get('role', 'user').upper()
+            content = h.get('content', '')
+            memory_block += f"{role}: {content}\n"
 
-    # Context block from OCR text
     context_text_block = ""
     if contexts:
         context_text_block = "\nRelevant notes (OCR-extracted text):\n"
@@ -195,18 +215,46 @@ def generate_answer(query: str, contexts: list[dict], mode: str, history: list[d
             context_text_block += f"\n[Source: {c['source']} | {c['unit']} | {c.get('title', '')}]\n"
             context_text_block += f"{c['text']}\n"
 
-    input_parts = [
-        system_prompt,
-        memory_block,
-        context_text_block,
-        f"\nUser question:\n{query}"
-    ]
+    # Construct the final prompt
+    full_prompt = f"""
+{system_prompt}
+
+{memory_block}
+
+{context_text_block}
+
+User question:
+{query}
+"""
 
     try:
-        response = model.generate_content(input_parts)
-        if not response or not response.text:
-            return "⚠ I couldn't generate a response. Please try again."
-        return response.text
+        # Check against config to see if we use Gemini or Ollama
+        if MODEL_CHAT.startswith("gemini"):
+            import google.generativeai as genai
+            
+            api_key = config.GEMINI_API_KEY
+            if not api_key:
+                return "⚠ Configuration Error: Gemini Model selected but GEMINI_API_KEY is missing."
+            
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel(MODEL_CHAT)
+            
+            response = model.generate_content(full_prompt)
+            if not response or not response.text:
+                 return "⚠ I couldn't generate a response (Empty from Gemini)."
+            return response.text
+
+        else:
+            # Default to Ollama
+            # Initialize client explicitly with config to avoid default host issues
+            client = ollama.Client(host=config.OLLAMA_BASE_URL)
+            
+            response = client.chat(
+                model=MODEL_CHAT,
+                messages=[{"role": "user", "content": full_prompt}]
+            )
+            return response["message"]["content"]
+
     except Exception as e:
         return f"Error generating answer: {e}"
 
@@ -295,6 +343,6 @@ def health_view(request):
 
     return JsonResponse({
         "status": status,
-        "model": "gemini-2.5-flash",
+        "model": MODEL_CHAT,
         "chroma_path": CHROMA_PATH,
     })
