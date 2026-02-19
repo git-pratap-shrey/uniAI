@@ -10,13 +10,12 @@ import config
 from pipeline.embeddings.local_mxbai import embed
 
 
-CHROMA_PATH = os.path.join(config.CHROMA_DB_PATH, "python")
-MODEL = config.MODEL_CHAT  # change later if needed
-
+CHROMA_PATH = config.CHROMA_DB_PATH
+MODEL = config.MODEL_CHAT  # configured in config.py
 
 # Initialize DB + Collection
 client = chromadb.PersistentClient(path=CHROMA_PATH)
-collection = client.get_collection("python")
+collection = client.get_collection(config.CHROMA_COLLECTION_NAME)
 
 
 def retrieve(query, n=5):
@@ -64,12 +63,17 @@ Relevant context:
 Answer clearly with bullet points and examples. Do NOT mention the context explicitly.
 """
 
-    response = ollama.chat(
+    # Initialize client explicitly with config to avoid default host issues
+    client = ollama.Client(host=config.OLLAMA_BASE_URL)
+
+    print("   Thinking...", end="", flush=True)
+    response = client.chat(
         model=MODEL,
         messages=[{"role": "user", "content": prompt}]
     )
+    print("\r", end="") # Clear "Thinking..."
 
-    return response["message"]["content"]
+    return response["message"]["content"], results
 
 
 def chat():
@@ -81,11 +85,21 @@ def chat():
         if query.lower() in ["exit", "quit"]:
             break
 
-        response = answer(query, conversation)
-        print("\n🤖 AI:", response)
+        response_text, results = answer(query, conversation)
+        print("\n🤖 AI:", response_text)
+
+        # Show sources
+        print("\n📚 Sources Used:")
+        docs = results.get("documents", [[]])[0]
+        metas = results.get("metadatas", [[]])[0]
+        
+        for i, (doc, meta) in enumerate(zip(docs, metas)):
+            source_file = meta.get('source', 'Unknown')
+            page_start = meta.get('page_start', '?')
+            print(f"   {i+1}. {source_file} (p.{page_start})")
 
         # maintain short history
-        conversation += f"\nUser: {query}\nAI: {response}\n"
+        conversation += f"\nUser: {query}\nAI: {response_text}\n"
 
 
 if __name__ == "__main__":
