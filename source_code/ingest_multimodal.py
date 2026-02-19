@@ -22,7 +22,10 @@ EMBED_MODEL = config.MODEL_EMBEDDING
 # ------------------------------------------------------------------
 
 def get_embedding(text: str) -> list[float]:
-    response = ollama.embeddings(
+    # Initialize client explicitly with config to avoid default host issues
+    client = ollama.Client(host=config.OLLAMA_BASE_URL)
+    
+    response = client.embeddings(
         model=EMBED_MODEL,
         prompt=text
     )
@@ -74,7 +77,7 @@ def build_embedding_text(data: dict) -> str:
 
     if full_text:
         # Combine metadata prefix with actual content
-        # Truncate full_text if extremely long (embedding models have limits)
+        # Keep relatively long for RAG context
         max_text_len = 4000
         truncated = full_text[:max_text_len]
         return f"{prefix}\n\n{truncated}" if prefix else truncated
@@ -104,7 +107,7 @@ def ingest_descriptions():
             with open(json_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
-            # Build embedding text
+            # Build embedding text (Full content for storage)
             embedding_text = build_embedding_text(data)
             if not embedding_text.strip():
                 print(f"   -> Skipping {json_file.name} (empty content)")
@@ -123,8 +126,11 @@ def ingest_descriptions():
                 skipped += 1
                 continue
 
-            # Generate embedding
-            vector = get_embedding(embedding_text)
+            # Generate embedding (Strict truncation for context limit)
+            # mxbai-embed-large has ~512 token limit. Safe char limit ~1500.
+            # Using 1200 specifically for embedding generation safety.
+            embedding_input = embedding_text[:1200]
+            vector = get_embedding(embedding_input)
 
             # Metadata for ChromaDB
             meta = data.get("extracted_metadata", {})
