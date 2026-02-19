@@ -1,12 +1,22 @@
 import os
+import sys
 import time
 import fitz  # PyMuPDF
 import ollama
 
+# --- Ensure imports work regardless of working directory ---
+# Add source_code root to path if not already there
+current_dir = os.path.dirname(os.path.abspath(__file__))
+source_code_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
+if source_code_root not in sys.path:
+    sys.path.append(source_code_root)
+
+import config
+
 # 1. Configuration
 # Use a raw string (r"") for your Windows path
-folder_path = r"D:\CODE-workingBuild\uniAI\source_code\data\year_2"
-MODEL_NAME = "deepseek-ocr"
+folder_path = config.BASE_DATA_DIR
+MODEL_NAME = config.MODEL_VISION
 
 def extract_and_save_by_page(pdf_path, txt_path):
     print(f"   > Opening: {os.path.basename(pdf_path)}")

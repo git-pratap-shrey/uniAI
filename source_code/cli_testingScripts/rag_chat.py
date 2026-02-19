@@ -6,11 +6,12 @@ import ollama
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(ROOT_DIR)
 
+import config
 from pipeline.embeddings.local_mxbai import embed
 
 
-CHROMA_PATH = r"D:\CODE-workingBuild\uniAI\source_code\chroma\python"
-MODEL = "llama3.1:8b"  # change later if needed
+CHROMA_PATH = os.path.join(config.CHROMA_DB_PATH, "python")
+MODEL = config.MODEL_CHAT  # change later if needed
 
 
 # Initialize DB + Collection

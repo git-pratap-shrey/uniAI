@@ -3,18 +3,19 @@ import json
 import chromadb
 import ollama
 from pathlib import Path
+import config
 
 # ------------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------------
 
-BASE_PATH = r"D:\CODE-workingBuild\uniAI\source_code\data\year_2"
+BASE_PATH = config.BASE_DATA_DIR
 
-CHROMA_PATH = r"D:\CODE-workingBuild\uniAI\source_code\chroma"
-COLLECTION_NAME = "multimodal_notes"
+CHROMA_PATH = config.CHROMA_DB_PATH
+COLLECTION_NAME = config.CHROMA_COLLECTION_NAME
 
 # Embedding Model (must match retrieval)
-EMBED_MODEL = "mxbai-embed-large"
+EMBED_MODEL = config.MODEL_EMBEDDING
 
 # ------------------------------------------------------------------
 # HELPERS

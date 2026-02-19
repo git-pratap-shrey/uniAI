@@ -2,13 +2,14 @@ import os
 import fitz  # PyMuPDF
 import ollama
 import json
+import config
 
 # ------------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------------
 
-BASE_PATH = r"D:\CODE-workingBuild\uniAI\source_code\data\year_2"
-MODEL_NAME = "deepseek-ocr"
+BASE_PATH = config.BASE_DATA_DIR
+MODEL_NAME = config.MODEL_VISION
 
 # ------------------------------------------------------------------
 # METADATA HELPERS
