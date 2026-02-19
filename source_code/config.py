@@ -26,8 +26,9 @@ MODEL_VISION = os.getenv("MODEL_VISION", "qwen3-vl:235b-cloud")
 
 # Chat / Generative Model
 # Used for RAG chat and general text generation
-# User requested "qwen3 vl 235b cloud"
-MODEL_CHAT = os.getenv("MODEL_CHAT", "qwen3-vl:235b-cloud")
+# Chat / Generative Model
+# Used for RAG chat and general text generation
+MODEL_CHAT = os.getenv("MODEL_CHAT", "llama3.2:3b")
 
 # Gemini Configuration (Legacy / Option)
 MODEL_GEMINI = os.getenv("MODEL_GEMINI", "gemini-2.5-flash")
