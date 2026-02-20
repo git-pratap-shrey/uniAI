@@ -19,16 +19,29 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 # Used for generating vector embeddings for text search
 MODEL_EMBEDDING = os.getenv("MODEL_EMBEDDING", "mxbai-embed-large")
 
-# Vision / OCR Model
-# Used for optical character recognition and image analysis
-# User requested "qwen3 vl 235b cloud"
+# Vision / OCR Model Backend
+# Options: "ollama" | "gemini" | "huggingface"
+#   ollama      -> Ollama model tag (local or cloud Ollama)
+#   gemini      -> Google Gemini API (cloud)
+#   huggingface -> HuggingFace Inference API (cloud, no local GPU needed)
+MODEL_VISION_BACKEND = os.getenv("MODEL_VISION_BACKEND", "huggingface")
+
+# Vision model name — interpreted differently per backend:
+#   ollama      -> Ollama model tag, e.g. "qwen3-vl:235b-cloud" or "llava:13b"
+#   gemini      -> Gemini model name, e.g. "gemini-2.5-flash"
+#   huggingface -> HuggingFace repo ID, e.g. "Qwen/Qwen3-VL-235B-A22B-Instruct"
 MODEL_VISION = os.getenv("MODEL_VISION", "qwen3-vl:235b-cloud")
+
+# HuggingFace cloud Inference API settings
+# Get your token from: https://huggingface.co/settings/tokens
+HF_TOKEN = os.getenv("HF_TOKEN")                                             # required
+MODEL_VISION_HF = os.getenv("MODEL_VISION_HF", "Qwen/Qwen3-VL-235B-A22B-Instruct")
 
 # Chat / Generative Model
 # Used for RAG chat and general text generation
 # Chat / Generative Model
 # Used for RAG chat and general text generation
-MODEL_CHAT = os.getenv("MODEL_CHAT", "gemini-3-flash-preview")
+MODEL_CHAT = os.getenv("MODEL_CHAT", "gemma3:4b")
 
 # Gemini Configuration (Legacy / Option)
 MODEL_GEMINI = os.getenv("MODEL_GEMINI", "gemini-2.5-flash")

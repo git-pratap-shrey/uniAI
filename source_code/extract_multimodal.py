@@ -2,12 +2,14 @@ import os
 import fitz  # PyMuPDF
 import json
 import time
+import base64
 from pathlib import Path
 from dotenv import load_dotenv
 import google.generativeai as genai
 import ollama
 from PIL import Image
 import io
+import torch
 
 # --- Ensure imports work regardless of working directory ---
 import sys
@@ -23,29 +25,47 @@ import config
 
 # Use configuration from config.py
 BASE_PATH = config.BASE_DATA_DIR
-MODEL_NAME = config.MODEL_VISION  # Defaults to "qwen3 vl 235b cloud"
 CHUNK_SIZE = 2  # Pages per chunk — kept small for OCR accuracy
 
-# Constants for model types
-MODEL_TYPE_OLLAMA = "ollama"
-MODEL_TYPE_GEMINI = "gemini"
+# Backend options (set MODEL_VISION_BACKEND in config.py or .env)
+# "ollama"      -> local/cloud Ollama model (MODEL_VISION tag)
+# "gemini"      -> Google Gemini API       (MODEL_VISION name)
+# "huggingface" -> HuggingFace transformers (MODEL_VISION_HF repo id)
+BACKEND = config.MODEL_VISION_BACKEND.lower()
 
-def get_model_type(model_name):
-    if "gemini" in model_name.lower():
-        return MODEL_TYPE_GEMINI
-    return MODEL_TYPE_OLLAMA
+# ---- Ollama / Gemini shared model name ----
+MODEL_NAME = config.MODEL_VISION
 
-# Configure Gemini if needed
-if get_model_type(MODEL_NAME) == MODEL_TYPE_GEMINI:
+# ---- Backend-specific setup ----
+if BACKEND == "gemini":
     if not config.GEMINI_API_KEY:
-         print("⚠️ Gemini model selected but GEMINI_API_KEY not set in config/env.")
+        print("⚠️  Gemini backend selected but GEMINI_API_KEY not set in config/env.")
     else:
         genai.configure(api_key=config.GEMINI_API_KEY)
+
+elif BACKEND == "huggingface":
+    HF_MODEL_ID = config.MODEL_VISION_HF
+    if not config.HF_TOKEN:
+        print("⚠️  HuggingFace backend selected but HF_TOKEN not set in config/env.")
+        print("   Get your token at: https://huggingface.co/settings/tokens")
+    else:
+        from huggingface_hub import InferenceClient as _HFClient
+        HF_CLIENT = _HFClient(
+            base_url="https://router.huggingface.co/v1",
+            api_key=config.HF_TOKEN,
+        )
+        print(f"✅ HuggingFace Inference API ready → {HF_MODEL_ID}")
 
 
 # ------------------------------------------------------------------
 # HELPERS
 # ------------------------------------------------------------------
+def pil_to_base64(img: Image.Image) -> str:
+    """Encode a PIL image as a base64 PNG data-URI string."""
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    b64 = base64.b64encode(buf.getvalue()).decode()
+    return f"data:image/png;base64,{b64}"
 
 def infer_metadata_from_path(pdf_path: Path) -> dict:
     parts = pdf_path.parts
@@ -158,9 +178,7 @@ Return ONLY a valid JSON object (no markdown fences, no extra text):
 
 def process_pdf(pdf_path: Path):
     print(f"\n📄 Processing: {pdf_path.name}")
-    print(f"   Model: {MODEL_NAME}")
-    
-    model_type = get_model_type(MODEL_NAME)
+    print(f"   Backend: {BACKEND}  |  Model: {MODEL_NAME if BACKEND != 'huggingface' else config.MODEL_VISION_HF}")
 
     metadata_base = infer_metadata_from_path(pdf_path)
     output_dir = pdf_path.parent
@@ -205,30 +223,24 @@ def process_pdf(pdf_path: Path):
         print(f"   -> Processing Chunk {start_page + 1}-{end_page}...", end="", flush=True)
 
         try:
-            # Prepare Images
-            if model_type == MODEL_TYPE_OLLAMA:
-                # Ollama expects bytes
+            # ── OLLAMA ────────────────────────────────────────────────────
+            if BACKEND == "ollama":
                 images = render_pages_to_images(doc, start_page, end_page, return_bytes=True)
-                
-                # Initialize client explicitly with config to avoid default host issues
                 client = ollama.Client(host=config.OLLAMA_BASE_URL)
-
-                # Ollama chat/generate
                 response = client.chat(
                     model=MODEL_NAME,
                     messages=[{
                         'role': 'user',
                         'content': PROMPT,
-                        'images': images
+                        'images': images,
                     }]
                 )
                 raw_response = response['message']['content'].strip()
 
-            elif model_type == MODEL_TYPE_GEMINI:
-                # Gemini expects PIL images
+            # ── GEMINI ────────────────────────────────────────────────────
+            elif BACKEND == "gemini":
                 images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)
                 gemini_model = genai.GenerativeModel(MODEL_NAME)
-                
                 response = gemini_model.generate_content(
                     [PROMPT] + images,
                     generation_config=genai.types.GenerationConfig(
@@ -237,9 +249,33 @@ def process_pdf(pdf_path: Path):
                     )
                 )
                 raw_response = response.text.strip()
-            
+
+            # ── HUGGINGFACE (cloud Inference API) ──────────────────────────
+            elif BACKEND == "huggingface":
+                images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)
+                # Encode PIL images as base64 data-URIs (OpenAI-compatible format)
+                hf_messages = [{
+                    "role": "user",
+                    "content": [
+                        *[{
+                            "type": "image_url",
+                            "image_url": {"url": pil_to_base64(img)},
+                        } for img in images],
+                        {"type": "text", "text": PROMPT},
+                    ],
+                }]
+                hf_response = HF_CLIENT.chat_completion(
+                    model=HF_MODEL_ID,
+                    messages=hf_messages,
+                    max_tokens=8192,
+                )
+                raw_response = hf_response.choices[0].message.content.strip()
+
             else:
-                 raise ValueError(f"Unsupported model type for {MODEL_NAME}")
+                raise ValueError(
+                    f"Unsupported MODEL_VISION_BACKEND: '{BACKEND}'. "
+                    "Choose 'ollama', 'gemini', or 'huggingface'."
+                )
 
             structured_data = extract_first_json(raw_response)
 
@@ -267,10 +303,12 @@ def process_pdf(pdf_path: Path):
 
             print(" ✅ Done.")
             
-            if model_type == MODEL_TYPE_GEMINI:
-                time.sleep(4)  # Rate limit for Gemini
+            if BACKEND == "gemini":
+                time.sleep(4)   # Respect Gemini rate limits
+            elif BACKEND == "huggingface":
+                pass            # Local inference — no rate limit needed
             else:
-                time.sleep(1) # Small pause for local/cloud ollama
+                time.sleep(1)   # Small pause for Ollama
 
         except Exception as e:
             print(f" ❌ Failed: {e}")
