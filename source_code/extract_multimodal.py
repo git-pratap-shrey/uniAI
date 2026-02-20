@@ -226,7 +226,10 @@ def process_pdf(pdf_path: Path):
             # ── OLLAMA ────────────────────────────────────────────────────
             if BACKEND == "ollama":
                 images = render_pages_to_images(doc, start_page, end_page, return_bytes=True)
-                client = ollama.Client(host=config.OLLAMA_BASE_URL)
+                ollama_headers = {}
+                if config.OLLAMA_API_KEY:
+                    ollama_headers["Authorization"] = f"Bearer {config.OLLAMA_API_KEY}"
+                client = ollama.Client(host=config.OLLAMA_BASE_URL, headers=ollama_headers)
                 response = client.chat(
                     model=MODEL_NAME,
                     messages=[{

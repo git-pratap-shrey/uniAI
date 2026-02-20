@@ -8,8 +8,10 @@ load_dotenv()
 # OLLAMA CONFIGURATION
 # ------------------------------------------------------------------
 
-# Base URL for Ollama instance
+# Base URL for Ollama instance (use https://api.ollama.com for cloud)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+# Optional API key for Ollama cloud (paid tier)
+OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "")
 
 # ------------------------------------------------------------------
 # MODEL CONFIGURATION
@@ -24,7 +26,7 @@ MODEL_EMBEDDING = os.getenv("MODEL_EMBEDDING", "mxbai-embed-large")
 #   ollama      -> Ollama model tag (local or cloud Ollama)
 #   gemini      -> Google Gemini API (cloud)
 #   huggingface -> HuggingFace Inference API (cloud, no local GPU needed)
-MODEL_VISION_BACKEND = os.getenv("MODEL_VISION_BACKEND", "huggingface")
+MODEL_VISION_BACKEND = os.getenv("MODEL_VISION_BACKEND", "ollama")
 
 # Vision model name — interpreted differently per backend:
 #   ollama      -> Ollama model tag, e.g. "qwen3-vl:235b-cloud" or "llava:13b"
