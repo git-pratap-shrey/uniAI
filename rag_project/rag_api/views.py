@@ -182,13 +182,13 @@ def generate_answer(query: str, contexts: list[dict], mode: str, history: list[d
             You will be given OCR-extracted text from course notes along with a user question.
 
             Rules:
-            - Answer ONLY from the provided notes or previous conversation.
+            - Answer from the provided notes or previous conversation.
             - Use definitions and exam keywords from the notes.
             - Write in a "what to write in exam" tone.
             - If the answer spans multiple chunks, synthesize them.
             - Use clear headings and structure.
             - If the question refers to a previous explanation, repeat or rephrase it.
-            - If something is outside the provided notes, clearly say so.
+            - If something is outside the provided notes, say so and answer it based on your knowledge.
         """
     else:
         system_prompt = """
