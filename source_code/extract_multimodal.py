@@ -70,12 +70,11 @@ def pil_to_base64(img: Image.Image) -> str:
 def infer_metadata_from_path(pdf_path: Path) -> dict:
     parts = pdf_path.parts
     try:
-        # Find 'year_2' in path to anchor specific folder structure
-        # Adjust index based on actual path structure if 'year_2' is not unique
-        year_idx = parts.index("year_2") 
-        subject = parts[year_idx + 1]
-        doc_type = parts[year_idx + 2]
-        unit = parts[year_idx + 3]
+        year_idx = parts.index("year_2")
+        subject  = parts[year_idx + 1]   # e.g. 'COA'
+        doc_type = parts[year_idx + 2]   # e.g. 'notes'
+        unit     = parts[year_idx + 3]   # e.g. 'unit1'
+        # year_idx+4 is now the pdf stem subfolder — not a path component we need
     except (ValueError, IndexError):
         subject, doc_type, unit = "unknown", "unknown", "unknown"
 
@@ -181,8 +180,11 @@ def process_pdf(pdf_path: Path):
     print(f"   Backend: {BACKEND}  |  Model: {MODEL_NAME if BACKEND != 'huggingface' else config.MODEL_VISION_HF}")
 
     metadata_base = infer_metadata_from_path(pdf_path)
-    output_dir = pdf_path.parent
-    txt_path = pdf_path.with_suffix(".txt")
+    # Write all chunk JSONs and .txt into a per-PDF subfolder so that
+    # multiple PDFs in the same unit folder never collide on chunk names.
+    output_dir = pdf_path.parent / pdf_path.stem
+    output_dir.mkdir(exist_ok=True)
+    txt_path = output_dir / (pdf_path.stem + ".txt")
 
     # Verify file exists before opening
     if not pdf_path.exists():
