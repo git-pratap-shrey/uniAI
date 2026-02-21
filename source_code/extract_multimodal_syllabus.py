@@ -354,7 +354,7 @@ def infer_subject_from_path(pdf_path: Path) -> str:
     parts = pdf_path.parts
     try:
         year_idx = parts.index("year_2")
-        return parts[year_idx + 1]          # e.g. 'COA' or 'PYTHON'
+        return parts[year_idx + 1].lower()         # e.g. 'COA' or 'PYTHON'
     except (ValueError, IndexError):
         return "unknown"
 

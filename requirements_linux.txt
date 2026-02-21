@@ -1,0 +1,59 @@
+# ============================================================
+# requirements_linux.txt  —  WSL2 / Ubuntu install guide
+# ============================================================
+#
+# STEP 1 — System packages (run these in the terminal first):
+#
+#   sudo apt update && sudo apt upgrade -y
+#   sudo apt install -y python3-dev build-essential \
+#       tesseract-ocr \
+#       libmupdf-dev \
+#       libgl1
+#
+# STEP 2 — Create and activate venv:
+#
+#   python3 -m venv .venv
+#   source .venv/bin/activate
+#   pip install --upgrade pip
+#
+# STEP 3 — Install PyTorch with CUDA (do this BEFORE pip install -r):
+#
+#   pip install torch torchvision \
+#       --index-url https://download.pytorch.org/whl/cu121
+#
+#   (CPU-only fallback — if no GPU / CUDA in WSL:)
+#   pip install torch torchvision \
+#       --index-url https://download.pytorch.org/whl/cpu
+#
+# STEP 4 — Then install the rest normally:
+#
+#   pip install -r requirements_linux.txt
+#
+# ============================================================
+
+# Core web framework
+Django>=4.2
+
+# Vector database
+chromadb>=0.4.22
+
+# PDF processing / OCR
+PyMuPDF>=1.23.0
+pytesseract>=0.3.10   # also needs: sudo apt install tesseract-ocr
+Pillow>=10.0.0
+
+# AI / LLM clients
+ollama>=0.1.7
+google-generativeai>=0.3.2
+huggingface_hub>=0.20.0
+
+# Django add-ons
+django-cors-headers>=4.0.0
+
+# Utilities
+requests>=2.31.0
+python-dotenv>=1.0.1
+
+# NOTE: torch is intentionally excluded here.
+# Install it manually with the CUDA index URL in Step 3 above.
+# torch>=2.0.0
