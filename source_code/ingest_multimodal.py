@@ -5,6 +5,9 @@ import ollama
 from pathlib import Path
 import config
 
+# Persistent client — reused for all embedding calls (keeps model warm in VRAM)
+_ollama_client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
+
 # ------------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------------
@@ -22,12 +25,11 @@ EMBED_MODEL = config.MODEL_EMBEDDING
 # ------------------------------------------------------------------
 
 def get_embedding(text: str) -> list[float]:
-    # Initialize client explicitly with config to avoid default host issues
-    client = ollama.Client(host=config.OLLAMA_BASE_URL)
-    
-    response = client.embeddings(
+    # Reuse persistent client — keeps model loaded in VRAM between calls
+    response = _ollama_client.embeddings(
         model=EMBED_MODEL,
-        prompt=text
+        prompt=text,
+        keep_alive="10m"   # keep model hot in VRAM for 10 minutes
     )
     return response["embedding"]
 
@@ -126,10 +128,8 @@ def ingest_descriptions():
                 skipped += 1
                 continue
 
-            # Generate embedding (Strict truncation for context limit)
-            # mxbai-embed-large has ~512 token limit. Safe char limit ~1500.
-            # Using 1200 specifically for embedding generation safety.
-            embedding_input = embedding_text[:1200]
+            # qwen3-embedding:4B supports 32K tokens — 4000 chars is well within limit
+            embedding_input = embedding_text[:4000]
             vector = get_embedding(embedding_input)
 
             # Metadata for ChromaDB

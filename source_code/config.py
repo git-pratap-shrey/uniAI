@@ -8,8 +8,10 @@ load_dotenv()
 # OLLAMA CONFIGURATION
 # ------------------------------------------------------------------
 
-# Base URL for Ollama instance (use https://api.ollama.com for cloud)
+# Base URL for Ollama instance (use https://api.ollama.com for cloud vision)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+# Local Ollama — always localhost, used for embeddings and local chat
+OLLAMA_LOCAL_URL = os.getenv("OLLAMA_LOCAL_URL", "http://localhost:11434")
 # Optional API key for Ollama cloud (paid tier)
 OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "")
 
@@ -19,7 +21,8 @@ OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "")
 
 # Embedding Model
 # Used for generating vector embeddings for text search
-MODEL_EMBEDDING = os.getenv("MODEL_EMBEDDING", "mxbai-embed-large")
+# qwen3-embedding:4B has a 32K token context window (vs 512 for mxbai-embed-large)
+MODEL_EMBEDDING = os.getenv("MODEL_EMBEDDING", "qwen3-embedding:4B")
 
 # Vision / OCR Model Backend
 # Options: "ollama" | "gemini" | "huggingface"

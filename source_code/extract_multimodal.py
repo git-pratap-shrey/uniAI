@@ -87,16 +87,16 @@ def infer_metadata_from_path(pdf_path: Path) -> dict:
     }
 
 
-def render_pages_to_images(doc, start_page: int, end_page: int, return_bytes=False) -> list:
+def render_pages_to_images(doc, start_page: int, end_page: int, return_bytes=False, scale=2.0) -> list:
     """
     Render PDF pages to images.
-    If using Ollama, we need raw bytes.
-    If using Gemini, we might use PIL Images.
+    scale: DPI multiplier — lower = smaller payload, higher = better OCR quality.
+    Ollama cloud uses 1.5 to avoid 524 timeouts; Gemini/HF use 2.0.
     """
     images = []
     for page_num in range(start_page, end_page):
         page = doc.load_page(page_num)
-        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+        pix = page.get_pixmap(matrix=fitz.Matrix(scale, scale))
         img_bytes = pix.tobytes("png")
         
         if return_bytes:
@@ -222,100 +222,109 @@ def process_pdf(pdf_path: Path):
 
         print(f"   -> Processing Chunk {start_page + 1}-{end_page}...", end="", flush=True)
 
-        try:
-            # ── OLLAMA ────────────────────────────────────────────────────
-            if BACKEND == "ollama":
-                images = render_pages_to_images(doc, start_page, end_page, return_bytes=True)
-                ollama_headers = {}
-                if config.OLLAMA_API_KEY:
-                    ollama_headers["Authorization"] = f"Bearer {config.OLLAMA_API_KEY}"
-                client = ollama.Client(host=config.OLLAMA_BASE_URL, headers=ollama_headers)
-                response = client.chat(
-                    model=MODEL_NAME,
-                    messages=[{
-                        'role': 'user',
-                        'content': PROMPT,
-                        'images': images,
-                    }]
-                )
-                raw_response = response['message']['content'].strip()
-
-            # ── GEMINI ────────────────────────────────────────────────────
-            elif BACKEND == "gemini":
-                images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)
-                gemini_model = genai.GenerativeModel(MODEL_NAME)
-                response = gemini_model.generate_content(
-                    [PROMPT] + images,
-                    generation_config=genai.types.GenerationConfig(
-                        temperature=0.1,
-                        max_output_tokens=8192,
+        MAX_RETRIES = 3
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                # ── OLLAMA ────────────────────────────────────────────────────
+                if BACKEND == "ollama":
+                    # Use 1.5x scale to reduce payload and avoid 524 timeouts
+                    images = render_pages_to_images(doc, start_page, end_page, return_bytes=True, scale=1.5)
+                    ollama_headers = {}
+                    if config.OLLAMA_API_KEY:
+                        ollama_headers["Authorization"] = f"Bearer {config.OLLAMA_API_KEY}"
+                    client = ollama.Client(host=config.OLLAMA_BASE_URL, headers=ollama_headers)
+                    response = client.chat(
+                        model=MODEL_NAME,
+                        messages=[{
+                            'role': 'user',
+                            'content': PROMPT,
+                            'images': images,
+                        }]
                     )
-                )
-                raw_response = response.text.strip()
+                    raw_response = response['message']['content'].strip()
 
-            # ── HUGGINGFACE (cloud Inference API) ──────────────────────────
-            elif BACKEND == "huggingface":
-                images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)
-                # Encode PIL images as base64 data-URIs (OpenAI-compatible format)
-                hf_messages = [{
-                    "role": "user",
-                    "content": [
-                        *[{
-                            "type": "image_url",
-                            "image_url": {"url": pil_to_base64(img)},
-                        } for img in images],
-                        {"type": "text", "text": PROMPT},
-                    ],
-                }]
-                hf_response = HF_CLIENT.chat_completion(
-                    model=HF_MODEL_ID,
-                    messages=hf_messages,
-                    max_tokens=8192,
-                )
-                raw_response = hf_response.choices[0].message.content.strip()
+                # ── GEMINI ────────────────────────────────────────────────────
+                elif BACKEND == "gemini":
+                    images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)
+                    gemini_model = genai.GenerativeModel(MODEL_NAME)
+                    response = gemini_model.generate_content(
+                        [PROMPT] + images,
+                        generation_config=genai.types.GenerationConfig(
+                            temperature=0.1,
+                            max_output_tokens=8192,
+                        )
+                    )
+                    raw_response = response.text.strip()
 
-            else:
-                raise ValueError(
-                    f"Unsupported MODEL_VISION_BACKEND: '{BACKEND}'. "
-                    "Choose 'ollama', 'gemini', or 'huggingface'."
-                )
+                # ── HUGGINGFACE (cloud Inference API) ──────────────────────────
+                elif BACKEND == "huggingface":
+                    images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)
+                    hf_messages = [{
+                        "role": "user",
+                        "content": [
+                            *[{
+                                "type": "image_url",
+                                "image_url": {"url": pil_to_base64(img)},
+                            } for img in images],
+                            {"type": "text", "text": PROMPT},
+                        ],
+                    }]
+                    hf_response = HF_CLIENT.chat_completion(
+                        model=HF_MODEL_ID,
+                        messages=hf_messages,
+                        max_tokens=8192,
+                    )
+                    raw_response = hf_response.choices[0].message.content.strip()
 
-            structured_data = extract_first_json(raw_response)
+                else:
+                    raise ValueError(
+                        f"Unsupported MODEL_VISION_BACKEND: '{BACKEND}'. "
+                        "Choose 'ollama', 'gemini', or 'huggingface'."
+                    )
 
-            if structured_data is None:
-                print(" ⚠ No valid JSON. Saving raw.")
-                structured_data = {"raw_description": raw_response, "full_text": raw_response}
+                # ── success — break retry loop ─────────────────────────────
+                break
 
-            # Collect full text
-            full_text = structured_data.get("full_text", "")
-            if full_text:
-                all_text_parts.append(f"\n--- PAGES {start_page+1}-{end_page} ---\n{full_text}")
+            except Exception as e:
+                err_str = str(e)
+                if attempt < MAX_RETRIES:
+                    wait = 15 * attempt  # 15s, 30s, 45s
+                    print(f" ⚠ Attempt {attempt} failed: {err_str[:120]}")
+                    print(f"   Retrying in {wait}s...", end="", flush=True)
+                    time.sleep(wait)
+                else:
+                    print(f" ❌ Failed after {MAX_RETRIES} attempts: {err_str[:120]}")
+                    raw_response = None  # mark as failed
 
-            # Save chunk JSON
-            chunk_data = {
-                **metadata_base,
-                "page_start": start_page + 1,
-                "page_end": end_page,
-                "extracted_metadata": structured_data,
-                "processed_by": MODEL_NAME,
-                "chunk_size": end_page - start_page,
-            }
-
-            with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(chunk_data, f, indent=2, ensure_ascii=False)
-
-            print(" ✅ Done.")
-            
-            if BACKEND == "gemini":
-                time.sleep(4)   # Respect Gemini rate limits
-            elif BACKEND == "huggingface":
-                pass            # Local inference — no rate limit needed
-            else:
-                time.sleep(1)   # Small pause for Ollama
-
-        except Exception as e:
-            print(f" ❌ Failed: {e}")
+        if raw_response is None:
             time.sleep(5)
+            continue  # skip to next chunk
+
+        structured_data = extract_first_json(raw_response)
+        if structured_data is None:
+            print(" ⚠ No valid JSON. Saving raw.")
+            structured_data = {"raw_description": raw_response, "full_text": raw_response}
+
+        full_text = structured_data.get("full_text", "")
+        if full_text:
+            all_text_parts.append(f"\n--- PAGES {start_page+1}-{end_page} ---\n{full_text}")
+
+        chunk_data = {
+            **metadata_base,
+            "page_start": start_page + 1,
+            "page_end": end_page,
+            "extracted_metadata": structured_data,
+            "processed_by": MODEL_NAME if BACKEND != "huggingface" else HF_MODEL_ID,
+            "chunk_size": end_page - start_page,
+        }
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(chunk_data, f, indent=2, ensure_ascii=False)
+
+        print(" ✅ Done.")
+        if BACKEND == "gemini":
+            time.sleep(4)
+        elif BACKEND != "huggingface":
+            time.sleep(1)
 
     doc.close()
 
