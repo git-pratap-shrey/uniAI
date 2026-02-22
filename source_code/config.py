@@ -57,6 +57,6 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # ------------------------------------------------------------------
 
 # Default paths - can be overridden by env vars
-BASE_DATA_DIR = os.getenv("BASE_DATA_DIR", r"D:\CODE-workingBuild\uniAI\source_code\data\year_2")
-CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", r"D:\CODE-workingBuild\uniAI\source_code\chroma")
+BASE_DATA_DIR = os.getenv("BASE_DATA_DIR", "/home/anon/PROJECTS/uniAI/source_code/data/year_2")
+CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "/home/anon/PROJECTS/uniAI/source_code/chroma")
 CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "multimodal_notes")
