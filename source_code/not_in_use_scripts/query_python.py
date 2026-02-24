@@ -8,7 +8,7 @@ if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
 import chromadb
-from pipeline.embeddings.local_mxbai import embed
+from pipeline.embeddings.local_embedding import embed
 
 # -------- CONFIG ----------
 CHROMA_PATH = r"D:\CODE-workingBuild\uniAI\source_code\chroma\python"
@@ -67,7 +67,7 @@ def chroma_query(user_query: str):
         # 2️⃣ Normal semantic search - USE YOUR CUSTOM EMBEDDING
         print("\n🔍 Semantic search...\n")
         
-        # ⚠️ FIX: Manually embed using YOUR mxbai model
+        # ⚠️ FIX: Manually embed using YOUR configured embedding model
         query_embedding = embed([user_query])  # Returns list of embeddings
         
         results = collection.query(
@@ -91,7 +91,7 @@ def chroma_query(user_query: str):
 # -------- CLI LOOP --------
 
 if __name__ == "__main__":
-    print("\n✨ Python Notes Query Engine (Chroma + MXBAI)\n")
+    print("\n✨ Python Notes Query Engine (Chroma + Local Embeddings)\n")
 
     while True:
         query = input("\n🔍 Ask something: ").strip()

@@ -10,7 +10,7 @@ if source_code_root not in sys.path:
     sys.path.append(source_code_root)
 
 import config
-from pipeline.embeddings.local_mxbai import embed
+from pipeline.embeddings.local_embedding import embed
 
 def test_config():
     print("--- Configuration Verification ---")
