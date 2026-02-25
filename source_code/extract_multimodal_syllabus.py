@@ -46,6 +46,7 @@ if current_dir not in sys.path:
 
 import config
 from utils import pil_to_base64, pil_to_bytes, extract_first_json, build_vlm_client
+from prompts import SYLLABUS_EXTRACTION
 
 # ──────────────────────────────────────────────────────────────────────────────
 # BACKEND SETUP
@@ -158,7 +159,7 @@ def call_vlm(images: list, max_retries: int = 3) -> dict | None:
                     model=MODEL_NAME,
                     messages=[{
                         "role": "user",
-                        "content": SYLLABUS_PROMPT,
+                        "content": SYLLABUS_EXTRACTION,
                         "images": img_bytes,
                     }],
                 )
@@ -170,7 +171,7 @@ def call_vlm(images: list, max_retries: int = 3) -> dict | None:
                     "content": [
                         *[{"type": "image_url", "image_url": {"url": pil_to_base64(img)}}
                           for img in images],
-                        {"type": "text", "text": SYLLABUS_PROMPT},
+                        {"type": "text", "text": SYLLABUS_EXTRACTION},
                     ],
                 }]
                 hf_resp = HF_CLIENT.chat_completion(

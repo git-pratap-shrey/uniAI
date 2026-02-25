@@ -8,6 +8,8 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(ROOT_DIR)
 
 import config
+import prompts
+
 from pipeline.embeddings.local_embedding import embed
 from pipeline.retrieval_utils import retrieve_with_threshold
 
@@ -78,15 +80,7 @@ def detect_subject(query):
     # Fallback to LLM if ambiguous (0 score or tied)
     print("   [Routing] Ambiguous query. Asking LLM for subject classification...", end="", flush=True)
     subjects_list = ", ".join(SUBJECT_KEYWORD_MAP.keys())
-    prompt = f"""
-You are a routing agent. The user is asking a question about university coursework.
-Known Subjects: {subjects_list}
-
-User Query: "{query}"
-
-Which of the Known Subjects is this query about? 
-Reply ONLY with the exact exact Subject name. If it does not match any, reply NONE.
-"""
+    prompt = prompts.subject_router(query=query, subjects_list=subjects_list)
     client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
     response = client.chat(model=ROUTER_MODEL, messages=[{"role": "user", "content": prompt}])
     llm_choice = response["message"]["content"].strip()
@@ -103,26 +97,11 @@ def answer(query, active_subject, conversation_history=""):
     results = retrieve(query, active_subject)
     context = format_context(results)
 
-    prompt = f"""
-You are a university assistant trained on real syllabus, notes, and PYQs.
-
-Answer the user based on the provided context, add that to your own knowledge, and information available on the internet,
-
-your goal is therefore to provide answers that are relevant to the students' academic needs, for exams, assignments, and projects.
-
-If the answer is not in the context, say: "here is some information about the topic from my knowledge: ".
-
-Conversation so far:
-{conversation_history}
-
-User question:
-{query}
-
-Relevant context:
-{context}
-
-Answer clearly with bullet points and examples. Do NOT mention the context explicitly.
-"""
+    prompt = prompts.rag_answer(
+        query=query, 
+        context=context, 
+        conversation_history=conversation_history
+    )
 
     # Initialize client explicitly with config to avoid default host issues
     client = ollama.Client(host=config.OLLAMA_BASE_URL)

@@ -50,6 +50,14 @@ MODEL_CHAT = os.getenv("MODEL_CHAT", "gemma3:4b")
 MODEL_ROUTER = os.getenv("MODEL_ROUTER", "mistral:7b-instruct")
 
 # ------------------------------------------------------------------
+# RETRIEVAL CONFIGURATION
+# ------------------------------------------------------------------
+
+# Minimum cosine similarity to keep a search result (0.0 = keep all, 1.0 = exact match only)
+# Distance in ChromaDB cosine space = 1.0 - similarity, so threshold 0.3 → max_distance 0.7
+SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.3"))
+
+# ------------------------------------------------------------------
 # PATH CONFIGURATION
 # ------------------------------------------------------------------
 

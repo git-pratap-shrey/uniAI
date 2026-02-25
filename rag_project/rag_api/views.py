@@ -26,6 +26,8 @@ except ImportError:
     import config
     from pipeline.embeddings.local_embedding import embed
     from pipeline.retrieval_utils import retrieve_with_threshold
+    
+import prompts
 
 # ------------------------------------------------------------------
 # CONFIG & INITIALIZATION
@@ -135,15 +137,7 @@ def detect_subject(query: str) -> str | None:
 
     # Fallback to LLM router
     subjects_list = ", ".join(SUBJECT_KEYWORD_MAP.keys())
-    prompt = f"""
-You are a routing agent. The user is asking a question about university coursework.
-Known Subjects: {subjects_list}
-
-User Query: "{query}"
-
-Which of the Known Subjects is this query about? 
-Reply ONLY with the exact Subject name. If it does not match any, reply NONE.
-"""
+    prompt = prompts.subject_router(query=query, subjects_list=subjects_list)
     # FIX: Renamed to ollama_router_client to avoid shadowing chroma_client
     ollama_router_client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
     response = ollama_router_client.chat(model=ROUTER_MODEL, messages=[{"role": "user", "content": prompt}])
@@ -178,8 +172,8 @@ def retrieve_context(query: str, active_subject: str = None, n_results: int = 5)
     results = retrieve_with_threshold(
         collection=collection,
         query=query,
-        n_initial=n_results,  # FIX: was hardcoded to 5, now uses the parameter
-        similarity_threshold=0.3,
+        n_initial=n_results,
+        similarity_threshold=config.SIMILARITY_THRESHOLD,
         metadata_filter=where_clause
     )
 
@@ -222,25 +216,11 @@ def generate_answer(query: str, contexts: list[dict], mode: str, history: list[d
         for i, c in enumerate(contexts):
             context += f"\n### Source {i+1}:\n{c['text']}\n"
 
-    prompt = f"""
-You are a university assistant trained on real syllabus, notes, and PYQs.
-
-Answer the user based on the provided context and your own knowledge.
-Your goal is to provide answers relevant to the students' academic needs, for exams, assignments, and projects.
-
-If the answer is not in the context, say: "Here is some information about the topic from my knowledge: ".
-
-Conversation so far:
-{conversation_history}
-
-User question:
-{query}
-
-Relevant context:
-{context}
-
-Answer clearly with bullet points and examples. Do NOT mention the context explicitly.
-"""
+    prompt = prompts.rag_answer(
+        query=query, 
+        context=context, 
+        conversation_history=conversation_history
+    )
 
     try:
         ollama_chat_client = ollama.Client(host=config.OLLAMA_BASE_URL)

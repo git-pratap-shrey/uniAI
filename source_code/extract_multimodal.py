@@ -12,6 +12,7 @@ if current_dir not in sys.path:
 
 import config
 from utils import pil_to_base64, extract_first_json, build_vlm_client
+from prompts import NOTES_EXTRACTION
 
 # ------------------------------------------------------------------
 # CONFIG
@@ -99,46 +100,7 @@ def render_pages_to_images(doc, start_page: int, end_page: int, return_bytes=Fal
 # ------------------------------------------------------------------
 # PROMPT
 # ------------------------------------------------------------------
-
-PROMPT = """You are an OCR + metadata extraction system for university course materials.
-
-You will receive images of PDF pages. These may be handwritten notes, printed slides, question papers, or diagrams. Text CANNOT be copy-pasted from these — you must read them visually.
-
-## Your Tasks
-
-### Task 1 — Full OCR
-Read ALL visible text from the images. Transcribe it faithfully:
-- Preserve headings, bullet points, numbering, and structure
-- For handwritten text, do your best to read it accurately
-- For code snippets, preserve indentation and syntax
-- Skip watermarks, page numbers, and headers/footers
-- If a diagram is present, describe it briefly in [DIAGRAM: ...]
-
-### Task 2 — Structured Metadata
-Classify and tag the content you extracted.
-
-## Output Format
-Return ONLY a valid JSON object (no markdown fences, no extra text):
-
-{
-  "full_text": "The complete transcribed text from all pages, preserving structure with newlines",
-  "title": "The topic title visible on the pages (e.g. 'Functions in Python', '2023 End Sem Paper')",
-  "unit": "Unit number if identifiable (e.g. '1', '3'), else null",
-  "document_type": "One of: question_paper, handwritten_notes, printed_notes, syllabus, lab_manual, other",
-  "topics": ["List of specific subtopics covered in these pages"],
-  "key_concepts": ["Important definitions, formulas, theorems, or algorithms mentioned"],
-  "diagrams_present": false,
-  "content_quality": "One of: clear, partially_legible, illegible",
-  "confidence": 0.85
-}
-
-## Rules
-- full_text must contain the ACTUAL text from the pages. This is the most important field.
-- Be thorough — every readable sentence matters for search.
-- Do NOT invent content that isn't visible.
-- If pages are completely illegible, set confidence to 0.1 and full_text to empty string.
-- confidence is a float between 0.0 and 1.0 reflecting OCR accuracy.
-"""
+# Moved to prompts.NOTES_EXTRACTION
 
 # ------------------------------------------------------------------
 # CORE LOGIC
@@ -198,7 +160,7 @@ def process_pdf(pdf_path: Path):
                         model=MODEL_NAME,
                         messages=[{
                             'role': 'user',
-                            'content': PROMPT,
+                            'content': NOTES_EXTRACTION,
                             'images': images,
                         }]
                     )
@@ -213,7 +175,7 @@ def process_pdf(pdf_path: Path):
                                 "type": "image_url",
                                 "image_url": {"url": pil_to_base64(img)},
                             } for img in images],
-                            {"type": "text", "text": PROMPT},
+                            {"type": "text", "text": NOTES_EXTRACTION},
                         ],
                     }]
                     hf_response = HF_CLIENT.chat_completion(

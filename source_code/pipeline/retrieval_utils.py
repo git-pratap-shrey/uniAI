@@ -9,7 +9,9 @@ if ROOT_DIR not in sys.path:
 from pipeline.embeddings.local_embedding import embed
 
 
-def retrieve_with_threshold(collection, query: str, n_initial=10, similarity_threshold=0.3, metadata_filter=None):
+def retrieve_with_threshold(collection, query: str, n_initial=10, similarity_threshold=None, metadata_filter=None):
+    if similarity_threshold is None:
+        similarity_threshold = config.SIMILARITY_THRESHOLD
     """
     Fetch top `n` chunks using the configured embeddings, and filter out any chunks
     with a cosine similarity below `similarity_threshold`.
