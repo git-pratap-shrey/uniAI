@@ -34,11 +34,13 @@ if uni_ai_root not in sys.path:
 # Actually if we are in uniAI, we can import source_code.config
 try:
     from source_code import config
-    from source_code.pipeline.embeddings.local_mxbai import embed
+    from source_code.pipeline.embeddings.local_embedding import embed
+    from source_code.pipeline.retrieval_utils import retrieve_with_threshold
 except ImportError:
     # Fallback if running relative to uniAI root directly
     import config
-    from pipeline.embeddings.local_mxbai import embed
+    from pipeline.embeddings.local_embedding import embed
+    from pipeline.retrieval_utils import retrieve_with_threshold
 
 # ------------------------------------------------------------------
 # CONFIG & INITIALIZATION
@@ -48,6 +50,15 @@ except ImportError:
 CHROMA_PATH = config.CHROMA_DB_PATH
 COLLECTION_NAME = config.CHROMA_COLLECTION_NAME
 MODEL_CHAT = config.MODEL_CHAT
+ROUTER_MODEL = config.MODEL_ROUTER
+
+KEYWORDS_FILE = os.path.join(uni_ai_root, "source_code", "data", "subject_keywords.json")
+
+# Load Keyword Map
+SUBJECT_KEYWORD_MAP = {}
+if os.path.exists(KEYWORDS_FILE):
+    with open(KEYWORDS_FILE, "r") as f:
+        SUBJECT_KEYWORD_MAP = json.load(f)
 
 # ChromaDB
 client = chromadb.PersistentClient(path=CHROMA_PATH)
@@ -118,9 +129,46 @@ def detect_unit_query(query: str) -> str | None:
     return f"unit{match.group(1)}" if match else None
 
 
+def detect_subject(query: str) -> str | None:
+    if not SUBJECT_KEYWORD_MAP:
+        return None
 
+    query_lower = query.lower()
+    scores = {subject: 0 for subject in SUBJECT_KEYWORD_MAP.keys()}
+    
+    for subject, keywords in SUBJECT_KEYWORD_MAP.items():
+        for kw in keywords:
+            if kw in query_lower:
+                scores[subject] += 1
+                
+    max_score = max(scores.values())
+    
+    if max_score > 0:
+        top_subjects = [s for s, score in scores.items() if score == max_score]
+        if len(top_subjects) == 1:
+            return top_subjects[0]
+            
+    # Fallback to LLM
+    subjects_list = ", ".join(SUBJECT_KEYWORD_MAP.keys())
+    prompt = f"""
+You are a routing agent. The user is asking a question about university coursework.
+Known Subjects: {subjects_list}
 
-def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> list[dict]:
+User Query: "{query}"
+
+Which of the Known Subjects is this query about? 
+Reply ONLY with the exact exact Subject name. If it does not match any, reply NONE.
+"""
+    client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
+    response = client.chat(model=ROUTER_MODEL, messages=[{"role": "user", "content": prompt}])
+    llm_choice = response["message"]["content"].strip()
+    
+    for valid_subject in SUBJECT_KEYWORD_MAP.keys():
+        if valid_subject.lower() in llm_choice.lower():
+            return valid_subject
+            
+    return None
+def retrieve_context(query: str, active_subject: str = None, mode: str = "syllabus", n_results: int = 5) -> list[dict]:
     collection = get_collection()
     unit = detect_unit_query(query)
 
@@ -128,12 +176,8 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
 
     if unit:
         filters.append({"unit": unit})
-
-    # Adjust filter for multimodal if needed
-    # START CHANGE: handling metadata flexibility
-    # if mode == "syllabus":
-    #     filters.append({"category": {"$in": ["notes", "pyq"]}})
-    # END CHANGE
+    if active_subject:
+        filters.append({"subject": active_subject})
 
     where_clause = None
     if filters:
@@ -142,16 +186,16 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
         else:
             where_clause = {"$and": filters}
 
-    query_embedding = embed([query])[0]
-
-    # Increase N for multimodal as we want to find the best page visuals
-    results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=3, # Fewer results because each result is now a CHUNK (5 pages)
-        where=where_clause,
+    # Use retrieve_with_threshold from pipeline.retrieval_utils
+    results = retrieve_with_threshold(
+        collection=collection,
+        query=query,
+        n_initial=5,
+        similarity_threshold=0.3,
+        metadata_filter=where_clause
     )
 
-    if not results or not results.get("documents"):
+    if not results or not results.get("documents") or not results["documents"][0]:
         return []
 
     documents = results["documents"][0]
@@ -159,10 +203,11 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
 
     return [
         {
-            "text": doc,  # Full OCR text + metadata
+            "text": doc,
             "source": meta.get("source", "unknown"),
             "unit": meta.get("unit", "unknown"),
             "title": meta.get("title", "unknown"),
+            "page_start": meta.get("page_start", "?"),
         }
         for doc, meta in zip(documents, metadatas)
     ]
@@ -175,56 +220,39 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
 def generate_answer(query: str, contexts: list[dict], mode: str, history: list[dict] | None = None) -> str:
     history = history or []
 
-    if mode == "syllabus":
-        system_prompt = """
-            You are uniAI, a syllabus-aware exam assistant.
-
-            You will be given OCR-extracted text from course notes along with a user question.
-
-            Rules:
-            - Answer from the provided notes or previous conversation.
-            - Use definitions and exam keywords from the notes.
-            - Write in a "what to write in exam" tone.
-            - If the answer spans multiple chunks, synthesize them.
-            - Use clear headings and structure.
-            - If the question refers to a previous explanation, repeat or rephrase it.
-            - If something is outside the provided notes, say so and answer it based on your knowledge.
-        """
-    else:
-        system_prompt = """
-            [GENERIC AI TUTOR MODE]
-
-            This question is outside the syllabus.
-            You may use general knowledge.
-            Mention clearly that this is not syllabus-bound.
-        """
-
     # Build Context
-    memory_block = ""
+    conversation_history = ""
     if history:
-        memory_block = "\nPrevious conversation:\n"
         for h in history:
-            role = h.get('role', 'user').upper()
+            role = "User" if h.get('role', 'user').lower() == 'user' else "AI"
             content = h.get('content', '')
-            memory_block += f"{role}: {content}\n"
+            conversation_history += f"{role}: {content}\n"
 
-    context_text_block = ""
+    context = ""
     if contexts:
-        context_text_block = "\nRelevant notes (OCR-extracted text):\n"
-        for c in contexts:
-            context_text_block += f"\n[Source: {c['source']} | {c['unit']} | {c.get('title', '')}]\n"
-            context_text_block += f"{c['text']}\n"
+        for i, c in enumerate(contexts):
+            context += f"\n### Source {i+1}:\n{c['text']}\n"
 
     # Construct the final prompt
-    full_prompt = f"""
-{system_prompt}
+    prompt = f"""
+You are a university assistant trained on real syllabus, notes, and PYQs.
 
-{memory_block}
+Answer the user based on the provided context, add that to your own knowledge, and information available on the internet,
 
-{context_text_block}
+your goal is therefore to provide answers that are relevant to the students' academic needs, for exams, assignments, and projects.
+
+If the answer is not in the context, say: "here is some information about the topic from my knowledge: ".
+
+Conversation so far:
+{conversation_history}
 
 User question:
 {query}
+
+Relevant context:
+{context}
+
+Answer clearly with bullet points and examples. Do NOT mention the context explicitly.
 """
 
     try:
@@ -239,7 +267,7 @@ User question:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel(MODEL_CHAT)
             
-            response = model.generate_content(full_prompt)
+            response = model.generate_content(prompt)
             if not response or not response.text:
                  return "⚠ I couldn't generate a response (Empty from Gemini)."
             return response.text
@@ -251,7 +279,8 @@ User question:
             
             response = client.chat(
                 model=MODEL_CHAT,
-                messages=[{"role": "user", "content": full_prompt}]
+                messages=[{"role": "user", "content": prompt}],
+                options={"num_ctx": 8192}
             )
             return response["message"]["content"]
 
@@ -295,11 +324,14 @@ def query_view(request):
         mode = "generic" if any(t in q_lower for t in GENERIC_TRIGGERS) else "syllabus"
 
         followup = is_followup(query)
+        # Attempt subject routing
+        active_subject = detect_subject(query)
+        print(f"ROUTING => Active Subject: {active_subject}")
 
         if followup and history:
             contexts = []
         else:
-            contexts = retrieve_context(query, mode=mode)
+            contexts = retrieve_context(query, active_subject=active_subject, mode=mode)
 
         if not contexts and not history:
             return JsonResponse({
@@ -324,7 +356,7 @@ def query_view(request):
             "answer": answer,
             "mode": mode,
             "sources": [
-                {"source": c["source"], "unit": c["unit"]}
+                {"source": c["source"], "unit": c["unit"], "page_start": c.get("page_start", "?")}
                 for c in contexts[:3]
             ],
         })
