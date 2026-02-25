@@ -243,30 +243,30 @@ Answer clearly with bullet points and examples. Do NOT mention the context expli
 """
 
     try:
-        if MODEL_CHAT.startswith("gemini"):
-            import google.generativeai as genai
-
-            api_key = config.GEMINI_API_KEY
-            if not api_key:
-                return "⚠ Configuration Error: Gemini Model selected but GEMINI_API_KEY is missing."
-
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel(MODEL_CHAT)
-
-            response = model.generate_content(prompt)
-            if not response or not response.text:
-                return "⚠ I couldn't generate a response (Empty from Gemini)."
-            return response.text
-
-        else:
-            # FIX: Renamed to ollama_chat_client to avoid shadowing chroma_client
-            ollama_chat_client = ollama.Client(host=config.OLLAMA_BASE_URL)
-            response = ollama_chat_client.chat(
-                model=MODEL_CHAT,
-                messages=[{"role": "user", "content": prompt}],
-                options={"num_ctx": 8192}
-            )
-            return response["message"]["content"]
+        # if MODEL_CHAT.startswith("gemini"):  # Gemini - commented out
+        #     import google.generativeai as genai
+        #
+        #     api_key = config.GEMINI_API_KEY
+        #     if not api_key:
+        #         return "⚠ Configuration Error: Gemini Model selected but GEMINI_API_KEY is missing."
+        #
+        #     genai.configure(api_key=api_key)
+        #     model = genai.GenerativeModel(MODEL_CHAT)
+        #
+        #     response = model.generate_content(prompt)
+        #     if not response or not response.text:
+        #         return "⚠ I couldn't generate a response (Empty from Gemini)."
+        #     return response.text
+        #
+        # else:
+        # FIX: Renamed to ollama_chat_client to avoid shadowing chroma_client
+        ollama_chat_client = ollama.Client(host=config.OLLAMA_BASE_URL)
+        response = ollama_chat_client.chat(
+            model=MODEL_CHAT,
+            messages=[{"role": "user", "content": prompt}],
+            options={"num_ctx": 8192}
+        )
+        return response["message"]["content"]
 
     except Exception as e:
         return f"Error generating answer: {e}"
