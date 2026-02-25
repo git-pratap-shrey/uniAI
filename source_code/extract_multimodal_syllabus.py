@@ -26,20 +26,18 @@ Each file follows the schema:
 }
 
 Usage:
-  python extract_multimodal_syllabus.py
+  python extract_multimodal_syllabus.py [--path PATH] [--pdf PDF] [--force]
 """
 
 import os
 import sys
 import json
 import time
-import base64
 import io
 from pathlib import Path
 
 import fitz          # PyMuPDF
 from PIL import Image
-from dotenv import load_dotenv
 
 # ── ensure source_code/ is on the path ────────────────────────────────────────
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -47,23 +45,18 @@ if current_dir not in sys.path:
     sys.path.append(current_dir)
 
 import config
-
-load_dotenv()
+from utils import pil_to_base64, pil_to_bytes, extract_first_json, build_vlm_client
 
 # ──────────────────────────────────────────────────────────────────────────────
-# BACKEND SETUP  (mirrors extract_multimodal.py)
+# BACKEND SETUP
 # ──────────────────────────────────────────────────────────────────────────────
 BACKEND    = config.MODEL_VISION_BACKEND.lower()
 MODEL_NAME = config.MODEL_VISION
 
-# if BACKEND == "gemini":  # Gemini - commented out
-#     import google.generativeai as genai
-#     if not config.GEMINI_API_KEY:
-#         print("⚠️  Gemini backend selected but GEMINI_API_KEY not set.")
-#     else:
-#         genai.configure(api_key=config.GEMINI_API_KEY)
+if BACKEND == "ollama":
+    _ollama_client = build_vlm_client()
 
-if BACKEND == "huggingface":  # was elif; gemini block above is commented out
+elif BACKEND == "huggingface":
     HF_MODEL_ID = config.MODEL_VISION_HF
     if not config.HF_TOKEN:
         print("⚠️  HuggingFace backend selected but HF_TOKEN not set.")
@@ -74,12 +67,8 @@ if BACKEND == "huggingface":  # was elif; gemini block above is commented out
             api_key=config.HF_TOKEN,
         )
 
-elif BACKEND == "ollama":
-    import ollama as _ollama
-    _ollama_headers = {}
-    if config.OLLAMA_API_KEY:
-        _ollama_headers["Authorization"] = f"Bearer {config.OLLAMA_API_KEY}"
-    _ollama_client = _ollama.Client(host=config.OLLAMA_BASE_URL, headers=_ollama_headers)
+else:
+    raise ValueError(f"Unsupported MODEL_VISION_BACKEND: '{BACKEND}'. Choose 'ollama' or 'huggingface'.")
 
 # ──────────────────────────────────────────────────────────────────────────────
 # HELPERS
@@ -95,38 +84,6 @@ def render_pdf_to_images(pdf_path: Path, scale: float = 2.0) -> list:
         images.append(img)
     doc.close()
     return images
-
-
-def pil_to_base64(img: Image.Image) -> str:
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    b64 = base64.b64encode(buf.getvalue()).decode()
-    return f"data:image/png;base64,{b64}"
-
-
-def pil_to_bytes(img: Image.Image) -> bytes:
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    return buf.getvalue()
-
-
-def extract_first_json(text: str):
-    """Extract the first complete JSON object from a (possibly noisy) string."""
-    start = text.find("{")
-    if start == -1:
-        return None
-    depth = 0
-    for i, ch in enumerate(text[start:], start=start):
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-        if depth == 0:
-            try:
-                return json.loads(text[start : i + 1])
-            except json.JSONDecodeError:
-                return None
-    return None
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -195,20 +152,7 @@ def call_vlm(images: list, max_retries: int = 3) -> dict | None:
         try:
             raw = None
 
-            # ── GEMINI ───────────────────────────────────────────────────────
-            # if BACKEND == "gemini":  # Gemini - commented out
-            #     model = genai.GenerativeModel(MODEL_NAME)
-            #     response = model.generate_content(
-            #         [SYLLABUS_PROMPT] + images,
-            #         generation_config=genai.types.GenerationConfig(
-            #             temperature=0.1,
-            #             max_output_tokens=8192,
-            #         ),
-            #     )
-            #     raw = response.text.strip()
-
-            # ── OLLAMA ───────────────────────────────────────────────────────
-            if BACKEND == "ollama":  # was elif; gemini block above is commented out
+            if BACKEND == "ollama":
                 img_bytes = [pil_to_bytes(img) for img in images]
                 response = _ollama_client.chat(
                     model=MODEL_NAME,
@@ -220,7 +164,6 @@ def call_vlm(images: list, max_retries: int = 3) -> dict | None:
                 )
                 raw = response["message"]["content"].strip()
 
-            # ── HUGGINGFACE ──────────────────────────────────────────────────
             elif BACKEND == "huggingface":
                 messages = [{
                     "role": "user",
@@ -236,9 +179,6 @@ def call_vlm(images: list, max_retries: int = 3) -> dict | None:
                     max_tokens=8192,
                 )
                 raw = hf_resp.choices[0].message.content.strip()
-
-            else:
-                raise ValueError(f"Unsupported backend: '{BACKEND}'")
 
             parsed = extract_first_json(raw)
             if parsed:
@@ -278,7 +218,6 @@ def build_unit_chunk(unit_data: dict, base: dict) -> dict:
     title = unit_data.get("unit_title", f"Unit {n}")
     lectures = unit_data.get("proposed_lectures", None)
 
-    # Build a rich full_text if VLM didn't include one
     if not full_text and topics_raw:
         full_text = f"Unit {n} – {title}\n" + "\n".join(f"- {t}" for t in topics_raw)
 

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from a .env file if present
@@ -25,25 +26,21 @@ OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "")
 MODEL_EMBEDDING = os.getenv("MODEL_EMBEDDING", "qwen3-embedding:4B")
 
 # Vision / OCR Model Backend
-# Options: "ollama" | "gemini" | "huggingface"
+# Options: "ollama" | "huggingface"
 #   ollama      -> Ollama model tag (local or cloud Ollama)
-#   gemini      -> Google Gemini API (cloud)
 #   huggingface -> HuggingFace Inference API (cloud, no local GPU needed)
 MODEL_VISION_BACKEND = os.getenv("MODEL_VISION_BACKEND", "ollama")
 
 # Vision model name — interpreted differently per backend:
 #   ollama      -> Ollama model tag, e.g. "qwen3-vl:235b-cloud" or "llava:13b"
-#   gemini      -> Gemini model name, e.g. "gemini-2.5-flash"
 #   huggingface -> HuggingFace repo ID, e.g. "Qwen/Qwen3-VL-235B-A22B-Instruct"
 MODEL_VISION = os.getenv("MODEL_VISION", "qwen3-vl:235b-cloud")
 
 # HuggingFace cloud Inference API settings
 # Get your token from: https://huggingface.co/settings/tokens
-HF_TOKEN = os.getenv("HF_TOKEN")                                             # required
+HF_TOKEN = os.getenv("HF_TOKEN")                                              # required
 MODEL_VISION_HF = os.getenv("MODEL_VISION_HF", "Qwen/Qwen3-VL-235B-A22B-Instruct")
 
-# Chat / Generative Model
-# Used for RAG chat and general text generation
 # Chat / Generative Model
 # Used for RAG chat and general text generation
 MODEL_CHAT = os.getenv("MODEL_CHAT", "gemma3:4b")
@@ -52,17 +49,14 @@ MODEL_CHAT = os.getenv("MODEL_CHAT", "gemma3:4b")
 # Fast local model used specifically for extracting keywords and context switching
 MODEL_ROUTER = os.getenv("MODEL_ROUTER", "mistral:7b-instruct")
 
-# Gemini Configuration (Legacy / Option) - commented out
-# MODEL_GEMINI = os.getenv("MODEL_GEMINI", "gemini-2.5-flash")
-# GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-MODEL_GEMINI = None  # Gemini disabled
-GEMINI_API_KEY = None  # Gemini disabled
-
 # ------------------------------------------------------------------
 # PATH CONFIGURATION
 # ------------------------------------------------------------------
 
-# Default paths - can be overridden by env vars
-BASE_DATA_DIR = os.getenv("BASE_DATA_DIR", "/home/anon/PROJECTS/uniAI/source_code/data/year_2")
-CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "/home/anon/PROJECTS/uniAI/source_code/chroma")
+# Resolve paths relative to this file so defaults work on any machine.
+# Override via .env for custom locations.
+_SOURCE_CODE_DIR = Path(__file__).parent
+
+BASE_DATA_DIR = os.getenv("BASE_DATA_DIR", str(_SOURCE_CODE_DIR / "data" / "year_2"))
+CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", str(_SOURCE_CODE_DIR / "chroma"))
 CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "multimodal_notes")
