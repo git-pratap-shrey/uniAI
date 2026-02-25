@@ -56,14 +56,14 @@ load_dotenv()
 BACKEND    = config.MODEL_VISION_BACKEND.lower()
 MODEL_NAME = config.MODEL_VISION
 
-if BACKEND == "gemini":
-    import google.generativeai as genai
-    if not config.GEMINI_API_KEY:
-        print("⚠️  Gemini backend selected but GEMINI_API_KEY not set.")
-    else:
-        genai.configure(api_key=config.GEMINI_API_KEY)
+# if BACKEND == "gemini":  # Gemini - commented out
+#     import google.generativeai as genai
+#     if not config.GEMINI_API_KEY:
+#         print("⚠️  Gemini backend selected but GEMINI_API_KEY not set.")
+#     else:
+#         genai.configure(api_key=config.GEMINI_API_KEY)
 
-elif BACKEND == "huggingface":
+if BACKEND == "huggingface":  # was elif; gemini block above is commented out
     HF_MODEL_ID = config.MODEL_VISION_HF
     if not config.HF_TOKEN:
         print("⚠️  HuggingFace backend selected but HF_TOKEN not set.")
@@ -196,19 +196,19 @@ def call_vlm(images: list, max_retries: int = 3) -> dict | None:
             raw = None
 
             # ── GEMINI ───────────────────────────────────────────────────────
-            if BACKEND == "gemini":
-                model = genai.GenerativeModel(MODEL_NAME)
-                response = model.generate_content(
-                    [SYLLABUS_PROMPT] + images,
-                    generation_config=genai.types.GenerationConfig(
-                        temperature=0.1,
-                        max_output_tokens=8192,
-                    ),
-                )
-                raw = response.text.strip()
+            # if BACKEND == "gemini":  # Gemini - commented out
+            #     model = genai.GenerativeModel(MODEL_NAME)
+            #     response = model.generate_content(
+            #         [SYLLABUS_PROMPT] + images,
+            #         generation_config=genai.types.GenerationConfig(
+            #             temperature=0.1,
+            #             max_output_tokens=8192,
+            #         ),
+            #     )
+            #     raw = response.text.strip()
 
             # ── OLLAMA ───────────────────────────────────────────────────────
-            elif BACKEND == "ollama":
+            if BACKEND == "ollama":  # was elif; gemini block above is commented out
                 img_bytes = [pil_to_bytes(img) for img in images]
                 response = _ollama_client.chat(
                     model=MODEL_NAME,

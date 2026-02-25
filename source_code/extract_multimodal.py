@@ -5,11 +5,11 @@ import time
 import base64
 from pathlib import Path
 from dotenv import load_dotenv
-import google.generativeai as genai
+# import google.generativeai as genai  # Gemini - commented out
 import ollama
 from PIL import Image
 import io
-import torch
+# import torch  # unused — caused Bus error (core dumped)
 
 # --- Ensure imports work regardless of working directory ---
 import sys
@@ -37,13 +37,13 @@ BACKEND = config.MODEL_VISION_BACKEND.lower()
 MODEL_NAME = config.MODEL_VISION
 
 # ---- Backend-specific setup ----
-if BACKEND == "gemini":
-    if not config.GEMINI_API_KEY:
-        print("⚠️  Gemini backend selected but GEMINI_API_KEY not set in config/env.")
-    else:
-        genai.configure(api_key=config.GEMINI_API_KEY)
+# if BACKEND == "gemini":  # Gemini - commented out
+#     if not config.GEMINI_API_KEY:
+#         print("⚠️  Gemini backend selected but GEMINI_API_KEY not set in config/env.")
+#     else:
+#         genai.configure(api_key=config.GEMINI_API_KEY)
 
-elif BACKEND == "huggingface":
+if BACKEND == "huggingface":  # was elif; gemini block above is commented out
     HF_MODEL_ID = config.MODEL_VISION_HF
     if not config.HF_TOKEN:
         print("⚠️  HuggingFace backend selected but HF_TOKEN not set in config/env.")
@@ -246,17 +246,17 @@ def process_pdf(pdf_path: Path):
                     raw_response = response['message']['content'].strip()
 
                 # ── GEMINI ────────────────────────────────────────────────────
-                elif BACKEND == "gemini":
-                    images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)
-                    gemini_model = genai.GenerativeModel(MODEL_NAME)
-                    response = gemini_model.generate_content(
-                        [PROMPT] + images,
-                        generation_config=genai.types.GenerationConfig(
-                            temperature=0.1,
-                            max_output_tokens=8192,
-                        )
-                    )
-                    raw_response = response.text.strip()
+                # elif BACKEND == "gemini":  # Gemini - commented out
+                #     images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)
+                #     gemini_model = genai.GenerativeModel(MODEL_NAME)
+                #     response = gemini_model.generate_content(
+                #         [PROMPT] + images,
+                #         generation_config=genai.types.GenerationConfig(
+                #             temperature=0.1,
+                #             max_output_tokens=8192,
+                #         )
+                #     )
+                #     raw_response = response.text.strip()
 
                 # ── HUGGINGFACE (cloud Inference API) ──────────────────────────
                 elif BACKEND == "huggingface":
@@ -323,9 +323,9 @@ def process_pdf(pdf_path: Path):
             json.dump(chunk_data, f, indent=2, ensure_ascii=False)
 
         print(" ✅ Done.")
-        if BACKEND == "gemini":
-            time.sleep(4)
-        elif BACKEND != "huggingface":
+        # if BACKEND == "gemini":  # Gemini - commented out
+        #     time.sleep(4)
+        if BACKEND != "huggingface":  # elif changed to if since gemini is commented out
             time.sleep(1)
 
     doc.close()

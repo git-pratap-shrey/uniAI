@@ -52,9 +52,11 @@ MODEL_CHAT = os.getenv("MODEL_CHAT", "gemma3:4b")
 # Fast local model used specifically for extracting keywords and context switching
 MODEL_ROUTER = os.getenv("MODEL_ROUTER", "mistral:7b-instruct")
 
-# Gemini Configuration (Legacy / Option)
-MODEL_GEMINI = os.getenv("MODEL_GEMINI", "gemini-2.5-flash")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# Gemini Configuration (Legacy / Option) - commented out
+# MODEL_GEMINI = os.getenv("MODEL_GEMINI", "gemini-2.5-flash")
+# GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+MODEL_GEMINI = None  # Gemini disabled
+GEMINI_API_KEY = None  # Gemini disabled
 
 # ------------------------------------------------------------------
 # PATH CONFIGURATION
