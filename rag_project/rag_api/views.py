@@ -12,45 +12,40 @@ import chromadb
 
 # --- Ensure imports work regardless of working directory ---
 import sys
-# Add parent directory of 'rag_project' (which is 'uniAI') to path to find 'source_code'
 # Actual structure: .../uniAI/rag_project/rag_api/views.py
-# We want .../uniAI to be in path so we can do 'from source_code import config'
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# current: rag_api
-# parent: rag_project
-# grandparent: uniAI
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir))) 
-# Wait, let's just add the uniAI root.
-# The user's root is d:\CODE-workingBuild\uniAI
-# And source_code is d:\CODE-workingBuild\uniAI\source_code
-# rag_project is d:\CODE-workingBuild\uniAI\rag_project
-
-# Best bet:
-uni_ai_root = os.path.abspath(os.path.join(current_dir, "../../..")) 
+uni_ai_root = os.path.abspath(os.path.join(current_dir, "../../.."))
 if uni_ai_root not in sys.path:
     sys.path.append(uni_ai_root)
 
-# Now likely we can import source_code? 
-# Actually if we are in uniAI, we can import source_code.config
 try:
     from source_code import config
-    from source_code.pipeline.embeddings.local_mxbai import embed
+    from source_code.pipeline.embeddings.local_embedding import embed
+    from source_code.pipeline.retrieval_utils import retrieve_with_threshold
 except ImportError:
-    # Fallback if running relative to uniAI root directly
     import config
-    from pipeline.embeddings.local_mxbai import embed
+    from pipeline.embeddings.local_embedding import embed
+    from pipeline.retrieval_utils import retrieve_with_threshold
 
 # ------------------------------------------------------------------
 # CONFIG & INITIALIZATION
 # ------------------------------------------------------------------
 
-# Use Config
 CHROMA_PATH = config.CHROMA_DB_PATH
 COLLECTION_NAME = config.CHROMA_COLLECTION_NAME
 MODEL_CHAT = config.MODEL_CHAT
+ROUTER_MODEL = config.MODEL_ROUTER
 
-# ChromaDB
-client = chromadb.PersistentClient(path=CHROMA_PATH)
+KEYWORDS_FILE = os.path.join(uni_ai_root, "source_code", "data", "subject_keywords.json")
+
+SUBJECT_KEYWORD_MAP = {}
+if os.path.exists(KEYWORDS_FILE):
+    with open(KEYWORDS_FILE, "r") as f:
+        SUBJECT_KEYWORD_MAP = json.load(f)
+
+# FIX: Renamed from `client` → `chroma_client` to prevent shadowing by
+# ollama.Client() calls inside detect_subject() and generate_answer().
+chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
 _collection = None
 
 
@@ -58,7 +53,8 @@ def get_collection():
     global _collection
     if _collection is None:
         try:
-            _collection = client.get_collection(COLLECTION_NAME)
+            # FIX: Uses renamed chroma_client
+            _collection = chroma_client.get_collection(COLLECTION_NAME)
         except chromadb.errors.NotFoundError:
             raise RuntimeError(
                 f"Collection '{COLLECTION_NAME}' not found. "
@@ -118,22 +114,59 @@ def detect_unit_query(query: str) -> str | None:
     return f"unit{match.group(1)}" if match else None
 
 
+def detect_subject(query: str) -> str | None:
+    if not SUBJECT_KEYWORD_MAP:
+        return None
+
+    query_lower = query.lower()
+    scores = {subject: 0 for subject in SUBJECT_KEYWORD_MAP.keys()}
+
+    for subject, keywords in SUBJECT_KEYWORD_MAP.items():
+        for kw in keywords:
+            if kw in query_lower:
+                scores[subject] += 1
+
+    max_score = max(scores.values())
+
+    if max_score > 0:
+        top_subjects = [s for s, score in scores.items() if score == max_score]
+        if len(top_subjects) == 1:
+            return top_subjects[0]
+
+    # Fallback to LLM router
+    subjects_list = ", ".join(SUBJECT_KEYWORD_MAP.keys())
+    prompt = f"""
+You are a routing agent. The user is asking a question about university coursework.
+Known Subjects: {subjects_list}
+
+User Query: "{query}"
+
+Which of the Known Subjects is this query about? 
+Reply ONLY with the exact Subject name. If it does not match any, reply NONE.
+"""
+    # FIX: Renamed to ollama_router_client to avoid shadowing chroma_client
+    ollama_router_client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
+    response = ollama_router_client.chat(model=ROUTER_MODEL, messages=[{"role": "user", "content": prompt}])
+    llm_choice = response["message"]["content"].strip()
+
+    for valid_subject in SUBJECT_KEYWORD_MAP.keys():
+        if valid_subject.lower() in llm_choice.lower():
+            return valid_subject
+
+    return None
 
 
-def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> list[dict]:
+def retrieve_context(query: str, active_subject: str = None, n_results: int = 5) -> list[dict]:
+    # FIX: Removed unused `mode` parameter.
+    # FIX: `n_results` now actually passed through to retrieve_with_threshold.
     collection = get_collection()
     unit = detect_unit_query(query)
 
     filters = []
-
     if unit:
         filters.append({"unit": unit})
-
-    # Adjust filter for multimodal if needed
-    # START CHANGE: handling metadata flexibility
-    # if mode == "syllabus":
-    #     filters.append({"category": {"$in": ["notes", "pyq"]}})
-    # END CHANGE
+    if active_subject:
+        filters.append({"subject": active_subject})
 
     where_clause = None
     if filters:
@@ -142,16 +175,15 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
         else:
             where_clause = {"$and": filters}
 
-    query_embedding = embed([query])[0]
-
-    # Increase N for multimodal as we want to find the best page visuals
-    results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=3, # Fewer results because each result is now a CHUNK (5 pages)
-        where=where_clause,
+    results = retrieve_with_threshold(
+        collection=collection,
+        query=query,
+        n_initial=n_results,  # FIX: was hardcoded to 5, now uses the parameter
+        similarity_threshold=0.3,
+        metadata_filter=where_clause
     )
 
-    if not results or not results.get("documents"):
+    if not results or not results.get("documents") or not results["documents"][0]:
         return []
 
     documents = results["documents"][0]
@@ -159,10 +191,11 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
 
     return [
         {
-            "text": doc,  # Full OCR text + metadata
+            "text": doc,
             "source": meta.get("source", "unknown"),
             "unit": meta.get("unit", "unknown"),
             "title": meta.get("title", "unknown"),
+            "page_start": meta.get("page_start", "?"),
         }
         for doc, meta in zip(documents, metadatas)
     ]
@@ -175,83 +208,63 @@ def retrieve_context(query: str, mode: str = "syllabus", n_results: int = 5) -> 
 def generate_answer(query: str, contexts: list[dict], mode: str, history: list[dict] | None = None) -> str:
     history = history or []
 
-    if mode == "syllabus":
-        system_prompt = """
-            You are uniAI, a syllabus-aware exam assistant.
-
-            You will be given OCR-extracted text from course notes along with a user question.
-
-            Rules:
-            - Answer from the provided notes or previous conversation.
-            - Use definitions and exam keywords from the notes.
-            - Write in a "what to write in exam" tone.
-            - If the answer spans multiple chunks, synthesize them.
-            - Use clear headings and structure.
-            - If the question refers to a previous explanation, repeat or rephrase it.
-            - If something is outside the provided notes, say so and answer it based on your knowledge.
-        """
-    else:
-        system_prompt = """
-            [GENERIC AI TUTOR MODE]
-
-            This question is outside the syllabus.
-            You may use general knowledge.
-            Mention clearly that this is not syllabus-bound.
-        """
-
-    # Build Context
-    memory_block = ""
+    # Build conversation history block
+    conversation_history = ""
     if history:
-        memory_block = "\nPrevious conversation:\n"
         for h in history:
-            role = h.get('role', 'user').upper()
+            role = "User" if h.get('role', 'user').lower() == 'user' else "AI"
             content = h.get('content', '')
-            memory_block += f"{role}: {content}\n"
+            conversation_history += f"{role}: {content}\n"
 
-    context_text_block = ""
+    # Build context block
+    context = ""
     if contexts:
-        context_text_block = "\nRelevant notes (OCR-extracted text):\n"
-        for c in contexts:
-            context_text_block += f"\n[Source: {c['source']} | {c['unit']} | {c.get('title', '')}]\n"
-            context_text_block += f"{c['text']}\n"
+        for i, c in enumerate(contexts):
+            context += f"\n### Source {i+1}:\n{c['text']}\n"
 
-    # Construct the final prompt
-    full_prompt = f"""
-{system_prompt}
+    prompt = f"""
+You are a university assistant trained on real syllabus, notes, and PYQs.
 
-{memory_block}
+Answer the user based on the provided context and your own knowledge.
+Your goal is to provide answers relevant to the students' academic needs, for exams, assignments, and projects.
 
-{context_text_block}
+If the answer is not in the context, say: "Here is some information about the topic from my knowledge: ".
+
+Conversation so far:
+{conversation_history}
 
 User question:
 {query}
+
+Relevant context:
+{context}
+
+Answer clearly with bullet points and examples. Do NOT mention the context explicitly.
 """
 
     try:
-        # Check against config to see if we use Gemini or Ollama
         if MODEL_CHAT.startswith("gemini"):
             import google.generativeai as genai
-            
+
             api_key = config.GEMINI_API_KEY
             if not api_key:
                 return "⚠ Configuration Error: Gemini Model selected but GEMINI_API_KEY is missing."
-            
+
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel(MODEL_CHAT)
-            
-            response = model.generate_content(full_prompt)
+
+            response = model.generate_content(prompt)
             if not response or not response.text:
-                 return "⚠ I couldn't generate a response (Empty from Gemini)."
+                return "⚠ I couldn't generate a response (Empty from Gemini)."
             return response.text
 
         else:
-            # Default to Ollama
-            # Initialize client explicitly with config to avoid default host issues
-            client = ollama.Client(host=config.OLLAMA_BASE_URL)
-            
-            response = client.chat(
+            # FIX: Renamed to ollama_chat_client to avoid shadowing chroma_client
+            ollama_chat_client = ollama.Client(host=config.OLLAMA_BASE_URL)
+            response = ollama_chat_client.chat(
                 model=MODEL_CHAT,
-                messages=[{"role": "user", "content": full_prompt}]
+                messages=[{"role": "user", "content": prompt}],
+                options={"num_ctx": 8192}
             )
             return response["message"]["content"]
 
@@ -259,47 +272,63 @@ User question:
         return f"Error generating answer: {e}"
 
 
-
 # ------------------------------------------------------------------
 # API VIEWS
 # ------------------------------------------------------------------
 
-@csrf_exempt  # DEV ONLY
+# TODO: Remove @csrf_exempt before deploying to production.
+# Options: (a) send CSRF token from frontend, or
+#          (b) add token auth: check request.headers.get("X-API-Key") == settings.API_SECRET
+@csrf_exempt
 @require_http_methods(["POST"])
 def query_view(request):
+    # FIX: JSON decode errors now caught separately and return a clean 400
     try:
         data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON in request body."}, status=400)
+
+    try:
         query = data.get("query", "").strip()
 
         print("\n--- NEW REQUEST ---")
         print("QUERY:", query)
 
-
-
         if not query:
             return JsonResponse({"answer": "Please enter a question."})
 
+        # FIX: Guard against oversized inputs to prevent prompt bloat / slow LLM calls
+        MAX_QUERY_LENGTH = 1000
+        if len(query) > MAX_QUERY_LENGTH:
+            return JsonResponse({
+                "answer": f"Your question is too long. Please keep it under {MAX_QUERY_LENGTH} characters."
+            })
+
         history = trim_history(data.get("history", []))
 
+        # FIX: Removed "how does" and "why does" — these fired on almost every
+        # valid syllabus question (e.g. "how does TCP work?") and incorrectly
+        # bypassed note retrieval. Remaining triggers reliably signal out-of-syllabus intent.
         GENERIC_TRIGGERS = [
             "explain in detail",
             "implementation",
             "code",
             "algorithm",
             "beyond syllabus",
-            "why does",
-            "how does",
         ]
 
         q_lower = query.lower()
         mode = "generic" if any(t in q_lower for t in GENERIC_TRIGGERS) else "syllabus"
 
         followup = is_followup(query)
+        active_subject = detect_subject(query)
+        print(f"ROUTING => Active Subject: {active_subject}")
 
         if followup and history:
             contexts = []
         else:
-            contexts = retrieve_context(query, mode=mode)
+            # FIX: No longer passes unused `mode` argument to retrieve_context
+            contexts = retrieve_context(query, active_subject=active_subject)
 
         if not contexts and not history:
             return JsonResponse({
@@ -324,7 +353,7 @@ def query_view(request):
             "answer": answer,
             "mode": mode,
             "sources": [
-                {"source": c["source"], "unit": c["unit"]}
+                {"source": c["source"], "unit": c["unit"], "page_start": c.get("page_start", "?")}
                 for c in contexts[:3]
             ],
         })
