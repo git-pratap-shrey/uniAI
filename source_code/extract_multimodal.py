@@ -190,7 +190,7 @@ def process_pdf(pdf_path: Path):
             except Exception as e:
                 err_str = str(e)
                 if attempt < MAX_RETRIES:
-                    wait = 15 * attempt  # 15s, 30s, 45s
+                    wait = 5 * attempt  # 15s, 30s, 45s
                     print(f" ⚠ Attempt {attempt} failed: {err_str[:120]}")
                     print(f"   Retrying in {wait}s...", end="", flush=True)
                     time.sleep(wait)
