@@ -11,6 +11,7 @@ if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
 import config
+import prompts
 
 CHROMA_PATH = config.CHROMA_DB_PATH
 MODEL = config.MODEL_ROUTER

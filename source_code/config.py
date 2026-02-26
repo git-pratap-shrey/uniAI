@@ -68,3 +68,4 @@ _SOURCE_CODE_DIR = Path(__file__).parent
 BASE_DATA_DIR = os.getenv("BASE_DATA_DIR", str(_SOURCE_CODE_DIR / "data" / "year_2"))
 CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", str(_SOURCE_CODE_DIR / "chroma"))
 CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "multimodal_notes")
+CHROMA_PYQ_COLLECTION_NAME = os.getenv("CHROMA_PYQ_COLLECTION_NAME", "multimodal_pyq")

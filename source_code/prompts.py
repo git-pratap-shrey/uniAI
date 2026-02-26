@@ -118,7 +118,7 @@ and leave reference_books empty.
 # 2. RAG CHAT PROMPT
 # ══════════════════════════════════════════════════════════════════════════════
 
-def rag_answer(query: str, context: str, conversation_history: str = "") -> str:
+def rag_answer(query: str, context: str, conversation_history: str = "", pyq_context: str = "", pyq_count: int = 0) -> str:
     """
     Build the full RAG answer prompt.
 
@@ -126,27 +126,35 @@ def rag_answer(query: str, context: str, conversation_history: str = "") -> str:
         query:                The user's question.
         context:              Pre-formatted retrieved context string (### Source N: ...).
         conversation_history: Formatted prior turns (User: ... / AI: ...).
+        pyq_context:          Pre-formatted PYQ context string.
+        pyq_count:            Number of similar PYQs found.
     """
     return f"""\
-You are a university assistant trained on real syllabus, notes, and PYQs.
+You are UniAI, an exam-focused assistant.
 
-Answer the user based on the provided context and your own knowledge.
-Your goal is to provide answers relevant to the students' academic needs, \
-for exams, assignments, and projects.
+CONTEXT FROM NOTES:
+{context}
 
-If the answer is not in the context, say: \
-"Here is some information about the topic from my knowledge: ".
+SIMILAR PREVIOUS YEAR QUESTIONS (same unit):
+{pyq_context}
+
+This topic has appeared in {pyq_count} previous exams.
+
+INSTRUCTIONS:
+1. Prioritize syllabus-aligned explanation.
+2. If PYQs are closely related:
+   - Match expected depth.
+   - Use exam-friendly phrasing.
+   - Include keywords.
+3. If partially related, use only as structural guidance.
+4. Do NOT hallucinate beyond provided notes.
+5. Write in exam-ready format.
 
 Conversation so far:
 {conversation_history}
 
 User question:
 {query}
-
-Relevant context:
-{context}
-
-Answer clearly with bullet points and examples. Do NOT mention the context explicitly.
 """
 
 
@@ -197,4 +205,38 @@ concepts, or terms that definitively represent this subject.
 Do not include generic words like "introduction", "overview", or "unit".
 ONLY output the comma-separated list of keywords. \
 No introductory text. No numbering. No markdown.\
+"""
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 5. PYQ EXTRACTION PROMPTS
+# ══════════════════════════════════════════════════════════════════════════════
+
+def pyq_unit_classification(question: str, syllabus_units: str) -> str:
+    """
+    Classify a given PYQ question into one of the syllabus units based on its text.
+
+    Args:
+        question:       The text of the question.
+        syllabus_units: Formatted string of syllabus units (Unit X: topic1, topic2 ...).
+    """
+    return f"""\
+You are an expert academic classifier.
+Given the following syllabus units for a course:
+{syllabus_units}
+
+And the following exam question:
+"{question}"
+
+Classify this question into the most appropriate unit number (1-5).
+Analyze the key concepts in the question and match them to the topics covered in each unit.
+Only output the unit number as an integer (e.g., 1, 3, 5). No other text or explanation.
+"""
+
+PYQ_VLM_TRANSCRIPTION = """\
+Read the text from this image block. It is part of a university exam question paper.
+Transcribe it faithfully:
+- Preserve headings, bullet points, numbering, and structure
+- For mathematical equations, transcribe them clearly
+- If there is a diagram, describe it briefly in [DIAGRAM: ...]
+- Do NOT output anything else except the transcribed text
 """
