@@ -2,6 +2,7 @@ import os, sys
 import json
 import chromadb
 import ollama
+import re
 
 # --- Ensure imports work regardless of working directory ---
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -29,6 +30,11 @@ else:
 # Initialize DB + Collection
 client = chromadb.PersistentClient(path=CHROMA_PATH)
 collection = client.get_collection(config.CHROMA_COLLECTION_NAME)
+try:
+    pyq_collection = client.get_collection(config.CHROMA_PYQ_COLLECTION_NAME)
+except chromadb.errors.NotFoundError:
+    print(f"Warning: PYQ Collection '{config.CHROMA_PYQ_COLLECTION_NAME}' not found.")
+    pyq_collection = None
 
 
 def retrieve(query, active_subject=None, n_initial=5, similarity_threshold=0.3):
@@ -97,25 +103,89 @@ def answer(query, active_subject, conversation_history=""):
     results = retrieve(query, active_subject)
     context = format_context(results)
 
+    # 1. Detect Unit
+    match = re.search(r"unit\s*(\d+)", query.lower())
+    predicted_unit = match.group(1) if match else None
+
+    # 2. Retrieve PYQs
+    pyq_context = ""
+    pyq_count = 0
+    filtered_pyqs = []
+    
+    if pyq_collection:
+        where_clause = {}
+        if active_subject:
+            where_clause["subject"] = active_subject
+        if predicted_unit:
+            where_clause["unit"] = str(predicted_unit)
+        
+        if len(where_clause) > 1:
+            where_clause = {"$and": [{"subject": active_subject}, {"unit": str(predicted_unit)}]}
+        elif not where_clause:
+            where_clause = None
+
+        pyq_results = pyq_collection.query(
+            query_texts=[query],
+            where=where_clause,
+            n_results=5
+        )
+
+        # 3. Apply Threshold
+        SIM_THRESHOLD = 0.72
+        
+        if pyq_results and pyq_results.get("distances") and pyq_results["distances"][0]:
+            for i, dist in enumerate(pyq_results["distances"][0]):
+                similarity = 1.0 - dist
+                if similarity >= SIM_THRESHOLD:
+                    filtered_pyqs.append({
+                        "text": pyq_results["documents"][0][i],
+                        "metadata": pyq_results["metadatas"][0][i]
+                    })
+        
+        # Limit to top 2-3
+        filtered_pyqs = filtered_pyqs[:3]
+        pyq_count = len(filtered_pyqs)
+
+        # 4. Build PYQ Context Block
+        if pyq_count > 0:
+            lines = []
+            for p in filtered_pyqs:
+                m = p["metadata"]
+                line = f"({m.get('year', 'Unknown Year')} {m.get('exam_type', 'Unknown Exam')} – {m.get('marks', '?')}M) {p['text']}"
+                lines.append(line)
+            pyq_context = "\n".join(lines)
+
     prompt = prompts.rag_answer(
         query=query, 
         context=context, 
-        conversation_history=conversation_history
+        conversation_history=conversation_history,
+        pyq_context=pyq_context,
+        pyq_count=pyq_count
     )
 
     # Initialize client explicitly with config to avoid default host issues
-    client = ollama.Client(host=config.OLLAMA_BASE_URL)
+    client_llm = ollama.Client(host=config.OLLAMA_BASE_URL)
 
     print("   Thinking...", end="", flush=True)
     # Provide a generous context window (e.g. 8192) to avoid "prompt too long" errors with chunky RAG contexts
-    response = client.chat(
+    response = client_llm.chat(
         model=MODEL,
         messages=[{"role": "user", "content": prompt}],
         options={"num_ctx": 8192}
     )
     print("\r", end="") # Clear "Thinking..."
 
-    return response["message"]["content"], results
+    final_answer = response["message"]["content"]
+    
+    # 6. Append Similar PYQs section
+    if pyq_count > 0:
+        final_answer += "\n\n📝 **Similar PYQs:**\n"
+        for p in filtered_pyqs:
+            m = p["metadata"]
+            # To ensure standard UI output:
+            final_answer += f"- ({m.get('year', 'Unknown Year')} {m.get('exam_type', 'Unknown Exam')} – {m.get('marks', '?')}M) {p['text']}\n"
+
+    return final_answer, results
 
 
 def chat():
