@@ -170,15 +170,18 @@ def subject_router(query: str, subjects_list: str) -> str:
         query:         The user's raw query string.
         subjects_list: Comma-separated list of known subject names.
     """
+    valid_answers = "\n".join(subjects_list.split(", ") + ["NONE"])
     return f"""\
-You are a routing agent. The user is asking a question about university coursework.
 Known Subjects: {subjects_list}
 
-User Query: "{query}"
+Classify the query into one of these subjects.
 
-Which of the Known Subjects is this query about?
-Reply ONLY with the exact Subject name. If it does not match any, reply NONE.
-"""
+Query: {query}
+
+Answer must be exactly one of:
+{valid_answers}
+
+Answer:"""
 
 
 # ══════════════════════════════════════════════════════════════════════════════

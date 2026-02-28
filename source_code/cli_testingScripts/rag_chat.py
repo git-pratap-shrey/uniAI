@@ -88,12 +88,23 @@ def detect_subject(query):
     subjects_list = ", ".join(SUBJECT_KEYWORD_MAP.keys())
     prompt = prompts.subject_router(query=query, subjects_list=subjects_list)
     client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
-    response = client.chat(model=ROUTER_MODEL, messages=[{"role": "user", "content": prompt}])
+    response = client.chat(
+        model=ROUTER_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        options={
+        "temperature": 0,
+        "top_p": 1
+        }
+    )
+
     llm_choice = response["message"]["content"].strip()
     print(f"\r   [Routing] Classified as: {llm_choice}")
     
+    # Only look at the first word — some models append explanations despite instructions,
+    # and those explanations often restate the subject names from the prompt.
+    first_word = llm_choice.split()[0] if llm_choice.split() else ""
     for valid_subject in SUBJECT_KEYWORD_MAP.keys():
-        if valid_subject.lower() in llm_choice.lower():
+        if valid_subject.lower() == first_word.lower():
             return valid_subject
             
     return None
