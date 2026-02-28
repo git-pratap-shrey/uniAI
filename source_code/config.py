@@ -68,4 +68,9 @@ _SOURCE_CODE_DIR = Path(__file__).parent
 BASE_DATA_DIR = os.getenv("BASE_DATA_DIR", str(_SOURCE_CODE_DIR / "data" / "year_2"))
 CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", str(_SOURCE_CODE_DIR / "chroma"))
 CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "multimodal_notes")
+CHROMA_SYLLABUS_COLLECTION_NAME = os.getenv("CHROMA_SYLLABUS_COLLECTION_NAME", "multimodal_syllabus")
 CHROMA_PYQ_COLLECTION_NAME = os.getenv("CHROMA_PYQ_COLLECTION_NAME", "multimodal_pyq")
+
+# Minimum OCR confidence to ingest a chunk (0.0 = ingest everything, 1.0 = perfect only)
+# Chunks below this threshold are likely illegible and hurt retrieval quality
+MIN_INGEST_CONFIDENCE = float(os.getenv("MIN_INGEST_CONFIDENCE", "0.3"))

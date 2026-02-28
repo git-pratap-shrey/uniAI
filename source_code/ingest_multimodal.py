@@ -79,6 +79,17 @@ def ingest_descriptions():
             with open(json_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
+            if data.get("extracted_metadata", {}).get("document_type") == "question_paper":
+                print(f"   -> Skipping {json_file.name} (question_paper, belongs in PYQ pipeline)")
+                skipped += 1
+                continue
+
+            confidence = data.get("extracted_metadata", {}).get("confidence", 1.0)
+            if confidence < config.MIN_INGEST_CONFIDENCE:
+                print(f"   -> Skipping {json_file.name} (confidence {confidence:.2f} below threshold {config.MIN_INGEST_CONFIDENCE})")
+                skipped += 1
+                continue
+
             embedding_text = build_embedding_text(data)
             if not embedding_text.strip():
                 print(f"   -> Skipping {json_file.name} (empty content)")
@@ -88,7 +99,8 @@ def ingest_descriptions():
             file_name = data.get("source_pdf", "unknown")
             page_start = data.get("page_start", 0)
             page_end = data.get("page_end", 0)
-            doc_id = f"{file_name}_p{page_start}-{page_end}"
+            subject = data.get("subject", "unknown")
+            doc_id = f"{subject}_{file_name}_p{page_start}-{page_end}"
 
             existing = collection.get(ids=[doc_id])
             if existing and existing["ids"]:

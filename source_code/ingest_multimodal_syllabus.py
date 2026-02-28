@@ -75,10 +75,10 @@ def build_syllabus_embedding_text(data: dict) -> str:
 
 def ingest_syllabuses():
     print("--- Syllabus Ingestion Start ---")
-    print(f"Target Collection : {config.CHROMA_COLLECTION_NAME}")
+    print(f"Target Collection : {config.CHROMA_SYLLABUS_COLLECTION_NAME}")
     print(f"Scanning           : {config.BASE_DATA_DIR}")
 
-    collection = get_chroma_collection()
+    collection = get_chroma_collection(config.CHROMA_SYLLABUS_COLLECTION_NAME)
     root_path  = Path(config.BASE_DATA_DIR)
 
     json_files = sorted(root_path.rglob("syllabus_*.json"))
@@ -106,7 +106,8 @@ def ingest_syllabuses():
             # Stable, collision-free ID
             source_pdf = data.get("source_pdf", "unknown")
             chunk_type = data.get("chunk_type", "unknown")
-            doc_id     = f"syllabus_{source_pdf}_{chunk_type}"
+            subject    = data.get("subject", "unknown")
+            doc_id     = f"syllabus_{subject}_{source_pdf}_{chunk_type}"
 
             existing = collection.get(ids=[doc_id])
             if existing and existing["ids"]:

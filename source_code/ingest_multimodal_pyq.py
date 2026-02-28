@@ -22,15 +22,14 @@ def build_pyq_embedding_text(q: dict) -> str:
     
     subject = q.get("subject", "")
     unit = q.get("unit")
-    exam_type = q.get("exam_type", "")
     year = q.get("year")
     
     if subject:
         prefix_parts.append(f"Subject: {subject}")
     if unit:
         prefix_parts.append(f"Unit: {unit}")
-    if exam_type and year:
-        prefix_parts.append(f"Exam: {exam_type} {year}")
+    if year:
+        prefix_parts.append(f"Year: {year}")
 
     prefix = " | ".join(prefix_parts)
     q_text = q.get("question_text", "").strip()
@@ -45,13 +44,13 @@ def build_pyq_embedding_text(q: dict) -> str:
 
 def ingest_pyqs():
     print("--- PYQ Ingestion Start ---")
-    print(f"Target Collection: {config.CHROMA_COLLECTION_NAME}")
+    print(f"Target Collection: {config.CHROMA_PYQ_COLLECTION_NAME}")
 
-    collection = get_chroma_collection()
+    collection = get_chroma_collection(config.CHROMA_PYQ_COLLECTION_NAME)
 
     root_path = Path(BASE_PATH)
     # the processed jsons are put in pyqs_processed subfolders
-    json_files = sorted(root_path.rglob("pyqs/pyqs_processed/*_processed.json"))
+    json_files = sorted(root_path.rglob("pyqs_processed/*_processed.json"))
 
     print(f"Found {len(json_files)} PYQ JSON files to ingest.")
 
@@ -92,7 +91,6 @@ def ingest_pyqs():
                         "unit": str(q_data.get("unit", "unknown")),
                         "subject": q_data.get("subject", "unknown"),
                         "document_type": "pyq",
-                        "exam_type": q_data.get("exam_type", "unknown"),
                         "year": q_data.get("year", 2023),
                         "marks": q_data.get("marks") if q_data.get("marks") is not None else 0
                     }]

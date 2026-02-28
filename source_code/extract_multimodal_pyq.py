@@ -121,13 +121,6 @@ def detect_metadata(text: str, pdf_path: Path):
     if year_match:
         year = int(year_match.group(1))
         
-    exam_type = "endsem"
-    text_lower = text.lower()
-    if "mid semester" in text_lower or "mid sem" in text_lower:
-        exam_type = "midsem"
-    elif "internal" in text_lower:
-        exam_type = "internal"
-        
     # Attempt to find subject code like BCC301
     subject_code = "UNKNOWN"
     code_match = re.search(r'([A-Z]{2,3}\d{3,4}[A-Z]?)', text)
@@ -135,7 +128,7 @@ def detect_metadata(text: str, pdf_path: Path):
         subject_code = code_match.group(1)
         
     program = "B.Tech" # Assuming B.Tech
-    return subject, subject_code, year, exam_type, program
+    return subject, subject_code, year, program
 
 def get_unit_classification(question_text: str, syllabus_text: str) -> int:
     prompt = pyq_unit_classification(question_text, syllabus_text)
@@ -178,7 +171,7 @@ def process_pyq(pdf_path: Path):
     raw_text = load_pdf(pdf_path)
     clean_text = normalize_text(raw_text)
     
-    subject, subject_code, year, exam_type, program = detect_metadata(raw_text, pdf_path)
+    subject, subject_code, year, program = detect_metadata(raw_text, pdf_path)
     syllabus_topics = get_syllabus_topics(subject)
     
     # Split by section
@@ -244,7 +237,7 @@ def process_pyq(pdf_path: Path):
                 # classify unit
                 unit = get_unit_classification(q_text, syllabus_topics)
                 
-                q_id = f"{subject.lower()}_{year}_{exam_type}_u{unit}_{q_num.lower()}"
+                q_id = f"{subject.lower()}_{year}_{pdf_path.stem}_u{unit}_{q_num.lower()}"
                 
                 q_obj = {
                     "question_id": q_id,
@@ -268,26 +261,9 @@ def process_pyq(pdf_path: Path):
     if questions_data:
         output_dir = pdf_path.parent / "pyqs_processed"
         output_dir.mkdir(exist_ok=True)
-        out_file = output_dir / f"{subject.lower()}_{year}_{exam_type}.json"
-        
-        # Merge if exists
-        all_q = []
-        if out_file.exists():
-            with open(out_file, 'r', encoding='utf-8') as f:
-                all_q = json.load(f)
-        
-        # simple dedup
-        existing_ids = {q["question_id"] for q in all_q}
-        for q in questions_data:
-            # avoid dupes, but since parsing is deterministic, we might just overwrite
-            # for now, let's just use the current run's data as source of truth for this pdf
-            pass
-            
-        # actually let's just write this PDF's questions to the unified file or a specific file
         out_file = output_dir / f"{pdf_path.stem}_processed.json"
         with open(out_file, 'w', encoding='utf-8') as f:
             json.dump(questions_data, f, indent=2, ensure_ascii=False)
-            
         print(f" ✅ Saved {len(questions_data)} questions to {out_file.name}")
     else:
         print(f" ⚠ No questions found in {pdf_path.name}")

@@ -50,6 +50,12 @@ if os.path.exists(KEYWORDS_FILE):
 chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
 _collection = None
 
+# PYQ Collection (optional — gracefully absent if not yet ingested)
+try:
+    pyq_collection = chroma_client.get_collection(config.CHROMA_PYQ_COLLECTION_NAME)
+except Exception:
+    pyq_collection = None
+
 
 def get_collection():
     global _collection
@@ -138,13 +144,19 @@ def detect_subject(query: str) -> str | None:
     # Fallback to LLM router
     subjects_list = ", ".join(SUBJECT_KEYWORD_MAP.keys())
     prompt = prompts.subject_router(query=query, subjects_list=subjects_list)
-    # FIX: Renamed to ollama_router_client to avoid shadowing chroma_client
     ollama_router_client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
-    response = ollama_router_client.chat(model=ROUTER_MODEL, messages=[{"role": "user", "content": prompt}])
+    response = ollama_router_client.chat(
+        model=ROUTER_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        options={"temperature": 0, "top_p": 1}
+    )
     llm_choice = response["message"]["content"].strip()
 
+    # Only check first word — models sometimes append explanation that
+    # restates subject names from the prompt, causing false matches.
+    first_word = llm_choice.split()[0] if llm_choice.split() else ""
     for valid_subject in SUBJECT_KEYWORD_MAP.keys():
-        if valid_subject.lower() in llm_choice.lower():
+        if valid_subject.lower() == first_word.lower():
             return valid_subject
 
     return None
@@ -199,7 +211,7 @@ def retrieve_context(query: str, active_subject: str = None, n_results: int = 5)
 # GENERATION
 # ------------------------------------------------------------------
 
-def generate_answer(query: str, contexts: list[dict], mode: str, history: list[dict] | None = None) -> str:
+def generate_answer(query: str, contexts: list[dict], mode: str, history: list[dict] | None = None, active_subject: str = None, predicted_unit: str = None) -> str:
     history = history or []
 
     # Build conversation history block
@@ -216,10 +228,54 @@ def generate_answer(query: str, contexts: list[dict], mode: str, history: list[d
         for i, c in enumerate(contexts):
             context += f"\n### Source {i+1}:\n{c['text']}\n"
 
+    # PYQ Retrieval
+    pyq_context = ""
+    pyq_count = 0
+    filtered_pyqs = []
+
+    if pyq_collection:
+        where_clause = {}
+        if active_subject:
+            where_clause["subject"] = active_subject
+        if predicted_unit:
+            where_clause["unit"] = str(predicted_unit)
+
+        if len(where_clause) > 1:
+            where_clause = {"$and": [{"subject": active_subject}, {"unit": str(predicted_unit)}]}
+        elif not where_clause:
+            where_clause = None
+
+        try:
+            pyq_results = pyq_collection.query(
+                query_texts=[query],
+                where=where_clause,
+                n_results=5
+            )
+            SIM_THRESHOLD = 0.72
+            if pyq_results and pyq_results.get("distances") and pyq_results["distances"][0]:
+                for i, dist in enumerate(pyq_results["distances"][0]):
+                    if (1.0 - dist) >= SIM_THRESHOLD:
+                        filtered_pyqs.append({
+                            "text": pyq_results["documents"][0][i],
+                            "metadata": pyq_results["metadatas"][0][i]
+                        })
+            filtered_pyqs = filtered_pyqs[:3]
+            pyq_count = len(filtered_pyqs)
+            if pyq_count > 0:
+                lines = []
+                for p in filtered_pyqs:
+                    m = p["metadata"]
+                    lines.append(f"({m.get('year', 'Unknown Year')} {m.get('exam_type', 'Unknown Exam')} – {m.get('marks', '?')}M) {p['text']}")
+                pyq_context = "\n".join(lines)
+        except Exception:
+            pass  # PYQ retrieval is best-effort
+
     prompt = prompts.rag_answer(
-        query=query, 
-        context=context, 
-        conversation_history=conversation_history
+        query=query,
+        context=context,
+        conversation_history=conversation_history,
+        pyq_context=pyq_context,
+        pyq_count=pyq_count
     )
 
     try:
@@ -229,7 +285,16 @@ def generate_answer(query: str, contexts: list[dict], mode: str, history: list[d
             messages=[{"role": "user", "content": prompt}],
             options={"num_ctx": 8192}
         )
-        return response["message"]["content"]
+        final_answer = response["message"]["content"]
+
+        # Append Similar PYQs section
+        if pyq_count > 0:
+            final_answer += "\n\n📝 **Similar PYQs:**\n"
+            for p in filtered_pyqs:
+                m = p["metadata"]
+                final_answer += f"- ({m.get('year', 'Unknown Year')} {m.get('exam_type', 'Unknown Exam')} – {m.get('marks', '?')}M) {p['text']}\n"
+
+        return final_answer
 
     except Exception as e:
         return f"Error generating answer: {e}"
@@ -304,11 +369,16 @@ def query_view(request):
                 "sources": [],
             })
 
+        match = re.search(r"unit\s*(\d+)", query.lower())
+        predicted_unit = match.group(1) if match else None
+
         answer = generate_answer(
             query=query,
             contexts=contexts,
             mode=mode,
-            history=history
+            history=history,
+            active_subject=active_subject,
+            predicted_unit=predicted_unit
         )
 
         return JsonResponse({
