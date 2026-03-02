@@ -97,7 +97,11 @@ def _trim_history(history: list[dict]) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 def _generate(prompt: str) -> str:
-    """Call the configured generation model."""
+    """Call the configured generation model.
+
+    Args:
+        prompt: The full prompt to send.
+    """
     try:
         if config.MODEL_CHAT.startswith("gemini"):
             import google.generativeai as genai
@@ -109,11 +113,11 @@ def _generate(prompt: str) -> str:
             return response.text or "⚠ Empty response from Gemini."
 
         else:
-            client = ollama.Client(host=config.OLLAMA_BASE_URL)
+            client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
             response = client.chat(
                 model=config.MODEL_CHAT,
                 messages=[{"role": "user", "content": prompt}],
-                options={"num_ctx": 8192},
+                options={"num_ctx": 8192, "think": False},
             )
             return response["message"]["content"]
 
@@ -193,6 +197,12 @@ def answer_query(
 
     # ── 6. Rerank ─────────────────────────────────────────────────────────
     ranked = rerank(all_chunks, predicted_unit=unit, top_n=5)
+
+    if not ranked:
+        mode = "generic"
+    elif ranked[0]["final_score"] < config.MIN_STRONG_SIM:
+        mode = "generic"
+        ranked = []
 
     # ── 7. Build context ──────────────────────────────────────────────────
     notes_context = build_context(ranked)

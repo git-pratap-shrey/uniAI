@@ -175,7 +175,7 @@ def answer(query, active_subject, conversation_history=""):
     )
 
     # Initialize client explicitly with config to avoid default host issues
-    client_llm = ollama.Client(host=config.OLLAMA_BASE_URL)
+    client_llm = ollama.Client(host=config.OLLAMA_LOCAL_URL)
 
     print("   Thinking...", end="", flush=True)
     # Provide a generous context window (e.g. 8192) to avoid "prompt too long" errors with chunky RAG contexts

@@ -56,7 +56,7 @@ def retrieve(
     unit: str | None = None,
     doc_type: str | None = None,   # e.g. "syllabus", "notes", None = all
     k: int = 8,
-    similarity_threshold: float = 0.30,
+    similarity_threshold: float | None = None,
 ) -> list[dict]:
     """
     Retrieve relevant chunks with metadata filtering and similarity threshold.
@@ -72,6 +72,9 @@ def retrieve(
         ...
     ]
     """
+    if similarity_threshold is None:
+        similarity_threshold = config.SIMILARITY_THRESHOLD
+
     collection = _get_collection()
 
     # Build ChromaDB where clause
@@ -144,12 +147,15 @@ def retrieve_notes(
     subject: str | None = None,
     unit: str | None = None,
     k: int = 8,
-    similarity_threshold: float = 0.30,
+    similarity_threshold: float | None = None,
 ) -> list[dict]:
     """Retrieve note chunks (excludes syllabus)."""
     # Don't filter by doc_type=notes because ingestion uses varied values
     # (printed_notes, handwritten_notes, question_paper etc.)
     # Instead exclude only syllabus explicitly.
+    if similarity_threshold is None:
+        similarity_threshold = config.SIMILARITY_THRESHOLD
+
     collection = _get_collection()
 
     filters = []
@@ -212,9 +218,12 @@ def retrieve_syllabus(
     subject: str | None = None,
     unit: str | None = None,
     k: int = 3,
-    similarity_threshold: float = 0.35,
+    similarity_threshold: float | None = None,
 ) -> list[dict]:
     """Retrieve syllabus chunks only."""
+    if similarity_threshold is None:
+        similarity_threshold = config.SIMILARITY_THRESHOLD
+
     return retrieve(
         query=query,
         subject=subject,

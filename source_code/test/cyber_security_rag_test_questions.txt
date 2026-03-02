@@ -1,0 +1,111 @@
+Cyber Security (BCC301) – System Stress Test Question Set
+
+Section 1 – Basic Sanity Checks
+
+1.  Hello
+2.  Who are you?
+3.  What can you help me with?
+4.  Repeat your previous answer.
+
+Section 2 – Clear Syllabus-Based Questions
+
+5.  Define cybercrime.
+6.  Who are cybercriminals?
+7.  Explain social engineering with examples.
+8.  What is an attack vector?
+9.  Define botnets and explain their role in cybercrime.
+10. Explain phishing attack.
+11. What is SQL injection?
+12. Explain buffer overflow attack.
+13. What is a DoS and DDoS attack?
+14. Explain steganography.
+15. Define digital forensics.
+16. Explain the digital forensics life cycle.
+17. What is chain of custody in computer forensics?
+18. Explain network forensics.
+19. What is the Digital Personal Data Protection Act 2023?
+20. Explain intellectual property issues in cyber law.
+
+Section 3 – Unit-Specific Queries
+
+21. List topics in Unit 1.
+22. List topics in Unit 3.
+23. What is covered in Unit 5?
+24. Explain password cracking in Unit 3.
+25. Explain mobile device security challenges in Unit 2.
+
+Section 4 – Slightly Outside Syllabus (Boundary Tests)
+
+26. What is HTTP?
+27. What is SSL?
+28. Explain TCP and IP.
+29. What is a MAC address?
+30. Explain the OSI model.
+31. What is port 443 used for?
+32. What is DNS?
+33. Explain HTTPS handshake.
+34. What is Linux?
+35. What is the crunch tool in Kali Linux?
+
+Section 5 – Hybrid Questions (Mixed In/Out of Syllabus)
+
+36. Explain SQL injection and how it works over HTTP.
+37. Explain phishing and how email protocols are exploited.
+38. What is a DDoS attack and how does TCP contribute to it?
+39. Explain buffer overflow in C programming.
+40. How does SSL prevent man-in-the-middle attacks?
+41. Explain password cracking using Linux tools.
+
+Section 6 – Adversarial / Ambiguous Queries
+
+42. Explain security.
+43. What is hacking?
+44. Tell me about cyber attacks.
+45. Explain networking.
+46. Define law.
+47. What is digital evidence?
+48. Explain authentication.
+49. What is encryption?
+50. What is cyber security?
+
+Section 7 – Retrieval Confidence Stress Tests
+
+51. Explain registry settings for mobile devices.
+52. What are authentication service security challenges?
+53. Explain attacks on wireless networks.
+54. What are organizational measures for handling mobile devices?
+55. Explain cyber stalking.
+56. Define proxy servers and anonymizers.
+57. What are Trojan horses and backdoors?
+58. Explain keyloggers and spyware.
+59. What is identity theft?
+60. What are challenges in computer forensics?
+
+Section 8 – Clearly Generic / Non-Academic
+
+61. Tell me a joke.
+62. What is love?
+63. Who invented the internet?
+64. What is the capital of India?
+65. Write a Python script for a TCP server.
+66. Implement a keylogger in C.
+67. How to hack WiFi?
+68. Give me Kali Linux commands for password cracking.
+69. Write code for SQL injection.
+70. How to bypass SSL security?
+
+Section 9 – Follow-Up Behavior Tests
+
+71. Explain phishing.
+72. Summarize that.
+73. Repeat.
+74. Explain that again.
+75. Give more detail.
+
+Section 10 – Edge Case Inputs
+
+76. Unit 3
+77. Unit 2 syllabus
+78. List topics
+79. 3
+80. ]

@@ -87,7 +87,8 @@ def _llm_classify(query: str) -> str | None:
         client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
         response = client.chat(
             model=config.MODEL_ROUTER,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            options={"think": False},
         )
         llm_choice = response["message"]["content"].strip()
 
