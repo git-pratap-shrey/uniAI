@@ -47,7 +47,7 @@ MODEL_CHAT = os.getenv("MODEL_CHAT", "gemma3:4b")
 
 # Router / Classification Model
 # Fast local model used specifically for extracting keywords and context switching
-MODEL_ROUTER = os.getenv("MODEL_ROUTER", "mistral:7b-instruct")
+MODEL_ROUTER = os.getenv("MODEL_ROUTER", "gemma3:4b")
 
 # ------------------------------------------------------------------
 # RETRIEVAL CONFIGURATION
@@ -55,7 +55,11 @@ MODEL_ROUTER = os.getenv("MODEL_ROUTER", "mistral:7b-instruct")
 
 # Minimum cosine similarity to keep a search result (0.0 = keep all, 1.0 = exact match only)
 # Distance in ChromaDB cosine space = 1.0 - similarity, so threshold 0.3 → max_distance 0.7
-SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.3"))
+SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.35"))
+
+# Minimum similarity the top-ranked chunk must have to use retrieved context.
+# If the best chunk falls below this, the pipeline falls back to generic mode.
+MIN_STRONG_SIM = float(os.getenv("MIN_STRONG_SIM", "0.6"))
 
 # ------------------------------------------------------------------
 # PATH CONFIGURATION

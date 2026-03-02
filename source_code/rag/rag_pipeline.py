@@ -194,6 +194,12 @@ def answer_query(
     # ── 6. Rerank ─────────────────────────────────────────────────────────
     ranked = rerank(all_chunks, predicted_unit=unit, top_n=5)
 
+    if not ranked:
+        mode = "generic"
+    elif ranked[0]["final_score"] < config.MIN_STRONG_SIM:
+        mode = "generic"
+        ranked = []
+
     # ── 7. Build context ──────────────────────────────────────────────────
     notes_context = build_context(ranked)
     history_block = build_history_block(history)
