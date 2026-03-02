@@ -2,7 +2,7 @@
 ingest_multimodal_syllabus.py
 ──────────────────────────────
 Ingests the syllabus chunk JSONs produced by extract_multimodal_syllabus.py
-into ChromaDB.  Keeps the notes ingestion pipeline (ingest_multimodal.py)
+into ChromaDB. Keeps the notes ingestion pipeline (ingest_multimodal.py)
 completely untouched.
 
 Expected input files (written by extract_multimodal_syllabus.py):
@@ -21,8 +21,6 @@ Usage:
 import os
 import sys
 import json
-import chromadb
-import ollama
 from pathlib import Path
 
 # ── ensure source_code/ is on the path ────────────────────────────────────────
@@ -31,39 +29,11 @@ if current_dir not in sys.path:
     sys.path.append(current_dir)
 
 import config
-
-# ──────────────────────────────────────────────────────────────────────────────
-# CONFIG
-# ──────────────────────────────────────────────────────────────────────────────
-
-BASE_PATH       = config.BASE_DATA_DIR
-CHROMA_PATH     = config.CHROMA_DB_PATH
-COLLECTION_NAME = config.CHROMA_COLLECTION_NAME
-EMBED_MODEL     = config.MODEL_EMBEDDING
-
-# Persistent Ollama client — keeps embedding model warm in VRAM
-_ollama_client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
+from utils import get_embedding, get_chroma_collection
 
 # ──────────────────────────────────────────────────────────────────────────────
 # HELPERS
 # ──────────────────────────────────────────────────────────────────────────────
-
-def get_embedding(text: str) -> list[float]:
-    response = _ollama_client.embeddings(
-        model=EMBED_MODEL,
-        prompt=text,
-        keep_alive="10m",
-    )
-    return response["embedding"]
-
-
-def get_chroma_collection():
-    client = chromadb.PersistentClient(path=CHROMA_PATH)
-    return client.get_or_create_collection(
-        name=COLLECTION_NAME,
-        metadata={"hnsw:space": "cosine"},
-    )
-
 
 def build_syllabus_embedding_text(data: dict) -> str:
     """
@@ -105,13 +75,12 @@ def build_syllabus_embedding_text(data: dict) -> str:
 
 def ingest_syllabuses():
     print("--- Syllabus Ingestion Start ---")
-    print(f"Target Collection : {COLLECTION_NAME}")
-    print(f"Scanning           : {BASE_PATH}")
+    print(f"Target Collection : {config.CHROMA_SYLLABUS_COLLECTION_NAME}")
+    print(f"Scanning           : {config.BASE_DATA_DIR}")
 
-    collection = get_chroma_collection()
-    root_path  = Path(BASE_PATH)
+    collection = get_chroma_collection(config.CHROMA_SYLLABUS_COLLECTION_NAME)
+    root_path  = Path(config.BASE_DATA_DIR)
 
-    # Find all syllabus chunk JSONs produced by extract_multimodal_syllabus.py
     json_files = sorted(root_path.rglob("syllabus_*.json"))
     print(f"Found {len(json_files)} syllabus chunk JSON(s).\n")
 
@@ -137,16 +106,15 @@ def ingest_syllabuses():
             # Stable, collision-free ID
             source_pdf = data.get("source_pdf", "unknown")
             chunk_type = data.get("chunk_type", "unknown")
-            doc_id     = f"syllabus_{source_pdf}_{chunk_type}"
+            subject    = data.get("subject", "unknown")
+            doc_id     = f"syllabus_{subject}_{source_pdf}_{chunk_type}"
 
-            # Skip if already in ChromaDB
             existing = collection.get(ids=[doc_id])
             if existing and existing["ids"]:
                 print(f"   -> {doc_id}: already ingested, skipping.")
                 skipped += 1
                 continue
 
-            # Embed and store
             vector = get_embedding(embedding_text[:4000])
             collection.upsert(
                 ids=[doc_id],

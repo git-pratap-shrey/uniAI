@@ -1,12 +1,7 @@
-import os
 import json
-import chromadb
-import ollama
 from pathlib import Path
 import config
-
-# Persistent client — reused for all embedding calls (keeps model warm in VRAM)
-_ollama_client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
+from utils import get_embedding, get_chroma_collection
 
 # ------------------------------------------------------------------
 # CONFIG
@@ -14,34 +9,8 @@ _ollama_client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
 
 BASE_PATH = config.BASE_DATA_DIR
 
-CHROMA_PATH = config.CHROMA_DB_PATH
-COLLECTION_NAME = config.CHROMA_COLLECTION_NAME
-
-# Embedding Model (must match retrieval)
-EMBED_MODEL = config.MODEL_EMBEDDING
-
 # ------------------------------------------------------------------
 # HELPERS
-# ------------------------------------------------------------------
-
-def get_embedding(text: str) -> list[float]:
-    # Reuse persistent client — keeps model loaded in VRAM between calls
-    response = _ollama_client.embeddings(
-        model=EMBED_MODEL,
-        prompt=text,
-        keep_alive="10m"   # keep model hot in VRAM for 10 minutes
-    )
-    return response["embedding"]
-
-def get_chroma_collection():
-    client = chromadb.PersistentClient(path=CHROMA_PATH)
-    return client.get_or_create_collection(
-        name=COLLECTION_NAME,
-        metadata={"hnsw:space": "cosine"}
-    )
-
-# ------------------------------------------------------------------
-# MAIN INGESTION
 # ------------------------------------------------------------------
 
 def build_embedding_text(data: dict) -> str:
@@ -62,7 +31,6 @@ def build_embedding_text(data: dict) -> str:
     concepts = ", ".join(meta.get("key_concepts", []))
     subject = data.get("subject", "")
 
-    # Build prefix with metadata context
     prefix_parts = []
     if subject:
         prefix_parts.append(f"Subject: {subject}")
@@ -79,20 +47,22 @@ def build_embedding_text(data: dict) -> str:
 
     if full_text:
         # Combine metadata prefix with actual content
-        # Keep relatively long for RAG context
         max_text_len = 4000
         truncated = full_text[:max_text_len]
         return f"{prefix}\n\n{truncated}" if prefix else truncated
     elif prefix:
         return prefix
     else:
-        # Last resort: raw description
         return data.get("description", "")
 
 
+# ------------------------------------------------------------------
+# MAIN INGESTION
+# ------------------------------------------------------------------
+
 def ingest_descriptions():
     print("--- Multimodal Ingestion Start ---")
-    print(f"Target Collection: {COLLECTION_NAME}")
+    print(f"Target Collection: {config.CHROMA_COLLECTION_NAME}")
 
     collection = get_chroma_collection()
 
@@ -109,30 +79,37 @@ def ingest_descriptions():
             with open(json_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
-            # Build embedding text (Full content for storage)
+            if data.get("extracted_metadata", {}).get("document_type") == "question_paper":
+                print(f"   -> Skipping {json_file.name} (question_paper, belongs in PYQ pipeline)")
+                skipped += 1
+                continue
+
+            confidence = data.get("extracted_metadata", {}).get("confidence", 1.0)
+            if confidence < config.MIN_INGEST_CONFIDENCE:
+                print(f"   -> Skipping {json_file.name} (confidence {confidence:.2f} below threshold {config.MIN_INGEST_CONFIDENCE})")
+                skipped += 1
+                continue
+
             embedding_text = build_embedding_text(data)
             if not embedding_text.strip():
                 print(f"   -> Skipping {json_file.name} (empty content)")
                 skipped += 1
                 continue
 
-            # Unique ID
             file_name = data.get("source_pdf", "unknown")
             page_start = data.get("page_start", 0)
             page_end = data.get("page_end", 0)
-            doc_id = f"{file_name}_p{page_start}-{page_end}"
+            subject = data.get("subject", "unknown")
+            doc_id = f"{subject}_{file_name}_p{page_start}-{page_end}"
 
-            # Skip existing
             existing = collection.get(ids=[doc_id])
             if existing and existing["ids"]:
                 skipped += 1
                 continue
 
             # qwen3-embedding:4B supports 32K tokens — 4000 chars is well within limit
-            embedding_input = embedding_text[:4000]
-            vector = get_embedding(embedding_input)
+            vector = get_embedding(embedding_text[:4000])
 
-            # Metadata for ChromaDB
             meta = data.get("extracted_metadata", {})
             collection.upsert(
                 ids=[doc_id],

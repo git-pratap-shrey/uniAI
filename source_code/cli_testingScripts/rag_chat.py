@@ -2,12 +2,15 @@ import os, sys
 import json
 import chromadb
 import ollama
+import re
 
 # --- Ensure imports work regardless of working directory ---
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(ROOT_DIR)
 
 import config
+import prompts
+
 from pipeline.embeddings.local_embedding import embed
 from pipeline.retrieval_utils import retrieve_with_threshold
 
@@ -27,6 +30,11 @@ else:
 # Initialize DB + Collection
 client = chromadb.PersistentClient(path=CHROMA_PATH)
 collection = client.get_collection(config.CHROMA_COLLECTION_NAME)
+try:
+    pyq_collection = client.get_collection(config.CHROMA_PYQ_COLLECTION_NAME)
+except chromadb.errors.NotFoundError:
+    print(f"Warning: PYQ Collection '{config.CHROMA_PYQ_COLLECTION_NAME}' not found.")
+    pyq_collection = None
 
 
 def retrieve(query, active_subject=None, n_initial=5, similarity_threshold=0.3):
@@ -78,22 +86,25 @@ def detect_subject(query):
     # Fallback to LLM if ambiguous (0 score or tied)
     print("   [Routing] Ambiguous query. Asking LLM for subject classification...", end="", flush=True)
     subjects_list = ", ".join(SUBJECT_KEYWORD_MAP.keys())
-    prompt = f"""
-You are a routing agent. The user is asking a question about university coursework.
-Known Subjects: {subjects_list}
-
-User Query: "{query}"
-
-Which of the Known Subjects is this query about? 
-Reply ONLY with the exact exact Subject name. If it does not match any, reply NONE.
-"""
+    prompt = prompts.subject_router(query=query, subjects_list=subjects_list)
     client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
-    response = client.chat(model=ROUTER_MODEL, messages=[{"role": "user", "content": prompt}])
+    response = client.chat(
+        model=ROUTER_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        options={
+        "temperature": 0,
+        "top_p": 1
+        }
+    )
+
     llm_choice = response["message"]["content"].strip()
     print(f"\r   [Routing] Classified as: {llm_choice}")
     
+    # Only look at the first word — some models append explanations despite instructions,
+    # and those explanations often restate the subject names from the prompt.
+    first_word = llm_choice.split()[0] if llm_choice.split() else ""
     for valid_subject in SUBJECT_KEYWORD_MAP.keys():
-        if valid_subject.lower() in llm_choice.lower():
+        if valid_subject.lower() == first_word.lower():
             return valid_subject
             
     return None
@@ -103,40 +114,89 @@ def answer(query, active_subject, conversation_history=""):
     results = retrieve(query, active_subject)
     context = format_context(results)
 
-    prompt = f"""
-You are a university assistant trained on real syllabus, notes, and PYQs.
+    # 1. Detect Unit
+    match = re.search(r"unit\s*(\d+)", query.lower())
+    predicted_unit = match.group(1) if match else None
 
-Answer the user based on the provided context, add that to your own knowledge, and information available on the internet,
+    # 2. Retrieve PYQs
+    pyq_context = ""
+    pyq_count = 0
+    filtered_pyqs = []
+    
+    if pyq_collection:
+        where_clause = {}
+        if active_subject:
+            where_clause["subject"] = active_subject
+        if predicted_unit:
+            where_clause["unit"] = str(predicted_unit)
+        
+        if len(where_clause) > 1:
+            where_clause = {"$and": [{"subject": active_subject}, {"unit": str(predicted_unit)}]}
+        elif not where_clause:
+            where_clause = None
 
-your goal is therefore to provide answers that are relevant to the students' academic needs, for exams, assignments, and projects.
+        pyq_results = pyq_collection.query(
+            query_texts=[query],
+            where=where_clause,
+            n_results=5
+        )
 
-If the answer is not in the context, say: "here is some information about the topic from my knowledge: ".
+        # 3. Apply Threshold
+        SIM_THRESHOLD = 0.72
+        
+        if pyq_results and pyq_results.get("distances") and pyq_results["distances"][0]:
+            for i, dist in enumerate(pyq_results["distances"][0]):
+                similarity = 1.0 - dist
+                if similarity >= SIM_THRESHOLD:
+                    filtered_pyqs.append({
+                        "text": pyq_results["documents"][0][i],
+                        "metadata": pyq_results["metadatas"][0][i]
+                    })
+        
+        # Limit to top 2-3
+        filtered_pyqs = filtered_pyqs[:3]
+        pyq_count = len(filtered_pyqs)
 
-Conversation so far:
-{conversation_history}
+        # 4. Build PYQ Context Block
+        if pyq_count > 0:
+            lines = []
+            for p in filtered_pyqs:
+                m = p["metadata"]
+                line = f"({m.get('year', 'Unknown Year')} {m.get('exam_type', 'Unknown Exam')} – {m.get('marks', '?')}M) {p['text']}"
+                lines.append(line)
+            pyq_context = "\n".join(lines)
 
-User question:
-{query}
-
-Relevant context:
-{context}
-
-Answer clearly with bullet points and examples. Do NOT mention the context explicitly.
-"""
+    prompt = prompts.rag_answer(
+        query=query, 
+        context=context, 
+        conversation_history=conversation_history,
+        pyq_context=pyq_context,
+        pyq_count=pyq_count
+    )
 
     # Initialize client explicitly with config to avoid default host issues
-    client = ollama.Client(host=config.OLLAMA_BASE_URL)
+    client_llm = ollama.Client(host=config.OLLAMA_BASE_URL)
 
     print("   Thinking...", end="", flush=True)
     # Provide a generous context window (e.g. 8192) to avoid "prompt too long" errors with chunky RAG contexts
-    response = client.chat(
+    response = client_llm.chat(
         model=MODEL,
         messages=[{"role": "user", "content": prompt}],
         options={"num_ctx": 8192}
     )
     print("\r", end="") # Clear "Thinking..."
 
-    return response["message"]["content"], results
+    final_answer = response["message"]["content"]
+    
+    # 6. Append Similar PYQs section
+    if pyq_count > 0:
+        final_answer += "\n\n📝 **Similar PYQs:**\n"
+        for p in filtered_pyqs:
+            m = p["metadata"]
+            # To ensure standard UI output:
+            final_answer += f"- ({m.get('year', 'Unknown Year')} {m.get('exam_type', 'Unknown Exam')} – {m.get('marks', '?')}M) {p['text']}\n"
+
+    return final_answer, results
 
 
 def chat():

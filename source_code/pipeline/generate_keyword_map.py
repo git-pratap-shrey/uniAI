@@ -11,6 +11,7 @@ if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
 import config
+import prompts
 
 CHROMA_PATH = config.CHROMA_DB_PATH
 MODEL = config.MODEL_ROUTER
@@ -137,15 +138,7 @@ def generate_keyword_map():
 
         print(f"\nProcessing '{subject}' ({len(raw_items)} items, using up to {MAX_ITEMS_PER_SUBJECT})...")
 
-        prompt = f"""You are a taxonomy expert extracting academic keywords.
-I will give you a Subject Name and a list of internal topics/titles found in that subject's syllabus.
-
-Subject: {subject}
-Discovered Content: {items_list}
-
-Extract a concise, comma-separated list of the 10-15 most defining key phrases, concepts, or terms that definitively represent this subject.
-Do not include generic words like "introduction", "overview", or "unit".
-ONLY output the comma-separated list of keywords. No introductory text. No numbering. No markdown."""
+        prompt = prompts.keyword_extraction(subject=subject, items_list=items_list)
 
         try:
             response = ollama_client.chat(
