@@ -27,7 +27,7 @@ def build_pyq_embedding_text(q: dict) -> str:
     """
     prefix_parts = []
     
-    subject = q.get("subject", "")
+    subject = q.get("subject", "").upper()
     unit = q.get("unit")
     year = q.get("year")
     
@@ -96,7 +96,7 @@ def ingest_pyqs():
                     metadatas=[{
                         "source": q_data.get("source_pdf", "unknown"),
                         "unit": str(q_data.get("unit", "unknown")),
-                        "subject": q_data.get("subject", "unknown"),
+                        "subject": q_data.get("subject", "unknown").upper(),
                         "document_type": "pyq",
                         "year": q_data.get("year", 2023),
                         "marks": q_data.get("marks") if q_data.get("marks") is not None else 0

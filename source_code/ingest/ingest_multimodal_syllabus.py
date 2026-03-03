@@ -40,7 +40,7 @@ def build_syllabus_embedding_text(data: dict) -> str:
     Build a rich embedding string for a syllabus chunk.
     Syllabus chunks have a flat schema — no 'extracted_metadata' wrapper.
     """
-    subject          = data.get("subject", "")
+    subject          = data.get("subject", "").upper()
     subject_name     = data.get("subject_name", "")
     syllabus_version = data.get("syllabus_version", "")
     chunk_type       = data.get("chunk_type", "")
@@ -106,7 +106,7 @@ def ingest_syllabuses():
             # Stable, collision-free ID
             source_pdf = data.get("source_pdf", "unknown")
             chunk_type = data.get("chunk_type", "unknown")
-            subject    = data.get("subject", "unknown")
+            subject    = data.get("subject", "unknown").upper()
             doc_id     = f"syllabus_{subject}_{source_pdf}_{chunk_type}"
 
             existing = collection.get(ids=[doc_id])
@@ -126,7 +126,7 @@ def ingest_syllabuses():
                     "page_start":       0,
                     "page_end":         0,
                     "unit":             str(data.get("unit") or ""),
-                    "subject":          data.get("subject", "unknown"),
+                    "subject":          subject,
                     "title":            data.get("unit_title", chunk_type),
                     "document_type":    "syllabus",
                     # Syllabus-specific fields

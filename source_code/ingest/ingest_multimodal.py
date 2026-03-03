@@ -52,6 +52,62 @@ def normalize_unit(unit):
 
     return "unknown"
 
+# Exact title blocklist (normalised to lower-case, stripped)
+_GARBAGE_TITLES = {
+    "thank you",
+    "rrsimt classes",
+    "gateway classes application promotion",
+    "aktu full courses (paid)",
+    "aktu full courses",
+    "subscribe",
+    "thank you slide",
+}
+
+# Keywords that signal promotional / non-educational content
+_PROMO_KEYWORDS = [
+    "download", "google play", "play store", "install",
+    "subscribe", "youtube", "whatsapp", "telegram",
+    "paid course", "paid courses", "link in description",
+    "scan qr", "qr code",
+]
+
+
+def is_garbage_chunk(meta: dict, data: dict) -> bool:
+    """
+    Return True if this chunk should be skipped because it is
+    promotional, non-educational, or near-empty.
+
+    Criteria (any one is sufficient):
+    1. Title is in the known-bad blocklist.
+    2. document_type is explicitly 'other' AND full_text is short.
+    3. full_text contains multiple promotional keywords.
+    4. full_text is very short (< 80 chars) and has no topics or concepts.
+    """
+    title      = meta.get("title", "").strip().lower()
+    doc_type   = meta.get("document_type", "")
+    full_text  = meta.get("full_text", "").strip()
+    topics     = meta.get("topics", [])
+    concepts   = meta.get("key_concepts", [])
+
+    # 1. Exact title blocklist
+    if title in _GARBAGE_TITLES:
+        return True
+
+    # 2. document_type == 'other' with minimal real content
+    if doc_type == "other" and len(full_text) < 200:
+        return True
+
+    # 3. Promotional keyword density (≥ 2 hits)
+    text_lower = full_text.lower()
+    hits = sum(1 for kw in _PROMO_KEYWORDS if kw in text_lower)
+    if hits >= 2:
+        return True
+
+    # 4. Very short text and no structured content at all
+    if len(full_text) < 80 and not topics and not concepts:
+        return True
+
+    return False
 
 def build_embedding_text(data: dict) -> str:
     """
@@ -62,7 +118,7 @@ def build_embedding_text(data: dict) -> str:
 
     full_text = meta.get("full_text", "").strip()
     title = meta.get("title", "")
-    subject = data.get("subject", "")
+    subject = data.get("subject", "").upper()
 
     raw_unit = data.get("unit")
     normalized_unit = normalize_unit(raw_unit)
@@ -133,6 +189,11 @@ def ingest_descriptions():
                 skipped += 1
                 continue
 
+            # Skip garbage / promotional chunks
+            if is_garbage_chunk(meta, data):
+                skipped += 1
+                continue
+
             embedding_text = build_embedding_text(data)
             if not embedding_text.strip():
                 skipped += 1
@@ -141,7 +202,7 @@ def ingest_descriptions():
             file_name = data.get("source_pdf", "unknown")
             page_start = data.get("page_start", 0)
             page_end = data.get("page_end", 0)
-            subject = data.get("subject", "unknown")
+            subject = data.get("subject", "unknown").upper()
 
             doc_id = f"{subject}_{file_name}_p{page_start}-{page_end}"
 
@@ -153,7 +214,7 @@ def ingest_descriptions():
 
             vector = get_embedding(embedding_text[:4000])
 
-            raw_unit = meta.get("unit") or data.get("unit")
+            raw_unit = data.get("unit")
             normalized_unit = normalize_unit(raw_unit)
 
             collection.upsert(
