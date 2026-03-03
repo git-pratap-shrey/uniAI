@@ -35,7 +35,7 @@ from rag.unit_detector import detect_unit
 from rag.search import retrieve_notes, retrieve_syllabus
 from rag.reranker import rerank
 from rag.context_builder import build_context, build_history_block
-from rag import prompts
+import prompts
 
 # ---------------------------------------------------------------------------
 # Constants

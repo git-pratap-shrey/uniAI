@@ -6,27 +6,28 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
+import config
 from pipeline.embeddings.local_embedding import embed
 
 
 def retrieve_with_threshold(collection, query: str, n_initial=10, similarity_threshold=None, metadata_filter=None):
-    if similarity_threshold is None:
-        similarity_threshold = config.SIMILARITY_THRESHOLD
     """
     Fetch top `n` chunks using the configured embeddings, and filter out any chunks
     with a cosine similarity below `similarity_threshold`.
-    
+
     Args:
         collection: The ChromaDB collection object to query against.
         query (str): The search string.
         n_initial (int): The number of initial top results to fetch.
         similarity_threshold (float): Minimum cosine similarity to keep a result.
         metadata_filter (dict): An optional dictionary for where filtering (e.g. {"subject": "XYZ"}).
-        
+
     Returns:
         dict: A dictionary mimicking ChromaDB's return struct containing ONLY the filtered chunks:
               {"documents": [...], "metadatas": [...], "distances": [...]}
     """
+    if similarity_threshold is None:
+        similarity_threshold = config.SIMILARITY_THRESHOLD
     
     # Generate embedding for the query
     query_emb = embed([query])[0]

@@ -24,8 +24,8 @@ import config
 # ── Persistent Ollama client for embeddings (keeps model warm in VRAM) ─────────
 _embed_client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
 
-# ── Cached ChromaDB collection ─────────────────────────────────────────────────
-_chroma_collection = None
+# ── Cached ChromaDB collections (keyed by collection name) ───────────────────
+_chroma_collections: dict[str, chromadb.Collection] = {}
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -94,19 +94,23 @@ def get_embedding(text: str) -> list[float]:
 # CHROMADB
 # ──────────────────────────────────────────────────────────────────────────────
 
-def get_chroma_collection() -> chromadb.Collection:
+def get_chroma_collection(collection_name: str = None) -> chromadb.Collection:
     """
-    Return (or create) the ChromaDB collection. Result is cached for the
-    lifetime of the process so we only open the DB once per script run.
+    Return (or create) a ChromaDB collection. Results are cached per collection
+    name for the lifetime of the process so we only open the DB once per script run.
+
+    Args:
+        collection_name: Name of the collection to open. Defaults to
+                         config.CHROMA_COLLECTION_NAME when omitted.
     """
-    global _chroma_collection
-    if _chroma_collection is None:
+    name = collection_name or config.CHROMA_COLLECTION_NAME
+    if name not in _chroma_collections:
         client = chromadb.PersistentClient(path=config.CHROMA_DB_PATH)
-        _chroma_collection = client.get_or_create_collection(
-            name=config.CHROMA_COLLECTION_NAME,
+        _chroma_collections[name] = client.get_or_create_collection(
+            name=name,
             metadata={"hnsw:space": "cosine"},
         )
-    return _chroma_collection
+    return _chroma_collections[name]
 
 
 # ──────────────────────────────────────────────────────────────────────────────

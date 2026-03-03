@@ -14,15 +14,21 @@ Optional debug mode:
 
 import json
 import os
+import sys
 import config
 import ollama
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
+
+from prompts import subject_router
 
 
 # -------------------------------------------------
 # Load keyword map once
 # -------------------------------------------------
 
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 KEYWORDS_FILE = os.path.join(ROOT_DIR, "data", "subject_keywords.json")
 
 _keyword_map: dict[str, list[str]] = {}
@@ -94,14 +100,7 @@ def _llm_classify(query: str) -> str | None:
 
     subjects_list = ", ".join(_keyword_map.keys())
 
-    prompt = (
-        "You are a routing agent for a university study assistant.\n"
-        f"Known subjects: {subjects_list}\n\n"
-        f'User query: "{query}"\n\n'
-        "Which subject is this query about?\n"
-        "Reply ONLY with the exact subject name from the list above.\n"
-        "If none match, reply NONE."
-    )
+    prompt = subject_router(query=query, subjects_list=subjects_list)
 
     try:
         client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
@@ -119,8 +118,9 @@ def _llm_classify(query: str) -> str | None:
         llm_choice = response["message"]["content"].strip()
         print(f"[LLM RAW OUTPUT]: '{llm_choice}'")  # add this
 
+        llm_choice_normalized = llm_choice.strip().upper().replace(" ", "_")
         for subject in _keyword_map:
-            if subject.lower() == llm_choice.lower():
+            if subject.upper() == llm_choice_normalized:
                 return subject
 
     except Exception as e:

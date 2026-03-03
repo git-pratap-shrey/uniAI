@@ -24,9 +24,9 @@ import json
 from pathlib import Path
 
 # ── ensure source_code/ is on the path ────────────────────────────────────────
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.append(current_dir)
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
 
 import config
 from utils import get_embedding, get_chroma_collection

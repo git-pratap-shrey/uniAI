@@ -6,9 +6,9 @@ from pathlib import Path
 
 # --- Ensure imports work regardless of working directory ---
 import sys
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.append(current_dir)
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
 
 import config
 from utils import pil_to_base64, extract_first_json, build_vlm_client
