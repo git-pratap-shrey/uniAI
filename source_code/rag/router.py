@@ -114,8 +114,8 @@ def _llm_classify(query: str) -> str | None:
             ],
             think=False,
             options={
-                "temperature": 0,
-                "num_predict": 10,
+                "temperature": config.OLLAMA_ROUTER_TEMPERATURE,
+                "num_predict": config.OLLAMA_ROUTER_NUM_PREDICT,
             },
         )
 

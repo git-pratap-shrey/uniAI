@@ -226,7 +226,7 @@ def retrieve_notes(
     query: str,
     subject: str | None = None,
     unit: str | None = None,
-    k: int = 8,
+    k: int = None,
     threshold: float | None = None,
 ) -> list[Chunk]:
     """
@@ -234,6 +234,8 @@ def retrieve_notes(
 
     Excludes syllabus chunks (they have their own collection).
     """
+    if k is None:
+        k = config.SEARCH_NOTES_K_DEFAULT
     if threshold is None:
         threshold = config.SIMILARITY_THRESHOLD
 
@@ -249,7 +251,7 @@ def retrieve_syllabus(
     query: str,
     subject: str | None = None,
     unit: str | None = None,
-    k: int = 5,
+    k: int = None,
     threshold: float | None = None,
 ) -> list[Chunk]:
     """
@@ -258,6 +260,8 @@ def retrieve_syllabus(
     This is the correct collection — NOT a filter inside multimodal_notes.
     chunk_type values:  unit_1…unit_5, course_outcomes, books_references
     """
+    if k is None:
+        k = config.SEARCH_SYLLABUS_K_DEFAULT
     if threshold is None:
         threshold = config.SIMILARITY_THRESHOLD
 
@@ -269,8 +273,8 @@ def retrieve_pyq(
     query: str,
     subject: str | None = None,
     unit: str | None = None,
-    k: int = 5,
-    threshold: float = 0.60,
+    k: int = None,
+    threshold: float = None,
     marks: int | None = None,
     year: int | None = None,
 ) -> list[Chunk]:
@@ -284,6 +288,11 @@ def retrieve_pyq(
       marks — e.g. 10 for ten-mark questions
       year  — e.g. 2023
     """
+    if k is None:
+        k = config.SEARCH_PYQ_K_DEFAULT
+    if threshold is None:
+        threshold = config.SEARCH_PYQ_THRESHOLD
+
     extra: list[dict] = []
     if marks is not None:
         extra.append({"marks": marks})
@@ -298,8 +307,8 @@ def retrieve_all(
     query: str,
     subject: str | None = None,
     unit: str | None = None,
-    notes_k: int = 6,
-    syllabus_k: int = 3,
+    notes_k: int = None,
+    syllabus_k: int = None,
     threshold: float | None = None,
 ) -> list[Chunk]:
     """
@@ -308,6 +317,11 @@ def retrieve_all(
     Useful for unit-overview queries where you want both conceptual content
     and the official topic list.
     """
+    if notes_k is None:
+        notes_k = config.SEARCH_ALL_NOTES_K
+    if syllabus_k is None:
+        syllabus_k = config.SEARCH_ALL_SYLLABUS_K
+
     notes = retrieve_notes(query, subject=subject, unit=unit, k=notes_k, threshold=threshold)
     syllabus = retrieve_syllabus(query, subject=subject, unit=unit, k=syllabus_k, threshold=threshold)
     return notes + syllabus

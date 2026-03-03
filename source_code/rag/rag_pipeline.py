@@ -41,7 +41,7 @@ import prompts
 # Constants
 # ---------------------------------------------------------------------------
 
-MAX_HISTORY_TURNS = 4  # user+assistant pairs kept in context
+MAX_HISTORY_TURNS = config.MAX_HISTORY_TURNS  # user+assistant pairs kept in context
 
 FOLLOWUP_PATTERNS = [
     r"^repeat",
@@ -103,9 +103,9 @@ def _generate(prompt: str) -> str:
         prompt: The full prompt to send.
     """
     try:
-        if config.MODEL_CHAT.startswith("gemini"):
+        if config.MODEL_CHAT.startswith("gemini") and not getattr(config, "USE_OLLAMA_CLOUD", False):
             import google.generativeai as genai
-            if not config.GEMINI_API_KEY:
+            if not getattr(config, "GEMINI_API_KEY", ""):
                 return "⚠ GEMINI_API_KEY not set in config."
             genai.configure(api_key=config.GEMINI_API_KEY)
             model = genai.GenerativeModel(config.MODEL_CHAT)
@@ -113,11 +113,16 @@ def _generate(prompt: str) -> str:
             return response.text or "⚠ Empty response from Gemini."
 
         else:
-            client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
+            if getattr(config, "USE_OLLAMA_CLOUD", False):
+                headers = {"Authorization": f"Bearer {config.OLLAMA_API_KEY}"} if getattr(config, "OLLAMA_API_KEY", "") else None
+                client = ollama.Client(host=config.OLLAMA_BASE_URL, headers=headers)
+            else:
+                client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
+                
             response = client.chat(
                 model=config.MODEL_CHAT,
                 messages=[{"role": "user", "content": prompt}],
-                 options={"num_ctx": 8192, "think": False, "temperature": 0.25},
+                 options={"num_ctx": config.OLLAMA_CHAT_NUM_CTX, "think": False, "temperature": config.OLLAMA_CHAT_TEMPERATURE},
             )
             return response["message"]["content"]
 
@@ -186,17 +191,17 @@ def answer_query(
         }
 
     # ── 5. Retrieve ───────────────────────────────────────────────────────
-    note_chunks = retrieve_notes(query, subject=subject, unit=unit, k=8)
+    note_chunks = retrieve_notes(query, subject=subject, unit=unit, k=config.PIPELINE_NOTES_K)
 
     # For unit overview queries, also pull syllabus chunks
     syllabus_chunks = []
     if _is_unit_overview(query, unit):
-        syllabus_chunks = retrieve_syllabus(query, subject=subject, unit=unit, k=3)
+        syllabus_chunks = retrieve_syllabus(query, subject=subject, unit=unit, k=config.PIPELINE_SYLLABUS_K)
 
     all_chunks = note_chunks + syllabus_chunks
 
     # ── 6. Rerank ─────────────────────────────────────────────────────────
-    ranked = rerank(all_chunks, predicted_unit=unit, top_n=5)
+    ranked = rerank(all_chunks, predicted_unit=unit, top_n=config.PIPELINE_RERANK_TOP_N)
 
     if not ranked:
         mode = "generic"

@@ -41,13 +41,16 @@ MODEL_VISION = os.getenv("MODEL_VISION", "qwen3-vl:235b-cloud")
 HF_TOKEN = os.getenv("HF_TOKEN")                                              # required
 MODEL_VISION_HF = os.getenv("MODEL_VISION_HF", "Qwen/Qwen3-VL-235B-A22B-Instruct")
 
+# Control whether to use Ollama Cloud API or Local
+USE_OLLAMA_CLOUD = os.getenv("USE_OLLAMA_CLOUD", "True").lower() in ("true", "1", "t")
+
 # Chat / Generative Model
 # Used for RAG chat and general text generation
-MODEL_CHAT = os.getenv("MODEL_CHAT", "qwen2.5-coder:3b")
+MODEL_CHAT = os.getenv("MODEL_CHAT", "gemini-3-flash-preview:latest")
 
 # Router / Classification Model
 # Fast local model used specifically for extracting keywords and context switching
-MODEL_ROUTER = os.getenv("MODEL_ROUTER", "qwen3.5:4B")
+MODEL_ROUTER = os.getenv("MODEL_ROUTER", "qwen3.5:4b")
 
 # ------------------------------------------------------------------
 # RETRIEVAL CONFIGURATION
@@ -78,3 +81,34 @@ CHROMA_PYQ_COLLECTION_NAME = os.getenv("CHROMA_PYQ_COLLECTION_NAME", "multimodal
 # Minimum OCR confidence to ingest a chunk (0.0 = ingest everything, 1.0 = perfect only)
 # Chunks below this threshold are likely illegible and hurt retrieval quality
 MIN_INGEST_CONFIDENCE = float(os.getenv("MIN_INGEST_CONFIDENCE", "0.3"))
+
+# ------------------------------------------------------------------
+# RAG PIPELINE & RETRIEVAL TWEAKS
+# ------------------------------------------------------------------
+
+# rag/rag_pipeline.py
+MAX_HISTORY_TURNS = int(os.getenv("MAX_HISTORY_TURNS", "4"))
+OLLAMA_CHAT_NUM_CTX = int(os.getenv("OLLAMA_CHAT_NUM_CTX", "8192"))
+OLLAMA_CHAT_TEMPERATURE = float(os.getenv("OLLAMA_CHAT_TEMPERATURE", "0.25"))
+
+# Retrieval counts in pipeline
+PIPELINE_NOTES_K = int(os.getenv("PIPELINE_NOTES_K", "8"))
+PIPELINE_SYLLABUS_K = int(os.getenv("PIPELINE_SYLLABUS_K", "3"))
+PIPELINE_RERANK_TOP_N = int(os.getenv("PIPELINE_RERANK_TOP_N", "5"))
+
+# rag/reranker.py
+RERANK_DEFAULT_TOP_N = int(os.getenv("RERANK_DEFAULT_TOP_N", "5"))
+RERANK_UNIT_MATCH_BOOST = float(os.getenv("RERANK_UNIT_MATCH_BOOST", "1.15"))
+RERANK_SYLLABUS_PENALTY = float(os.getenv("RERANK_SYLLABUS_PENALTY", "0.90"))
+
+# rag/router.py
+OLLAMA_ROUTER_TEMPERATURE = float(os.getenv("OLLAMA_ROUTER_TEMPERATURE", "0.0"))
+OLLAMA_ROUTER_NUM_PREDICT = int(os.getenv("OLLAMA_ROUTER_NUM_PREDICT", "10"))
+
+# rag/search.py
+SEARCH_NOTES_K_DEFAULT = int(os.getenv("SEARCH_NOTES_K_DEFAULT", "8"))
+SEARCH_SYLLABUS_K_DEFAULT = int(os.getenv("SEARCH_SYLLABUS_K_DEFAULT", "5"))
+SEARCH_PYQ_K_DEFAULT = int(os.getenv("SEARCH_PYQ_K_DEFAULT", "5"))
+SEARCH_PYQ_THRESHOLD = float(os.getenv("SEARCH_PYQ_THRESHOLD", "0.60"))
+SEARCH_ALL_NOTES_K = int(os.getenv("SEARCH_ALL_NOTES_K", "6"))
+SEARCH_ALL_SYLLABUS_K = int(os.getenv("SEARCH_ALL_SYLLABUS_K", "3"))
