@@ -107,11 +107,15 @@ def _llm_classify(query: str) -> str | None:
 
         response = client.chat(
             model=config.MODEL_ROUTER,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[
+                # Force the model to bypass reasoning at the system level
+                {"role": "system", "content": "You are a helpful assistant. You must respond directly without internal reasoning or <think> tags."},
+                {"role": "user", "content": f"{prompt} /no_think"}
+            ],
+            think=False,
             options={
                 "temperature": 0,
-                "num_predict": 20,  # put this back — think: False alone isn't enough
-                "think": False,
+                "num_predict": 10,
             },
         )
 

@@ -191,7 +191,6 @@ def topic_list(subject: str, unit: str) -> str:
 
 def subject_router(query: str, subjects_list: str) -> str:
     return (
-        "/no_think\n"
         "You are a routing agent for a university study assistant.\n"
         f"Known subjects: {subjects_list}\n\n"
         f'User query: "{query}"\n\n'

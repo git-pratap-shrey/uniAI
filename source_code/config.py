@@ -43,11 +43,11 @@ MODEL_VISION_HF = os.getenv("MODEL_VISION_HF", "Qwen/Qwen3-VL-235B-A22B-Instruct
 
 # Chat / Generative Model
 # Used for RAG chat and general text generation
-MODEL_CHAT = os.getenv("MODEL_CHAT", "qwen3:4B")
+MODEL_CHAT = os.getenv("MODEL_CHAT", "qwen2.5-coder:3b")
 
 # Router / Classification Model
 # Fast local model used specifically for extracting keywords and context switching
-MODEL_ROUTER = os.getenv("MODEL_ROUTER", "qwen3:4B")
+MODEL_ROUTER = os.getenv("MODEL_ROUTER", "qwen3.5:4B")
 
 # ------------------------------------------------------------------
 # RETRIEVAL CONFIGURATION
