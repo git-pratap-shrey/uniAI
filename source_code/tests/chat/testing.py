@@ -2,27 +2,29 @@ import os
 import sys
 import json
 import re
+from collections import Counter
 
 # ------------------------------------------------------------
-# Path Setup
+# Path Setup (robust)
 # ------------------------------------------------------------
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if ROOT_DIR not in sys.path:
-    sys.path.append(ROOT_DIR)
+    sys.path.insert(0, ROOT_DIR)
 
 from rag.rag_pipeline import answer_query
 
 
 # ------------------------------------------------------------
-# Hardcoded Files
+# Configuration
 # ------------------------------------------------------------
 
 BASE_DIR = os.path.dirname(__file__)
 INPUT_FILE = os.path.join(BASE_DIR, "questions.txt")
 OUTPUT_FILE = os.path.join(BASE_DIR, "results.jsonl")
 
-SESSION_SUBJECT = "CYBER_SECURITY"   # set to None if you don't want locking
+# Set to None if you want subject auto-detection
+SESSION_SUBJECT = "CYBER_SECURITY"
 
 
 # ------------------------------------------------------------
@@ -30,6 +32,8 @@ SESSION_SUBJECT = "CYBER_SECURITY"   # set to None if you don't want locking
 # ------------------------------------------------------------
 
 def load_lines(filename):
+    if not os.path.exists(filename):
+        raise FileNotFoundError(f"Input file not found: {filename}")
     with open(filename, "r", encoding="utf-8") as f:
         return [line.rstrip() for line in f]
 
@@ -51,6 +55,9 @@ def evaluate():
     history = []
     current_section = None
 
+    mode_counter = Counter()
+    zero_chunk_count = 0
+
     for line in lines:
 
         stripped = line.strip()
@@ -58,7 +65,7 @@ def evaluate():
         # ---- Detect new section ----
         if stripped.lower().startswith("section"):
             print(f"\n--- New Session: {stripped} ---")
-            history = []  # reset session history
+            history = []
             current_section = stripped
             continue
 
@@ -66,9 +73,7 @@ def evaluate():
         if not re.match(r"^\d+\.\s+", stripped):
             continue
 
-        # Extract question text after "1. "
         question = re.sub(r"^\d+\.\s+", "", stripped)
-
         print(f"Processing: {question}")
 
         result = answer_query(
@@ -77,16 +82,22 @@ def evaluate():
             session_subject=SESSION_SUBJECT
         )
 
-        # Update session history
+        # Update history (simulated conversation)
         history.append({"role": "user", "content": question})
         history.append({"role": "assistant", "content": result["answer"]})
+
+        mode_counter[result["mode"]] += 1
+
+        if not result["chunks"]:
+            zero_chunk_count += 1
 
         top_similarity = None
         top_final_score = None
 
         if result["chunks"]:
-            top_similarity = result["chunks"][0].get("similarity")
-            top_final_score = result["chunks"][0].get("final_score")
+            top_chunk = result["chunks"][0]
+            top_similarity = top_chunk.get("similarity")
+            top_final_score = top_chunk.get("final_score")
 
         record = {
             "section": current_section,
@@ -103,7 +114,17 @@ def evaluate():
         results.append(record)
 
     write_jsonl(OUTPUT_FILE, results)
-    print(f"\nEvaluation complete. Results written to {OUTPUT_FILE}")
+
+    # ------------------------------------------------------------
+    # Summary
+    # ------------------------------------------------------------
+
+    print("\n================ Evaluation Summary ================")
+    print(f"Total Questions: {len(results)}")
+    print(f"Mode Distribution: {dict(mode_counter)}")
+    print(f"Zero-Chunk Responses: {zero_chunk_count}")
+    print(f"Results written to: {OUTPUT_FILE}")
+    print("====================================================")
 
 
 # ------------------------------------------------------------

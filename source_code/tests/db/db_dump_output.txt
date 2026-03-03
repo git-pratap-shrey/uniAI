@@ -10,15 +10,15 @@ Total vectors: 7
 [1] ID: syllabus_CYBER_SECURITY_cs_syllabus.pdf_books_references
 Metadata:
    - page_end: 0
-   - title: books_references
-   - page_start: 0
-   - syllabus_version: BCC301
    - chunk_type: books_references
-   - source: cs_syllabus.pdf
-   - confidence: 1.0
-   - unit: 
-   - document_type: syllabus
    - subject: CYBER_SECURITY
+   - unit: 
+   - syllabus_version: BCC301
+   - source: cs_syllabus.pdf
+   - title: books_references
+   - document_type: syllabus
+   - confidence: 1.0
+   - page_start: 0
 Preview:
 Subject: Cyber Security | Syllabus: BCC301 | Section: Books References | Topics:
 Sunit Belapure and Nina Godbole, "Cyber Security: Understanding Cyber Crimes,
@@ -27,16 +27,16 @@ Computer Forensics And Legal Perspectives", Wiley India Pvt Ltd, ISBN:
 --------------------------------------------------------------------------------
 [2] ID: syllabus_CYBER_SECURITY_cs_syllabus.pdf_course_outcomes
 Metadata:
-   - syllabus_version: BCC301
-   - subject: CYBER_SECURITY
-   - document_type: syllabus
-   - confidence: 1.0
-   - unit: 
+   - page_end: 0
+   - page_start: 0
    - source: cs_syllabus.pdf
    - chunk_type: course_outcomes
    - title: course_outcomes
-   - page_end: 0
-   - page_start: 0
+   - document_type: syllabus
+   - syllabus_version: BCC301
+   - unit: 
+   - confidence: 1.0
+   - subject: CYBER_SECURITY
 Preview:
 Subject: Cyber Security | Syllabus: BCC301 | Section: Course Outcomes | Topics:
 CO 1: Understand the basic concepts of cyber security and cybercrimes., CO 2:
@@ -45,16 +45,16 @@ methods used in cyber crime, CO 4: Understand the concepts of
 --------------------------------------------------------------------------------
 [3] ID: syllabus_CYBER_SECURITY_cs_syllabus.pdf_unit_1
 Metadata:
-   - page_start: 0
-   - unit: 1
-   - confidence: 1.0
-   - subject: CYBER_SECURITY
    - chunk_type: unit_1
-   - title: INTRODUCTION TO CYBER CRIME
-   - document_type: syllabus
-   - page_end: 0
-   - syllabus_version: BCC301
+   - confidence: 1.0
    - source: cs_syllabus.pdf
+   - subject: CYBER_SECURITY
+   - title: INTRODUCTION TO CYBER CRIME
+   - unit: 1
+   - page_end: 0
+   - document_type: syllabus
+   - page_start: 0
+   - syllabus_version: BCC301
 Preview:
 Subject: Cyber Security | Syllabus: BCC301 | Unit: 1 | Title: INTRODUCTION TO
 CYBER CRIME | Section: Unit 1 | Topics: Cybercrime- Definition and Origins of
@@ -63,16 +63,16 @@ Classifications of Cybercrimes, A Global Perspective on Cybercrimes, Cybe
 --------------------------------------------------------------------------------
 [4] ID: syllabus_CYBER_SECURITY_cs_syllabus.pdf_unit_2
 Metadata:
-   - title: CYBER CRIME
-   - subject: CYBER_SECURITY
-   - source: cs_syllabus.pdf
-   - page_end: 0
-   - page_start: 0
-   - chunk_type: unit_2
-   - unit: 2
-   - document_type: syllabus
    - confidence: 1.0
    - syllabus_version: BCC301
+   - unit: 2
+   - title: CYBER CRIME
+   - chunk_type: unit_2
+   - page_start: 0
+   - document_type: syllabus
+   - page_end: 0
+   - source: cs_syllabus.pdf
+   - subject: CYBER_SECURITY
 Preview:
 Subject: Cyber Security | Syllabus: BCC301 | Unit: 2 | Title: CYBER CRIME |
 Section: Unit 2 | Topics: Mobile and Wireless Devices-Introduction,
@@ -81,16 +81,16 @@ Frauds in Mobile and Wireless Computing Era, Security Challenges Posed by Mobi
 --------------------------------------------------------------------------------
 [5] ID: syllabus_CYBER_SECURITY_cs_syllabus.pdf_unit_3
 Metadata:
-   - syllabus_version: BCC301
-   - source: cs_syllabus.pdf
-   - unit: 3
-   - confidence: 1.0
-   - subject: CYBER_SECURITY
-   - chunk_type: unit_3
-   - document_type: syllabus
-   - page_start: 0
    - title: TOOLS AND METHODS USED IN CYBERCRIME
+   - source: cs_syllabus.pdf
+   - subject: CYBER_SECURITY
+   - page_start: 0
+   - confidence: 1.0
+   - syllabus_version: BCC301
    - page_end: 0
+   - chunk_type: unit_3
+   - unit: 3
+   - document_type: syllabus
 Preview:
 Subject: Cyber Security | Syllabus: BCC301 | Unit: 3 | Title: TOOLS AND METHODS
 USED IN CYBERCRIME | Section: Unit 3 | Topics: Introduction, Proxy Servers and
@@ -99,16 +99,16 @@ Worms, Trojan-horses and Backdoors, Steganography, DoS and DDoS
 --------------------------------------------------------------------------------
 [6] ID: syllabus_CYBER_SECURITY_cs_syllabus.pdf_unit_4
 Metadata:
-   - syllabus_version: BCC301
-   - document_type: syllabus
-   - page_end: 0
-   - subject: CYBER_SECURITY
-   - chunk_type: unit_4
-   - source: cs_syllabus.pdf
    - page_start: 0
-   - unit: 4
-   - confidence: 1.0
+   - page_end: 0
    - title: UNDERSTANDING COMPUTER FORENSICS
+   - chunk_type: unit_4
+   - subject: CYBER_SECURITY
+   - document_type: syllabus
+   - confidence: 1.0
+   - syllabus_version: BCC301
+   - source: cs_syllabus.pdf
+   - unit: 4
 Preview:
 Subject: Cyber Security | Syllabus: BCC301 | Unit: 4 | Title: UNDERSTANDING
 COMPUTER FORENSICS | Section: Unit 4 | Topics: Introduction, Digital Forensics
@@ -117,16 +117,16 @@ Forensics Analysis of E-Mail, Digital Forensics Life Cycle, Chain
 --------------------------------------------------------------------------------
 [7] ID: syllabus_CYBER_SECURITY_cs_syllabus.pdf_unit_5
 Metadata:
+   - document_type: syllabus
    - title: INTRODUCTION TO SECURITY POLICIES AND CYBER LAWS
    - confidence: 1.0
-   - chunk_type: unit_5
-   - document_type: syllabus
    - subject: CYBER_SECURITY
-   - page_end: 0
-   - source: cs_syllabus.pdf
-   - syllabus_version: BCC301
-   - page_start: 0
    - unit: 5
+   - chunk_type: unit_5
+   - syllabus_version: BCC301
+   - source: cs_syllabus.pdf
+   - page_start: 0
+   - page_end: 0
 Preview:
 Subject: Cyber Security | Syllabus: BCC301 | Unit: 5 | Title: INTRODUCTION TO
 SECURITY POLICIES AND CYBER LAWS | Section: Unit 5 | Topics: Need for An
@@ -141,36 +141,36 @@ Total vectors: 99
 
 [1] ID: cyber_security_2019_20_general_u1_sub_a.
 Metadata:
-   - document_type: pyq
-   - source: 20.pdf
+   - year: 2019
    - subject: CYBER_SECURITY
    - unit: 1
-   - year: 2019
    - marks: 2
+   - source: 20.pdf
+   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2019  Question: What is computer
 securityproblem? What factors contribute to it?
 --------------------------------------------------------------------------------
 [2] ID: cyber_security_2019_20_general_u1_sub_b.
 Metadata:
-   - unit: 1
-   - source: 20.pdf
-   - document_type: pyq
-   - subject: CYBER_SECURITY
    - year: 2019
+   - subject: CYBER_SECURITY
    - marks: 2
+   - source: 20.pdf
+   - unit: 1
+   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2019  Question: What is Encryption and
 Decryption?
 --------------------------------------------------------------------------------
 [3] ID: cyber_security_2019_20_general_u3_sub_c.
 Metadata:
+   - subject: CYBER_SECURITY
+   - document_type: pyq
+   - marks: 2
    - source: 20.pdf
    - unit: 3
-   - marks: 2
-   - subject: CYBER_SECURITY
    - year: 2019
-   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2019  Question: What are the
 principles of secure design?
@@ -178,34 +178,34 @@ principles of secure design?
 [4] ID: cyber_security_2019_20_general_u2_sub_d.
 Metadata:
    - source: 20.pdf
+   - document_type: pyq
+   - marks: 2
    - subject: CYBER_SECURITY
    - unit: 2
    - year: 2019
-   - marks: 2
-   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2019  Question: What are the
 difference between HTTPs, SSL and TLS?
 --------------------------------------------------------------------------------
 [5] ID: cyber_security_2019_20_general_u3_sub_e.
 Metadata:
-   - year: 2019
    - document_type: pyq
-   - source: 20.pdf
-   - subject: CYBER_SECURITY
-   - unit: 3
    - marks: 2
+   - unit: 3
+   - year: 2019
+   - subject: CYBER_SECURITY
+   - source: 20.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2019  Question: Explain System Call
 Interposition?
 --------------------------------------------------------------------------------
 [6] ID: cyber_security_2019_20_general_u3_sub_f.
 Metadata:
-   - unit: 3
-   - year: 2019
-   - source: 20.pdf
-   - subject: CYBER_SECURITY
    - marks: 2
+   - source: 20.pdf
+   - year: 2019
+   - subject: CYBER_SECURITY
+   - unit: 3
    - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2019  Question: What are difference
@@ -213,70 +213,70 @@ between Discretionary Access Control and Mandatory Access Control?
 --------------------------------------------------------------------------------
 [7] ID: cyber_security_2019_20_general_u4_sub_g.
 Metadata:
-   - subject: CYBER_SECURITY
-   - source: 20.pdf
-   - unit: 4
-   - document_type: pyq
    - year: 2019
+   - source: 20.pdf
    - marks: 2
+   - document_type: pyq
+   - unit: 4
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2019  Question: What is Web Security?
 --------------------------------------------------------------------------------
 [8] ID: cyber_security_2019_20_general_u3_sub_h.
 Metadata:
-   - year: 2019
-   - source: 20.pdf
-   - unit: 3
    - subject: CYBER_SECURITY
-   - document_type: pyq
    - marks: 2
+   - year: 2019
+   - unit: 3
+   - source: 20.pdf
+   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2019  Question: Give three benefits of
 IPsec?
 --------------------------------------------------------------------------------
 [9] ID: cyber_security_2019_20_general_u4_sub_i.
 Metadata:
-   - year: 2019
-   - marks: 2
-   - document_type: pyq
    - source: 20.pdf
-   - subject: CYBER_SECURITY
+   - document_type: pyq
    - unit: 4
+   - year: 2019
+   - subject: CYBER_SECURITY
+   - marks: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2019  Question: What is SQL injection?
 --------------------------------------------------------------------------------
 [10] ID: cyber_security_2019_20_general_u3_sub_j.
 Metadata:
-   - unit: 3
-   - year: 2019
    - source: 20.pdf
-   - document_type: pyq
    - subject: CYBER_SECURITY
+   - document_type: pyq
    - marks: 2
+   - year: 2019
+   - unit: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2019  Question: What is the problem of
 covert channel in VMM security?
 --------------------------------------------------------------------------------
 [11] ID: cyber_security_2019_20_general_u2_sub_a.
 Metadata:
-   - document_type: pyq
-   - marks: 10
    - source: 20.pdf
-   - year: 2019
-   - unit: 2
    - subject: CYBER_SECURITY
+   - document_type: pyq
+   - unit: 2
+   - year: 2019
+   - marks: 10
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2019  Question: What is an Intrusion
 Detection System? What are the difficulties in Anomaly detection?
 --------------------------------------------------------------------------------
 [12] ID: cyber_security_2019_20_general_u3_sub_b.
 Metadata:
-   - source: 20.pdf
-   - year: 2019
-   - unit: 3
-   - document_type: pyq
-   - subject: CYBER_SECURITY
    - marks: 10
+   - unit: 3
+   - subject: CYBER_SECURITY
+   - year: 2019
+   - document_type: pyq
+   - source: 20.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2019  Question: Why is security hard?
 --------------------------------------------------------------------------------
@@ -285,8 +285,8 @@ Metadata:
    - subject: CYBER_SECURITY
    - source: 20.pdf
    - marks: 10
-   - unit: 2
    - document_type: pyq
+   - unit: 2
    - year: 2019
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2019  Question: What is Access Control
@@ -295,10 +295,10 @@ list (ACL) and also defined what are the technologies used in access control?
 [14] ID: cyber_security_2019_20_general_u4_sub_d.
 Metadata:
    - year: 2019
+   - source: 20.pdf
+   - marks: 10
    - document_type: pyq
    - subject: CYBER_SECURITY
-   - marks: 10
-   - source: 20.pdf
    - unit: 4
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2019  Question: What is Cross site
@@ -306,35 +306,35 @@ request forgery and what are defences against it?
 --------------------------------------------------------------------------------
 [15] ID: cyber_security_2019_20_general_u2_sub_e.
 Metadata:
-   - marks: 10
    - document_type: pyq
+   - marks: 10
+   - unit: 2
+   - year: 2019
    - source: 20.pdf
    - subject: CYBER_SECURITY
-   - year: 2019
-   - unit: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2019  Question: Explain SSL
 Encryption. What are the steps involved in SSL: server authentication?
 --------------------------------------------------------------------------------
 [16] ID: cyber_security_2019_20_part_o_u3_sub_a.
 Metadata:
-   - marks: 10
    - unit: 3
+   - year: 2019
    - source: 20.pdf
    - subject: CYBER_SECURITY
+   - marks: 10
    - document_type: pyq
-   - year: 2019
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2019  Question: What are Asymmetric
 Algorithms? Give their advantages, disadvantages.
 --------------------------------------------------------------------------------
 [17] ID: cyber_security_2019_20_part_o_u4_sub_b.
 Metadata:
-   - subject: CYBER_SECURITY
    - unit: 4
    - document_type: pyq
-   - marks: 10
+   - subject: CYBER_SECURITY
    - year: 2019
+   - marks: 10
    - source: 20.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2019  Question: Why do cyber criminals
@@ -342,71 +342,71 @@ want to own machines?
 --------------------------------------------------------------------------------
 [18] ID: cyber_security_2019_20_part_o_u1_sub_a.
 Metadata:
+   - unit: 1
    - source: 20.pdf
-   - subject: CYBER_SECURITY
+   - year: 2019
    - document_type: pyq
    - marks: 10
-   - year: 2019
-   - unit: 1
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2019  Question: What is DES? Why were
 Double and Triple DES created and what are they?
 --------------------------------------------------------------------------------
 [19] ID: cyber_security_2019_20_part_o_u3_sub_b.
 Metadata:
-   - source: 20.pdf
    - document_type: pyq
-   - subject: CYBER_SECURITY
    - unit: 3
-   - year: 2019
+   - subject: CYBER_SECURITY
+   - source: 20.pdf
    - marks: 10
+   - year: 2019
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2019  Question: Write Short notes on
 software fault isolation (SFI): i. Goal & Solution, ii. SFI Approach.
 --------------------------------------------------------------------------------
 [20] ID: cyber_security_2019_20_part_o_u4_sub_a.
 Metadata:
-   - marks: 10
    - subject: CYBER_SECURITY
-   - year: 2019
-   - document_type: pyq
    - source: 20.pdf
+   - year: 2019
    - unit: 4
+   - document_type: pyq
+   - marks: 10
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2019  Question: How are the different
 approaches to use Virtual OS on desktop?
 --------------------------------------------------------------------------------
 [21] ID: cyber_security_2019_20_part_o_u2_sub_b.
 Metadata:
-   - subject: CYBER_SECURITY
-   - year: 2019
-   - marks: 10
-   - document_type: pyq
    - source: 20.pdf
+   - year: 2019
    - unit: 2
+   - subject: CYBER_SECURITY
+   - document_type: pyq
+   - marks: 10
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2019  Question: Write a short note on
 secret key cryptography. Also list its advantages, disadvantages and examples.
 --------------------------------------------------------------------------------
 [22] ID: cyber_security_2019_20_part_o_u2_sub_a.
 Metadata:
-   - source: 20.pdf
-   - document_type: pyq
    - year: 2019
    - marks: 10
-   - unit: 2
    - subject: CYBER_SECURITY
+   - source: 20.pdf
+   - document_type: pyq
+   - unit: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2019  Question: What is Domain Name
 System and explain what is DNS cache poisoning?
 --------------------------------------------------------------------------------
 [23] ID: cyber_security_2020_21_section_a_u1_sub_a.
 Metadata:
+   - unit: 1
+   - document_type: pyq
+   - year: 2020
    - marks: 0
    - source: 21.pdf
-   - year: 2020
-   - document_type: pyq
-   - unit: 1
    - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2020  Question: | What are the roles
@@ -414,24 +414,24 @@ of a) cypher and b) key in cryptography? | 2 |
 --------------------------------------------------------------------------------
 [24] ID: cyber_security_2020_21_section_a_u2_sub_b.
 Metadata:
-   - source: 21.pdf
-   - subject: CYBER_SECURITY
-   - unit: 2
-   - year: 2020
    - document_type: pyq
+   - year: 2020
    - marks: 0
+   - unit: 2
+   - subject: CYBER_SECURITY
+   - source: 21.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2020  Question: | What are some of the
 advantages and limitations of UNIX? | 2 |
 --------------------------------------------------------------------------------
 [25] ID: cyber_security_2020_21_section_a_u3_sub_c.
 Metadata:
-   - year: 2020
-   - marks: 0
    - subject: CYBER_SECURITY
-   - document_type: pyq
-   - source: 21.pdf
    - unit: 3
+   - year: 2020
+   - source: 21.pdf
+   - marks: 0
+   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2020  Question: | What is a privilege
 and discuss any two secure architecture principles | 2 |
@@ -439,8 +439,8 @@ and discuss any two secure architecture principles | 2 |
 [26] ID: cyber_security_2020_21_section_a_u2_sub_d.
 Metadata:
    - document_type: pyq
-   - marks: 0
    - year: 2020
+   - marks: 0
    - unit: 2
    - source: 21.pdf
    - subject: CYBER_SECURITY
@@ -452,45 +452,45 @@ does it work? | 2 |
 Metadata:
    - year: 2020
    - document_type: pyq
-   - source: 21.pdf
-   - marks: 0
    - subject: CYBER_SECURITY
+   - source: 21.pdf
    - unit: 3
+   - marks: 0
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2020  Question: | Discuss two problems
 associated with using ptrace | 2 |
 --------------------------------------------------------------------------------
 [28] ID: cyber_security_2020_21_section_a_u2_sub_f.
 Metadata:
-   - year: 2020
    - marks: 0
-   - unit: 2
    - source: 21.pdf
-   - document_type: pyq
    - subject: CYBER_SECURITY
+   - unit: 2
+   - year: 2020
+   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2020  Question: | What are covert
 channels and what are their disadvantages? | 2 |
 --------------------------------------------------------------------------------
 [29] ID: cyber_security_2020_21_section_a_u2_sub_g.
 Metadata:
-   - unit: 2
+   - source: 21.pdf
    - subject: CYBER_SECURITY
    - year: 2020
+   - unit: 2
    - marks: 0
    - document_type: pyq
-   - source: 21.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2020  Question: | When changing
 effective user ids, distinguish between ways to drop privileges | 2 |
 --------------------------------------------------------------------------------
 [30] ID: cyber_security_2020_21_section_a_u4_sub_h.
 Metadata:
-   - unit: 4
-   - year: 2020
    - subject: CYBER_SECURITY
    - marks: 0
+   - unit: 4
    - source: 21.pdf
+   - year: 2020
    - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2020  Question: | Why would you
@@ -498,36 +498,36 @@ recommend using DNSSEC? | 2 |
 --------------------------------------------------------------------------------
 [31] ID: cyber_security_2020_21_section_a_u1_sub_i.
 Metadata:
+   - subject: CYBER_SECURITY
    - marks: 0
-   - unit: 1
-   - document_type: pyq
    - year: 2020
    - source: 21.pdf
-   - subject: CYBER_SECURITY
+   - unit: 1
+   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2020  Question: | What are the goals
 of confidentiality policies? | 2 |
 --------------------------------------------------------------------------------
 [32] ID: cyber_security_2020_21_section_a_u3_sub_j.
 Metadata:
-   - year: 2020
-   - marks: 0
    - source: 21.pdf
-   - unit: 3
+   - year: 2020
    - subject: CYBER_SECURITY
    - document_type: pyq
+   - marks: 0
+   - unit: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2020  Question: | Explain advanced
 anti-XSS tools | 2 |
 --------------------------------------------------------------------------------
 [33] ID: cyber_security_2020_21_section_b_u2_sub_a.
 Metadata:
+   - source: 21.pdf
    - document_type: pyq
-   - unit: 2
    - marks: 10
+   - unit: 2
    - subject: CYBER_SECURITY
    - year: 2020
-   - source: 21.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2020  Question: Define the logout
 process, its steps and potential problems. Also, define session hijacking and
@@ -535,70 +535,70 @@ discuss steps to mitigate session-tokens theft.
 --------------------------------------------------------------------------------
 [34] ID: cyber_security_2020_21_section_b_u2_sub_b.
 Metadata:
-   - subject: CYBER_SECURITY
-   - year: 2020
-   - marks: 10
    - source: 21.pdf
-   - unit: 2
+   - year: 2020
    - document_type: pyq
+   - unit: 2
+   - marks: 10
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2020  Question: Define Network-based
 IDS. What are its strengths?
 --------------------------------------------------------------------------------
 [35] ID: cyber_security_2020_21_section_b_u4_sub_c.
 Metadata:
-   - document_type: pyq
-   - subject: CYBER_SECURITY
-   - marks: 10
-   - unit: 4
-   - source: 21.pdf
    - year: 2020
+   - subject: CYBER_SECURITY
+   - unit: 4
+   - document_type: pyq
+   - source: 21.pdf
+   - marks: 10
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2020  Question: Discuss a)SQL
 injection b)CSRF c)XSS d)Sessions e) Four HTTP auth Problems
 --------------------------------------------------------------------------------
 [36] ID: cyber_security_2020_21_section_b_u4_sub_d.
 Metadata:
-   - subject: CYBER_SECURITY
-   - year: 2020
-   - document_type: pyq
    - unit: 4
-   - source: 21.pdf
    - marks: 10
+   - document_type: pyq
+   - source: 21.pdf
+   - year: 2020
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2020  Question: Define role-based
 access control its major properties and why would you use it?
 --------------------------------------------------------------------------------
 [37] ID: cyber_security_2020_21_section_b_u3_sub_e.
 Metadata:
-   - year: 2020
    - source: 21.pdf
-   - subject: CYBER_SECURITY
    - document_type: pyq
-   - marks: 10
+   - year: 2020
    - unit: 3
+   - subject: CYBER_SECURITY
+   - marks: 10
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2020  Question: Discuss session
 fixation attacks, steps to perform an attack and how can it be prevented?
 --------------------------------------------------------------------------------
 [38] ID: cyber_security_2020_21_part_o_u3_sub_a.
 Metadata:
-   - unit: 3
-   - document_type: pyq
    - marks: 10
    - source: 21.pdf
    - year: 2020
    - subject: CYBER_SECURITY
+   - document_type: pyq
+   - unit: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2020  Question: Discuss how
 vulnerabilities can be exploited in web applications.
 --------------------------------------------------------------------------------
 [39] ID: cyber_security_2020_21_part_o_u2_sub_b.
 Metadata:
-   - document_type: pyq
-   - marks: 10
    - subject: CYBER_SECURITY
+   - marks: 10
    - unit: 2
+   - document_type: pyq
    - year: 2020
    - source: 21.pdf
 Preview:
@@ -607,23 +607,23 @@ access control. What are the problems associated with it?
 --------------------------------------------------------------------------------
 [40] ID: cyber_security_2020_21_part_o_u4_sub_b.
 Metadata:
-   - source: 21.pdf
-   - year: 2020
-   - unit: 4
    - subject: CYBER_SECURITY
    - document_type: pyq
+   - source: 21.pdf
    - marks: 10
+   - year: 2020
+   - unit: 4
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2020  Question: Discuss any three
 digital signatures and what are the steps to use them in the real world?
 --------------------------------------------------------------------------------
 [41] ID: cyber_security_2020_21_part_o_u2_sub_a.
 Metadata:
-   - unit: 2
-   - subject: CYBER_SECURITY
-   - year: 2020
-   - source: 21.pdf
    - document_type: pyq
+   - unit: 2
+   - year: 2020
+   - subject: CYBER_SECURITY
+   - source: 21.pdf
    - marks: 10
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2020  Question: Discuss DoS attacks
@@ -631,72 +631,72 @@ and briefly discuss various methods for mitigation of DoS attacks.
 --------------------------------------------------------------------------------
 [42] ID: cyber_security_2021_22_section_a_u2_sub_a
 Metadata:
-   - subject: CYBER_SECURITY
    - unit: 2
+   - marks: 1
+   - subject: CYBER_SECURITY
+   - document_type: pyq
    - year: 2021
    - source: 22.pdf
-   - marks: 1
-   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2021  Question: Why is Session
 Hijacking successful?
 --------------------------------------------------------------------------------
 [43] ID: cyber_security_2021_22_section_a_u3_sub_b
 Metadata:
-   - marks: 2
+   - document_type: pyq
+   - year: 2021
    - source: 22.pdf
    - subject: CYBER_SECURITY
+   - marks: 2
    - unit: 3
-   - year: 2021
-   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2021  Question: What is the
 significance of Confinement Principle?
 --------------------------------------------------------------------------------
 [44] ID: cyber_security_2021_22_section_a_u3_sub_c
 Metadata:
-   - unit: 3
-   - marks: 3
-   - subject: CYBER_SECURITY
-   - year: 2021
-   - document_type: pyq
    - source: 22.pdf
+   - unit: 3
+   - document_type: pyq
+   - year: 2021
+   - subject: CYBER_SECURITY
+   - marks: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2021  Question: How access control in
 UNIX is different from Windows?
 --------------------------------------------------------------------------------
 [45] ID: cyber_security_2021_22_section_a_u2_sub_d
 Metadata:
+   - subject: CYBER_SECURITY
    - year: 2021
-   - unit: 2
    - marks: 4
    - document_type: pyq
-   - subject: CYBER_SECURITY
    - source: 22.pdf
+   - unit: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2021  Question: How many look-up zones
 are in DNS?
 --------------------------------------------------------------------------------
 [46] ID: cyber_security_2021_22_section_a_u1_sub_e
 Metadata:
-   - year: 2021
-   - unit: 1
-   - subject: CYBER_SECURITY
    - document_type: pyq
-   - source: 22.pdf
+   - unit: 1
    - marks: 5
+   - source: 22.pdf
+   - year: 2021
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2021  Question: Define Firewall and
 Its Uses?
 --------------------------------------------------------------------------------
 [47] ID: cyber_security_2021_22_section_b_u3_sub_a
 Metadata:
-   - source: 22.pdf
-   - year: 2021
-   - unit: 3
-   - subject: CYBER_SECURITY
    - document_type: pyq
+   - unit: 3
    - marks: 1
+   - year: 2021
+   - source: 22.pdf
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2021  Question: What is Control
 hijacking with an example? Explain the term of Buffer overflow in Control
@@ -704,11 +704,11 @@ hijacking.
 --------------------------------------------------------------------------------
 [48] ID: cyber_security_2021_22_section_b_u3_sub_b
 Metadata:
-   - marks: 2
-   - source: 22.pdf
    - document_type: pyq
-   - unit: 3
+   - marks: 2
    - year: 2021
+   - source: 22.pdf
+   - unit: 3
    - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2021  Question: Write short notes on
@@ -717,23 +717,23 @@ System call Interposition.
 [49] ID: cyber_security_2021_22_section_b_u4_sub_c
 Metadata:
    - document_type: pyq
-   - source: 22.pdf
-   - year: 2021
-   - unit: 4
-   - marks: 3
    - subject: CYBER_SECURITY
+   - year: 2021
+   - marks: 3
+   - unit: 4
+   - source: 22.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2021  Question: What is Cross Site
 Scripting? How to Protect against XSS Attacks.
 --------------------------------------------------------------------------------
 [50] ID: cyber_security_2021_22_section_b_u3_sub_d
 Metadata:
-   - unit: 3
-   - marks: 4
-   - subject: CYBER_SECURITY
-   - source: 22.pdf
-   - document_type: pyq
    - year: 2021
+   - document_type: pyq
+   - marks: 4
+   - unit: 3
+   - source: 22.pdf
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2021  Question: Explain the term
 Public key Cryptography in detail.
@@ -741,11 +741,11 @@ Public key Cryptography in detail.
 [51] ID: cyber_security_2021_22_section_b_u3_sub_e
 Metadata:
    - subject: CYBER_SECURITY
-   - document_type: pyq
-   - marks: 5
-   - unit: 3
    - source: 22.pdf
+   - marks: 5
    - year: 2021
+   - document_type: pyq
+   - unit: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2021  Question: Explain in brief about
 RSA Public key cryptography.
@@ -753,34 +753,34 @@ RSA Public key cryptography.
 [52] ID: cyber_security_2021_22_part_o_u4_sub_a
 Metadata:
    - subject: CYBER_SECURITY
-   - year: 2021
-   - marks: 1
    - source: 22.pdf
+   - year: 2021
    - unit: 4
    - document_type: pyq
+   - marks: 1
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2021  Question: How Security System
 Should Evolve to Handle Cyber Security Threats and Vulnerabilities?
 --------------------------------------------------------------------------------
 [53] ID: cyber_security_2021_22_part_o_u2_sub_b
 Metadata:
-   - subject: CYBER_SECURITY
    - document_type: pyq
+   - marks: 4
    - year: 2021
    - unit: 2
    - source: 22.pdf
-   - marks: 4
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2021  Question: What is a Digital
 Signature? How Digital Signature Works?
 --------------------------------------------------------------------------------
 [54] ID: cyber_security_2021_22_part_o_u3_sub_a
 Metadata:
-   - unit: 3
-   - source: 22.pdf
-   - year: 2021
-   - document_type: pyq
    - subject: CYBER_SECURITY
+   - year: 2021
+   - source: 22.pdf
+   - unit: 3
+   - document_type: pyq
    - marks: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2021  Question: How to detect
@@ -788,23 +788,23 @@ Rootkits? Explain how to prevent Rootkits
 --------------------------------------------------------------------------------
 [55] ID: cyber_security_2021_22_part_o_u3_sub_b
 Metadata:
+   - source: 22.pdf
+   - marks: 2
+   - document_type: pyq
    - year: 2021
    - unit: 3
-   - marks: 2
    - subject: CYBER_SECURITY
-   - document_type: pyq
-   - source: 22.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2021  Question: Explain the need of
 Software fault isolation.
 --------------------------------------------------------------------------------
 [56] ID: cyber_security_2021_22_part_o_u4_sub_b
 Metadata:
-   - source: 22.pdf
-   - document_type: pyq
    - marks: 3
    - subject: CYBER_SECURITY
    - year: 2021
+   - source: 22.pdf
+   - document_type: pyq
    - unit: 4
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2021  Question: What’s the difference
@@ -812,12 +812,12 @@ between Browser Isolation and Remote Browser Isolation?
 --------------------------------------------------------------------------------
 [57] ID: cyber_security_2021_22_part_o_u1_sub_b
 Metadata:
-   - subject: CYBER_SECURITY
-   - source: 22.pdf
-   - unit: 1
    - marks: 4
    - year: 2021
    - document_type: pyq
+   - subject: CYBER_SECURITY
+   - unit: 1
+   - source: 22.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2021  Question: What is Symmetric and
 Asymmetric Key cryptography? Write their respective advantages and
@@ -825,71 +825,71 @@ disadvantages?
 --------------------------------------------------------------------------------
 [58] ID: cyber_security_2021_22_part_o_u2_sub_a
 Metadata:
-   - subject: CYBER_SECURITY
    - document_type: pyq
    - year: 2021
    - unit: 2
-   - source: 22.pdf
+   - subject: CYBER_SECURITY
    - marks: 5
+   - source: 22.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2021  Question: How do you define
 Risk, Vulnerability and threat in the context of Network Security?
 --------------------------------------------------------------------------------
 [59] ID: cyber_security_2022_23_section_a_u1_sub_a.
 Metadata:
-   - unit: 1
-   - year: 2022
-   - marks: 0
    - subject: CYBER_SECURITY
-   - document_type: pyq
    - source: 23.pdf
+   - marks: 0
+   - document_type: pyq
+   - year: 2022
+   - unit: 1
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2022  Question: What is computer
 security? Discuss confidentiality and integrity.
 --------------------------------------------------------------------------------
 [60] ID: cyber_security_2022_23_section_a_u1_sub_b.
 Metadata:
-   - document_type: pyq
-   - marks: 0
-   - source: 23.pdf
-   - unit: 1
-   - subject: CYBER_SECURITY
    - year: 2022
+   - marks: 0
+   - subject: CYBER_SECURITY
+   - document_type: pyq
+   - unit: 1
+   - source: 23.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2022  Question: What is Ransomware?
 --------------------------------------------------------------------------------
 [61] ID: cyber_security_2022_23_section_a_u4_sub_c.
 Metadata:
+   - year: 2022
+   - document_type: pyq
    - marks: 0
    - source: 23.pdf
    - subject: CYBER_SECURITY
    - unit: 4
-   - year: 2022
-   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2022  Question: What is the use of
 frame busting in web security?
 --------------------------------------------------------------------------------
 [62] ID: cyber_security_2022_23_section_a_u1_sub_d.
 Metadata:
+   - document_type: pyq
+   - marks: 0
+   - subject: CYBER_SECURITY
    - unit: 1
    - source: 23.pdf
    - year: 2022
-   - marks: 0
-   - document_type: pyq
-   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2022  Question: Differentiate between
 encryption and decryption in cryptography.
 --------------------------------------------------------------------------------
 [63] ID: cyber_security_2022_23_section_a_u3_sub_e.
 Metadata:
-   - document_type: pyq
-   - unit: 3
    - source: 23.pdf
-   - year: 2022
-   - marks: 0
+   - document_type: pyq
    - subject: CYBER_SECURITY
+   - marks: 0
+   - unit: 3
+   - year: 2022
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2022  Question: Discuss software fault
 isolation.
@@ -897,34 +897,34 @@ isolation.
 [64] ID: cyber_security_2022_23_section_a_u2_sub_f.
 Metadata:
    - subject: CYBER_SECURITY
+   - document_type: pyq
+   - source: 23.pdf
+   - marks: 0
    - unit: 2
    - year: 2022
-   - document_type: pyq
-   - marks: 0
-   - source: 23.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2022  Question: What is use of kernel
 in Unix operating system?
 --------------------------------------------------------------------------------
 [65] ID: cyber_security_2022_23_section_a_u1_sub_g.
 Metadata:
-   - source: 23.pdf
    - subject: CYBER_SECURITY
-   - marks: 0
-   - unit: 1
-   - year: 2022
    - document_type: pyq
+   - source: 23.pdf
+   - year: 2022
+   - unit: 1
+   - marks: 0
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2022  Question: Define hash function.
 What is the use of hash function?
 --------------------------------------------------------------------------------
 [66] ID: cyber_security_2022_23_section_a_u2_sub_h.
 Metadata:
+   - year: 2022
    - source: 23.pdf
    - document_type: pyq
-   - marks: 0
-   - year: 2022
    - subject: CYBER_SECURITY
+   - marks: 0
    - unit: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2022  Question: What is the main
@@ -932,47 +932,47 @@ difference between virus and worm?
 --------------------------------------------------------------------------------
 [67] ID: cyber_security_2022_23_section_a_u2_sub_i.
 Metadata:
-   - source: 23.pdf
    - subject: CYBER_SECURITY
-   - document_type: pyq
-   - marks: 0
    - unit: 2
+   - source: 23.pdf
+   - document_type: pyq
    - year: 2022
+   - marks: 0
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2022  Question: What is SQL injection
 attack? Explain in brief.
 --------------------------------------------------------------------------------
 [68] ID: cyber_security_2022_23_section_a_u2_sub_j.
 Metadata:
-   - subject: CYBER_SECURITY
    - year: 2022
-   - marks: 0
+   - source: 23.pdf
+   - subject: CYBER_SECURITY
    - unit: 2
    - document_type: pyq
-   - source: 23.pdf
+   - marks: 0
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2022  Question: What is difference
 between Cache Memory and RAM?
 --------------------------------------------------------------------------------
 [69] ID: cyber_security_2022_23_section_b_u3_sub_a.
 Metadata:
-   - document_type: pyq
-   - year: 2022
    - source: 23.pdf
+   - document_type: pyq
+   - unit: 3
+   - year: 2022
    - subject: CYBER_SECURITY
    - marks: 0
-   - unit: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2022  Question: What is control
 hijacking? Discuss the various types of hijacking attacks in detail.
 --------------------------------------------------------------------------------
 [70] ID: cyber_security_2022_23_section_b_u3_sub_b.
 Metadata:
-   - source: 23.pdf
-   - year: 2022
    - document_type: pyq
    - marks: 0
+   - year: 2022
    - subject: CYBER_SECURITY
+   - source: 23.pdf
    - unit: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2022  Question: What is system call
@@ -980,11 +980,11 @@ interposition? Explain ptrace and systrace in detail.
 --------------------------------------------------------------------------------
 [71] ID: cyber_security_2022_23_section_b_u4_sub_c.
 Metadata:
-   - year: 2022
-   - subject: CYBER_SECURITY
+   - source: 23.pdf
    - marks: 0
    - unit: 4
-   - source: 23.pdf
+   - subject: CYBER_SECURITY
+   - year: 2022
    - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2022  Question: Discuss browser
@@ -992,24 +992,24 @@ isolation and remote browser isolation in detail.
 --------------------------------------------------------------------------------
 [72] ID: cyber_security_2022_23_section_b_u3_sub_d.
 Metadata:
-   - marks: 0
-   - source: 23.pdf
    - document_type: pyq
    - year: 2022
-   - subject: CYBER_SECURITY
    - unit: 3
+   - subject: CYBER_SECURITY
+   - marks: 0
+   - source: 23.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2022  Question: Explain RSA algorithm
 with the help of suitably chosen example.
 --------------------------------------------------------------------------------
 [73] ID: cyber_security_2022_23_section_b_u2_sub_e.
 Metadata:
+   - marks: 0
+   - year: 2022
+   - subject: CYBER_SECURITY
+   - source: 23.pdf
    - unit: 2
    - document_type: pyq
-   - marks: 0
-   - subject: CYBER_SECURITY
-   - year: 2022
-   - source: 23.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2022  Question: What is an Intrusion
 Detection System (IDS)? Discuss the various approaches adopted in developing IDS
@@ -1018,34 +1018,34 @@ system.
 [74] ID: cyber_security_2022_23_part_o_u3_sub_a.
 Metadata:
    - subject: CYBER_SECURITY
-   - source: 23.pdf
-   - document_type: pyq
    - year: 2022
-   - unit: 3
    - marks: 0
+   - source: 23.pdf
+   - unit: 3
+   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2022  Question: Describe various types
 of security threats in detail.
 --------------------------------------------------------------------------------
 [75] ID: cyber_security_2022_23_part_o_u3_sub_b.
 Metadata:
+   - document_type: pyq
+   - source: 23.pdf
+   - subject: CYBER_SECURITY
+   - marks: 0
    - year: 2022
    - unit: 3
-   - marks: 0
-   - source: 23.pdf
-   - document_type: pyq
-   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2022  Question: Explain the different
 types of defenses used against control hijacking.
 --------------------------------------------------------------------------------
 [76] ID: cyber_security_2022_23_part_o_u2_sub_a.
 Metadata:
-   - year: 2022
    - source: 23.pdf
-   - subject: CYBER_SECURITY
-   - marks: 0
    - unit: 2
+   - marks: 0
+   - year: 2022
+   - subject: CYBER_SECURITY
    - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2022  Question: Define confinement
@@ -1054,10 +1054,10 @@ principle. Discuss the approaches of confinement at different levels.
 [77] ID: cyber_security_2022_23_part_o_u4_sub_a.
 Metadata:
    - year: 2022
-   - marks: 0
-   - unit: 4
    - document_type: pyq
+   - unit: 4
    - subject: CYBER_SECURITY
+   - marks: 0
    - source: 23.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2022  Question: What is cross site
@@ -1065,9 +1065,9 @@ request forgery? Explain the concept with suitable examples.
 --------------------------------------------------------------------------------
 [78] ID: cyber_security_2022_23_part_o_u4_sub_b.
 Metadata:
-   - document_type: pyq
-   - marks: 0
    - year: 2022
+   - marks: 0
+   - document_type: pyq
    - unit: 4
    - source: 23.pdf
    - subject: CYBER_SECURITY
@@ -1077,11 +1077,11 @@ and protection against cross site scripting.
 --------------------------------------------------------------------------------
 [79] ID: cyber_security_2022_23_part_o_u2_sub_b.
 Metadata:
-   - source: 23.pdf
    - marks: 0
-   - year: 2022
-   - unit: 2
    - subject: CYBER_SECURITY
+   - year: 2022
+   - source: 23.pdf
+   - unit: 2
    - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2022  Question: What is digital
@@ -1089,57 +1089,57 @@ signature? Discuss the various steps used in creating digital signature.
 --------------------------------------------------------------------------------
 [80] ID: cyber_security_2022_23_part_o_u1_sub_b.
 Metadata:
-   - source: 23.pdf
    - marks: 0
    - year: 2022
+   - document_type: pyq
+   - source: 23.pdf
    - subject: CYBER_SECURITY
    - unit: 1
-   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2022  Question: Write short note on
 the following:
 --------------------------------------------------------------------------------
 [81] ID: cyber_security_2022_23_part_o_u3_sub_i
 Metadata:
-   - document_type: pyq
+   - source: 23.pdf
    - marks: 0
    - year: 2022
-   - source: 23.pdf
-   - subject: CYBER_SECURITY
+   - document_type: pyq
    - unit: 3
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Year: 2022  Question: DNS security (ii)
 Routing security
 --------------------------------------------------------------------------------
 [82] ID: cyber_security_2023_24_section_a_u1_sub_a.
 Metadata:
-   - unit: 1
-   - year: 2023
-   - source: 24.pdf
-   - document_type: pyq
    - subject: CYBER_SECURITY
+   - year: 2023
+   - document_type: pyq
    - marks: 2
+   - source: 24.pdf
+   - unit: 1
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2023  Question: Define Cyber Crime.
 --------------------------------------------------------------------------------
 [83] ID: cyber_security_2023_24_section_a_u4_sub_b.
 Metadata:
    - marks: 2
-   - subject: CYBER_SECURITY
-   - document_type: pyq
-   - year: 2023
-   - unit: 4
    - source: 24.pdf
+   - unit: 4
+   - year: 2023
+   - document_type: pyq
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2023  Question: What is Bot net.
 --------------------------------------------------------------------------------
 [84] ID: cyber_security_2023_24_section_a_u4_sub_c.
 Metadata:
-   - marks: 2
-   - document_type: pyq
-   - year: 2023
-   - subject: CYBER_SECURITY
    - source: 24.pdf
+   - document_type: pyq
+   - subject: CYBER_SECURITY
+   - year: 2023
+   - marks: 2
    - unit: 4
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2023  Question: Why mobile needs
@@ -1147,23 +1147,23 @@ security?
 --------------------------------------------------------------------------------
 [85] ID: cyber_security_2023_24_section_a_u1_sub_d.
 Metadata:
-   - subject: CYBER_SECURITY
-   - document_type: pyq
-   - source: 24.pdf
-   - unit: 1
    - year: 2023
+   - source: 24.pdf
+   - document_type: pyq
    - marks: 2
+   - unit: 1
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2023  Question: Define Authentication
 and Authorization.
 --------------------------------------------------------------------------------
 [86] ID: cyber_security_2023_24_section_a_u1_sub_e.
 Metadata:
-   - marks: 2
    - unit: 1
-   - document_type: pyq
-   - year: 2023
    - source: 24.pdf
+   - year: 2023
+   - marks: 2
+   - document_type: pyq
    - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2023  Question: What is virus and
@@ -1172,21 +1172,21 @@ worms.
 [87] ID: cyber_security_2023_24_section_a_u4_sub_f.
 Metadata:
    - marks: 2
+   - year: 2023
    - source: 24.pdf
+   - unit: 4
    - subject: CYBER_SECURITY
    - document_type: pyq
-   - year: 2023
-   - unit: 4
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2023  Question: Explain digital
 evidence?
 --------------------------------------------------------------------------------
 [88] ID: cyber_security_2023_24_section_a_u1_sub_g.
 Metadata:
-   - subject: CYBER_SECURITY
    - unit: 1
-   - marks: 2
    - document_type: pyq
+   - subject: CYBER_SECURITY
+   - marks: 2
    - source: 24.pdf
    - year: 2023
 Preview:
@@ -1195,23 +1195,23 @@ Subject: CYBER_SECURITY | Unit: 1 | Year: 2023  Question: Why cyber is needed?
 [89] ID: cyber_security_2023_24_section_b_u1_sub_a.
 Metadata:
    - unit: 1
-   - year: 2023
-   - document_type: pyq
-   - source: 24.pdf
    - subject: CYBER_SECURITY
    - marks: 7
+   - document_type: pyq
+   - year: 2023
+   - source: 24.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2023  Question: Explain how the term
 'cybercrime' originated/State few Cyber Crimes.
 --------------------------------------------------------------------------------
 [90] ID: cyber_security_2023_24_section_b_u4_sub_b.
 Metadata:
-   - year: 2023
    - source: 24.pdf
-   - unit: 4
-   - subject: CYBER_SECURITY
-   - marks: 7
    - document_type: pyq
+   - subject: CYBER_SECURITY
+   - unit: 4
+   - year: 2023
+   - marks: 7
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2023  Question: Explain wireless
 devices with example. What are the security challenges faced by wireless
@@ -1220,35 +1220,35 @@ devices?
 [91] ID: cyber_security_2023_24_section_b_u4_sub_c.
 Metadata:
    - unit: 4
-   - source: 24.pdf
    - year: 2023
    - document_type: pyq
-   - marks: 7
+   - source: 24.pdf
    - subject: CYBER_SECURITY
+   - marks: 7
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2023  Question: Explain 7 Tools used
 in Cyber Crime.
 --------------------------------------------------------------------------------
 [92] ID: cyber_security_2023_24_section_b_u4_sub_d.
 Metadata:
-   - year: 2023
-   - source: 24.pdf
-   - marks: 7
-   - document_type: pyq
    - unit: 4
+   - year: 2023
    - subject: CYBER_SECURITY
+   - document_type: pyq
+   - marks: 7
+   - source: 24.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2023  Question: Explain Digital
 forensics life cycle.
 --------------------------------------------------------------------------------
 [93] ID: cyber_security_2023_24_section_b_u1_sub_e.
 Metadata:
-   - year: 2023
-   - unit: 1
-   - source: 24.pdf
    - subject: CYBER_SECURITY
+   - source: 24.pdf
    - document_type: pyq
    - marks: 7
+   - unit: 1
+   - year: 2023
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2023  Question: What is the need of
 Information Security policy?
@@ -1256,71 +1256,71 @@ Information Security policy?
 [94] ID: cyber_security_2023_24_part_o_u1_sub_a.
 Metadata:
    - document_type: pyq
+   - marks: 7
+   - unit: 1
+   - year: 2023
    - subject: CYBER_SECURITY
    - source: 24.pdf
-   - marks: 7
-   - year: 2023
-   - unit: 1
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2023  Question: Who are Cyber
 Criminals? Classify Cybercrimes.
 --------------------------------------------------------------------------------
 [95] ID: cyber_security_2023_24_part_o_u4_sub_b.
 Metadata:
-   - document_type: pyq
-   - source: 24.pdf
-   - subject: CYBER_SECURITY
    - year: 2023
    - marks: 7
+   - subject: CYBER_SECURITY
+   - document_type: pyq
    - unit: 4
+   - source: 24.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2023  Question: What is the fuel for
 cybercrime. How may a criminal plan cybercrime?
 --------------------------------------------------------------------------------
 [96] ID: cyber_security_2023_24_part_o_u4_sub_a.
 Metadata:
-   - subject: CYBER_SECURITY
-   - marks: 7
-   - unit: 4
    - document_type: pyq
-   - year: 2023
+   - subject: CYBER_SECURITY
    - source: 24.pdf
+   - marks: 7
+   - year: 2023
+   - unit: 4
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Year: 2023  Question: Explain the security
 measures and policies taken for mobile devices.
 --------------------------------------------------------------------------------
 [97] ID: cyber_security_2023_24_part_o_u1_sub_b.
 Metadata:
-   - unit: 1
-   - subject: CYBER_SECURITY
    - source: 24.pdf
-   - year: 2023
-   - document_type: pyq
+   - subject: CYBER_SECURITY
    - marks: 7
+   - document_type: pyq
+   - unit: 1
+   - year: 2023
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Year: 2023  Question: What is steganography.
 Explain in detail.
 --------------------------------------------------------------------------------
 [98] ID: cyber_security_2023_24_part_o_u2_sub_a.
 Metadata:
-   - year: 2023
-   - source: 24.pdf
    - subject: CYBER_SECURITY
+   - year: 2023
    - marks: 7
-   - document_type: pyq
+   - source: 24.pdf
    - unit: 2
+   - document_type: pyq
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2023  Question: What is Email. Explain
 how Email forensics can be done.
 --------------------------------------------------------------------------------
 [99] ID: cyber_security_2023_24_part_o_u2_sub_b.
 Metadata:
-   - source: 24.pdf
-   - document_type: pyq
-   - marks: 7
    - year: 2023
    - subject: CYBER_SECURITY
    - unit: 2
+   - marks: 7
+   - document_type: pyq
+   - source: 24.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Year: 2023  Question: What are privacy
 threats? What are the challenges faced?
@@ -1333,14 +1333,14 @@ Total vectors: 129
 
 [1] ID: CYBER_SECURITY_hand_unit1.pdf_p11-12
 Metadata:
-   - page_end: 12
-   - title: Cyber Law: Defamation and Cybersquatting
-   - source: hand_unit1.pdf
    - page_start: 11
+   - source: hand_unit1.pdf
    - confidence: 0.85
    - document_type: handwritten_notes
+   - title: Cyber Law: Defamation and Cybersquatting
    - subject: CYBER_SECURITY
    - unit: 1
+   - page_end: 12
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cyber Law: Defamation and
 Cybersquatting | Topics: Defamation in India, Liability for defamatory content,
@@ -1349,14 +1349,14 @@ content creators), Service providers (authorization liability), Defama
 --------------------------------------------------------------------------------
 [2] ID: CYBER_SECURITY_hand_unit1.pdf_p13-14
 Metadata:
-   - document_type: handwritten_notes
-   - title: Cyber Crimes
-   - source: hand_unit1.pdf
-   - page_start: 13
-   - unit: 1
-   - confidence: 0.9
-   - page_end: 14
    - subject: CYBER_SECURITY
+   - page_end: 14
+   - confidence: 0.9
+   - page_start: 13
+   - source: hand_unit1.pdf
+   - document_type: handwritten_notes
+   - unit: 1
+   - title: Cyber Crimes
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cyber Crimes | Topics: Cyber
 vandalism, IPR Crime, Online gambling, Cyber trafficking | Key Concepts: Cyber
@@ -1365,14 +1365,14 @@ profiles, IPR Crime involves stealing intellectual property without permi
 --------------------------------------------------------------------------------
 [3] ID: CYBER_SECURITY_hand_unit1.pdf_p15-16
 Metadata:
-   - document_type: handwritten_notes
-   - page_start: 15
-   - subject: CYBER_SECURITY
-   - page_end: 16
-   - confidence: 0.75
    - unit: 1
+   - confidence: 0.75
    - source: hand_unit1.pdf
    - title: Cybercrime Era: Survival mantra for Netizens
+   - page_end: 16
+   - subject: CYBER_SECURITY
+   - document_type: handwritten_notes
+   - page_start: 15
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cybercrime Era: Survival mantra for
 Netizens | Topics: Cyber warfare, Cyber terrorism, Netizens, 5 P Netizen mantra,
@@ -1381,14 +1381,14 @@ using computers and internet, Cyber terrorism involves using c
 --------------------------------------------------------------------------------
 [4] ID: CYBER_SECURITY_hand_unit1.pdf_p17-18
 Metadata:
-   - title: Social Engineering
    - page_start: 17
-   - source: hand_unit1.pdf
-   - document_type: handwritten_notes
    - page_end: 18
    - confidence: 0.85
-   - unit: 1
    - subject: CYBER_SECURITY
+   - unit: 1
+   - document_type: handwritten_notes
+   - source: hand_unit1.pdf
+   - title: Social Engineering
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Social Engineering | Topics: Hacking,
 Identity Theft, Cyber Stalking, Online Scams, Social Engineering | Key Concepts:
@@ -1397,14 +1397,14 @@ people to obtain information or perform some action, Social
 --------------------------------------------------------------------------------
 [5] ID: CYBER_SECURITY_hand_unit1.pdf_p19-20
 Metadata:
-   - source: hand_unit1.pdf
-   - subject: CYBER_SECURITY
    - title: Botnet: the fuel for CyberCrime
+   - subject: CYBER_SECURITY
+   - source: hand_unit1.pdf
+   - unit: 1
    - confidence: 0.9
+   - page_start: 19
    - page_end: 20
    - document_type: handwritten_notes
-   - unit: 1
-   - page_start: 19
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Botnet: the fuel for CyberCrime |
 Topics: Botnets, Cybercrime, Malware, Information Theft, Power and Control in
@@ -1413,14 +1413,14 @@ network of infected computers controlled by cybercriminals, Malware
 --------------------------------------------------------------------------------
 [6] ID: CYBER_SECURITY_hand_unit1.pdf_p1-2
 Metadata:
-   - subject: CYBER_SECURITY
-   - page_start: 1
    - page_end: 2
    - unit: 1
-   - document_type: handwritten_notes
    - title: Introduction to Cyber Crime
-   - source: hand_unit1.pdf
+   - page_start: 1
    - confidence: 0.85
+   - subject: CYBER_SECURITY
+   - source: hand_unit1.pdf
+   - document_type: handwritten_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Introduction to Cyber Crime | Topics:
 Definition of cyber crime, Types of cyber crime, Cyber security, CIA triad,
@@ -1429,14 +1429,14 @@ computer is tool or target, DoS (denial of service) attacks, CIA t
 --------------------------------------------------------------------------------
 [7] ID: CYBER_SECURITY_hand_unit1.pdf_p21-22
 Metadata:
-   - source: hand_unit1.pdf
-   - title: Malware Types and Attack Vectors
-   - page_end: 22
-   - subject: CYBER_SECURITY
-   - document_type: handwritten_notes
-   - unit: 1
    - confidence: 0.9
+   - source: hand_unit1.pdf
+   - document_type: handwritten_notes
    - page_start: 21
+   - subject: CYBER_SECURITY
+   - unit: 1
+   - page_end: 22
+   - title: Malware Types and Attack Vectors
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Malware Types and Attack Vectors |
 Topics: Types of Malware, Attack Vectors | Key Concepts: Malware: developed by
@@ -1445,14 +1445,14 @@ monitors user activity and steals secrets like passwords, Ransomware
 --------------------------------------------------------------------------------
 [8] ID: CYBER_SECURITY_hand_unit1.pdf_p23-24
 Metadata:
-   - source: hand_unit1.pdf
    - confidence: 0.8
-   - subject: CYBER_SECURITY
    - page_start: 23
-   - page_end: 24
    - title: Access Control
    - document_type: handwritten_notes
    - unit: 1
+   - source: hand_unit1.pdf
+   - page_end: 24
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Access Control | Topics: Access
 Control, Access Control Policies | Key Concepts: Access control analogy (special
@@ -1461,14 +1461,14 @@ Authorization, Non-Repudiation  Access Control:- Access control is l
 --------------------------------------------------------------------------------
 [9] ID: CYBER_SECURITY_hand_unit1.pdf_p3-4
 Metadata:
-   - unit: 1
-   - document_type: handwritten_notes
-   - title: Cyber Crime: Challenges and Prevention
-   - subject: CYBER_SECURITY
    - confidence: 0.75
-   - source: hand_unit1.pdf
+   - title: Cyber Crime: Challenges and Prevention
+   - unit: 1
    - page_end: 4
+   - source: hand_unit1.pdf
+   - subject: CYBER_SECURITY
    - page_start: 3
+   - document_type: handwritten_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cyber Crime: Challenges and
 Prevention | Topics: Cyber crime history, Challenges of cyber crime, Prevention
@@ -1477,14 +1477,14 @@ Strong password practices, Data encryption, Regular backups, Cyber cri
 --------------------------------------------------------------------------------
 [10] ID: CYBER_SECURITY_hand_unit1.pdf_p5-6
 Metadata:
-   - confidence: 0.9
-   - document_type: handwritten_notes
-   - source: hand_unit1.pdf
-   - subject: CYBER_SECURITY
    - page_end: 6
-   - unit: 1
+   - confidence: 0.9
+   - subject: CYBER_SECURITY
    - page_start: 5
    - title: Information Security
+   - unit: 1
+   - source: hand_unit1.pdf
+   - document_type: handwritten_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Information Security | Topics: Origin
 of cybercrime, Classification of cyber crime, CIA triad, Cybercrime examples |
@@ -1493,14 +1493,14 @@ availability), Akash Arora (1999) Yahoo case, Types of cybercri
 --------------------------------------------------------------------------------
 [11] ID: CYBER_SECURITY_hand_unit1.pdf_p7-8
 Metadata:
-   - unit: 1
-   - source: hand_unit1.pdf
-   - confidence: 0.85
-   - page_end: 8
-   - subject: CYBER_SECURITY
    - title: Classification of Cybercrime - Against individual
+   - subject: CYBER_SECURITY
+   - source: hand_unit1.pdf
+   - page_end: 8
+   - confidence: 0.85
    - document_type: handwritten_notes
    - page_start: 7
+   - unit: 1
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Classification of Cybercrime -
 Against individual | Topics: Cyber stalking, Spoofing, Stalking by Email,
@@ -1509,14 +1509,14 @@ definition: Stalking/harassing behavior using internet/IT, Three methods of cy
 --------------------------------------------------------------------------------
 [12] ID: CYBER_SECURITY_hand_unit1.pdf_p9-10
 Metadata:
-   - document_type: handwritten_notes
    - page_end: 10
-   - subject: CYBER_SECURITY
-   - title: Cyber Security Concepts: Phishing, Hacking, and Defamation
+   - document_type: handwritten_notes
    - confidence: 0.85
-   - unit: 1
+   - title: Cyber Security Concepts: Phishing, Hacking, and Defamation
    - page_start: 9
+   - unit: 1
    - source: hand_unit1.pdf
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cyber Security Concepts: Phishing,
 Hacking, and Defamation | Topics: Phishing, Hacking, Types of Hackers, Cyber
@@ -1525,14 +1525,14 @@ attack to obtain sensitive data, Spoofing: fake payment screenshots, T
 --------------------------------------------------------------------------------
 [13] ID: CYBER_SECURITY_unit1.pdf_p11-12
 Metadata:
-   - page_start: 11
    - confidence: 0.95
-   - source: unit1.pdf
    - subject: CYBER_SECURITY
-   - page_end: 12
-   - title: Cybercrime Against Organization and Society
    - document_type: printed_notes
    - unit: 1
+   - title: Cybercrime Against Organization and Society
+   - page_start: 11
+   - source: unit1.pdf
+   - page_end: 12
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cybercrime Against Organization and
 Society | Topics: E-Mail bombing, Salami Attack, Logic Bomb, Trojan Horse, Data
@@ -1542,13 +1542,13 @@ refers to sending large emails to crash victim's account/server
 [14] ID: CYBER_SECURITY_unit1.pdf_p13-14
 Metadata:
    - subject: CYBER_SECURITY
-   - title: Information Security
-   - confidence: 0.95
-   - document_type: printed_notes
-   - source: unit1.pdf
    - page_start: 13
+   - confidence: 0.95
    - page_end: 14
    - unit: 1
+   - source: unit1.pdf
+   - title: Information Security
+   - document_type: printed_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Information Security | Topics: Origin
 of cybercrime, CIA Triad, Confidentiality | Key Concepts: Definition of
@@ -1557,14 +1557,14 @@ Integrity, Availability), Confidentiality techniques (encryption, a
 --------------------------------------------------------------------------------
 [15] ID: CYBER_SECURITY_unit1.pdf_p15-16
 Metadata:
-   - title: The CIA Triad and Types of Information Security
-   - unit: 1
-   - document_type: printed_notes
-   - subject: CYBER_SECURITY
    - page_start: 15
-   - source: unit1.pdf
    - confidence: 0.95
    - page_end: 16
+   - document_type: printed_notes
+   - title: The CIA Triad and Types of Information Security
+   - unit: 1
+   - subject: CYBER_SECURITY
+   - source: unit1.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: The CIA Triad and Types of
 Information Security | Topics: CIA Triad, Confidentiality, Integrity,
@@ -1574,14 +1574,14 @@ digit
 --------------------------------------------------------------------------------
 [16] ID: CYBER_SECURITY_unit1.pdf_p17-18
 Metadata:
-   - page_start: 17
-   - subject: CYBER_SECURITY
-   - source: unit1.pdf
    - document_type: printed_notes
-   - page_end: 18
-   - confidence: 0.95
    - title: Cybercriminals
    - unit: 1
+   - confidence: 0.95
+   - subject: CYBER_SECURITY
+   - page_end: 18
+   - source: unit1.pdf
+   - page_start: 17
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cybercriminals | Topics: Cloud
 Security, Information Security Governance, Cryptography, Physical Security,
@@ -1590,14 +1590,14 @@ Securing data, applications, and services in the cloud, Policies, procedure
 --------------------------------------------------------------------------------
 [17] ID: CYBER_SECURITY_unit1.pdf_p19-20
 Metadata:
-   - page_end: 20
+   - source: unit1.pdf
+   - document_type: printed_notes
    - subject: CYBER_SECURITY
+   - title: Types of cyber criminals
    - unit: 1
    - page_start: 19
-   - title: Types of cyber criminals
-   - document_type: printed_notes
+   - page_end: 20
    - confidence: 0.95
-   - source: unit1.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Types of cyber criminals | Topics:
 Cybercriminals seeking recognition, Cybercriminals not seeking recognition,
@@ -1606,14 +1606,14 @@ Politically Motivated Hackers, Terrorist Organizations, Psychological P
 --------------------------------------------------------------------------------
 [18] ID: CYBER_SECURITY_unit1.pdf_p1-2
 Metadata:
-   - document_type: syllabus
-   - unit: 1
-   - page_start: 1
+   - source: unit1.pdf
    - title: Unit-1 Introduction To Cyber Crime
+   - page_start: 1
    - page_end: 2
    - confidence: 0.95
-   - source: unit1.pdf
+   - document_type: syllabus
    - subject: CYBER_SECURITY
+   - unit: 1
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Unit-1 Introduction To Cyber Crime |
 Topics: Cybercrime- Definition and Origins of the word Cybercrime and
@@ -1622,14 +1622,14 @@ Global Perspective on Cybercrimes, Cybercrime Era: Survival Mantra fo
 --------------------------------------------------------------------------------
 [19] ID: CYBER_SECURITY_unit1.pdf_p21-22
 Metadata:
-   - page_end: 22
    - page_start: 21
-   - source: unit1.pdf
-   - subject: CYBER_SECURITY
-   - title: A Global Perspective On Cybercrime
-   - confidence: 0.95
    - unit: 1
+   - subject: CYBER_SECURITY
+   - confidence: 0.95
+   - page_end: 22
+   - title: A Global Perspective On Cybercrime
    - document_type: printed_notes
+   - source: unit1.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: A Global Perspective On Cybercrime |
 Topics: Cybercriminals who are insiders, Growing Threat, Economic Impact,
@@ -1638,14 +1638,14 @@ Challenges, Future Trends, Preventative Measures | Key Concepts: Disg
 --------------------------------------------------------------------------------
 [20] ID: CYBER_SECURITY_unit1.pdf_p25-26
 Metadata:
-   - source: unit1.pdf
-   - unit: 1
-   - subject: CYBER_SECURITY
    - page_start: 25
+   - page_end: 26
+   - source: unit1.pdf
    - confidence: 0.95
    - document_type: printed_notes
+   - unit: 1
+   - subject: CYBER_SECURITY
    - title: Cyber Offense
-   - page_end: 26
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cyber Offense | Topics: Cyber Offense
 Definitions, Doxing, Cyber Attack Life Cycle, Reconnaissance, Weaponization,
@@ -1654,14 +1654,14 @@ commit harm, Cybercrime as a subset of cyber offenses, Doxing:
 --------------------------------------------------------------------------------
 [21] ID: CYBER_SECURITY_unit1.pdf_p27-28
 Metadata:
-   - document_type: printed_notes
-   - source: unit1.pdf
-   - page_end: 28
-   - page_start: 27
-   - unit: 1
-   - confidence: 0.95
-   - title: Stages of Cyber Attack Lifecycle
    - subject: CYBER_SECURITY
+   - confidence: 0.95
+   - page_start: 27
+   - page_end: 28
+   - document_type: printed_notes
+   - title: Stages of Cyber Attack Lifecycle
+   - unit: 1
+   - source: unit1.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Stages of Cyber Attack Lifecycle |
 Topics: Reconnaissance, Weaponization, Delivery, Exploitation, Installation,
@@ -1670,14 +1670,14 @@ vulnerability to gain access, Installing malicious software for acce
 --------------------------------------------------------------------------------
 [22] ID: CYBER_SECURITY_unit1.pdf_p31-32
 Metadata:
-   - unit: 1
+   - title: Cyber Stalking
    - confidence: 0.95
    - page_start: 31
    - page_end: 32
-   - source: unit1.pdf
    - subject: CYBER_SECURITY
+   - source: unit1.pdf
+   - unit: 1
    - document_type: printed_notes
-   - title: Cyber Stalking
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cyber Stalking | Topics: Definition
 of Cyber Stalking, Methods of Cyber Stalking, Key Characteristics of Cyber
@@ -1686,14 +1686,14 @@ digital methods, Social Media for unwanted messages and tracking,
 --------------------------------------------------------------------------------
 [23] ID: CYBER_SECURITY_unit1.pdf_p33-34
 Metadata:
-   - page_end: 34
-   - page_start: 33
-   - subject: CYBER_SECURITY
-   - unit: 1
-   - title: Cybercafe
    - confidence: 0.95
-   - source: unit1.pdf
+   - page_start: 33
    - document_type: printed_notes
+   - subject: CYBER_SECURITY
+   - title: Cybercafe
+   - unit: 1
+   - source: unit1.pdf
+   - page_end: 34
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cybercafe | Topics: Cybercafe
 definition, Location, Services, Access and Usage, Additional Services, Reasons
@@ -1703,12 +1703,12 @@ Attacks, Botnet Operations | Key Concepts: Cybercafe: a place where
 [24] ID: CYBER_SECURITY_unit1.pdf_p35-36
 Metadata:
    - confidence: 0.95
-   - subject: CYBER_SECURITY
-   - page_end: 36
-   - source: unit1.pdf
-   - title: Cybercrime Types and Preventive Measures
    - unit: 1
+   - source: unit1.pdf
+   - page_end: 36
+   - subject: CYBER_SECURITY
    - document_type: printed_notes
+   - title: Cybercrime Types and Preventive Measures
    - page_start: 35
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cybercrime Types and Preventive
@@ -1718,14 +1718,14 @@ Piracy, Malware Distribution, Cryptocurrency Transactions, Financial Fraud
 --------------------------------------------------------------------------------
 [25] ID: CYBER_SECURITY_unit1.pdf_p37-38
 Metadata:
-   - source: unit1.pdf
-   - page_end: 38
-   - unit: 1
    - subject: CYBER_SECURITY
-   - title: Botnet
-   - document_type: printed_notes
    - confidence: 0.95
+   - document_type: printed_notes
+   - source: unit1.pdf
    - page_start: 37
+   - unit: 1
+   - page_end: 38
+   - title: Botnet
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Botnet | Topics: How Botnets Work,
 Infection, Communication, Execution, Anonymity and Scale, Distributed Power,
@@ -1734,13 +1734,13 @@ bots/zombies, botmaster, command-and-control (C&C) server, DDoS attacks, phi
 --------------------------------------------------------------------------------
 [26] ID: CYBER_SECURITY_unit1.pdf_p39-40
 Metadata:
+   - subject: CYBER_SECURITY
    - document_type: printed_notes
-   - source: unit1.pdf
-   - page_start: 39
-   - title: Botnet Uses in Cybercrime and Attack Vectors
    - confidence: 0.95
    - unit: 1
-   - subject: CYBER_SECURITY
+   - title: Botnet Uses in Cybercrime and Attack Vectors
+   - source: unit1.pdf
+   - page_start: 39
    - page_end: 40
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Botnet Uses in Cybercrime and Attack
@@ -1750,14 +1750,14 @@ as paths for unauthorized access, Phishing as an attack ve
 --------------------------------------------------------------------------------
 [27] ID: CYBER_SECURITY_unit1.pdf_p3-4
 Metadata:
+   - unit: 1
    - document_type: printed_notes
+   - source: unit1.pdf
+   - confidence: 0.95
+   - title: Cyber Security and Cybercrime
+   - page_start: 3
    - page_end: 4
    - subject: CYBER_SECURITY
-   - unit: 1
-   - source: unit1.pdf
-   - page_start: 3
-   - title: Cyber Security and Cybercrime
-   - confidence: 0.95
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cyber Security and Cybercrime |
 Topics: Cyber Security, Cybercrime, Definitions of Cyber Security, Need of Cyber
@@ -1766,14 +1766,14 @@ is the practice of protecting systems, networks and program from
 --------------------------------------------------------------------------------
 [28] ID: CYBER_SECURITY_unit1.pdf_p41-42
 Metadata:
-   - page_start: 41
-   - document_type: printed_notes
    - title: Common Attack Vectors and Attack Surface
+   - page_end: 42
+   - page_start: 41
    - confidence: 0.95
+   - subject: CYBER_SECURITY
+   - document_type: printed_notes
    - unit: 1
    - source: unit1.pdf
-   - subject: CYBER_SECURITY
-   - page_end: 42
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Common Attack Vectors and Attack
 Surface | Topics: Common Attack Vectors, Phishing, Malware, Social Engineering,
@@ -1782,14 +1782,14 @@ Service (DDoS), Attack Vector vs Attack Surface | Key Concepts: Attac
 --------------------------------------------------------------------------------
 [29] ID: CYBER_SECURITY_unit1.pdf_p5-6
 Metadata:
-   - page_end: 6
-   - subject: CYBER_SECURITY
-   - source: unit1.pdf
    - title: Cybercrime
+   - page_end: 6
    - confidence: 0.95
+   - source: unit1.pdf
+   - unit: 1
    - document_type: printed_notes
    - page_start: 5
-   - unit: 1
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cybercrime | Topics: Types of
 cybercrime attacks, Techno-crime, Techno-vandalism, Differences between
@@ -1798,14 +1798,14 @@ against systems for financial gain, theft of information, or causing harm,
 --------------------------------------------------------------------------------
 [30] ID: CYBER_SECURITY_unit1.pdf_p7-8
 Metadata:
-   - unit: 1
-   - title: Classification Of Cyber Crime
-   - source: unit1.pdf
-   - document_type: printed_notes
-   - page_end: 8
    - page_start: 7
+   - page_end: 8
+   - title: Classification Of Cyber Crime
    - confidence: 0.95
+   - document_type: printed_notes
+   - source: unit1.pdf
    - subject: CYBER_SECURITY
+   - unit: 1
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Classification Of Cyber Crime |
 Topics: Cybercrime Against Individual, Cybercrime Against Property, Cybercrime
@@ -1814,14 +1814,14 @@ cybercrime against individuals, Definition of cybercrime against pr
 --------------------------------------------------------------------------------
 [31] ID: CYBER_SECURITY_unit1.pdf_p9-10
 Metadata:
+   - page_start: 9
+   - source: unit1.pdf
+   - title: Cybercrime
+   - subject: CYBER_SECURITY
+   - page_end: 10
    - document_type: printed_notes
    - confidence: 0.95
-   - page_start: 9
-   - subject: CYBER_SECURITY
    - unit: 1
-   - title: Cybercrime
-   - page_end: 10
-   - source: unit1.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 1 | Title: Cybercrime | Topics: E-Mail Spoofing,
 Spamming, Cyber Defamation, Cyber stalking, Credit Card Frauds, Intellectual
@@ -1830,14 +1830,14 @@ spoofed E-Mail is one that appears to originate from one source b
 --------------------------------------------------------------------------------
 [32] ID: CYBER_SECURITY_hand_unit2.pdf_p11-12
 Metadata:
-   - title: Credit Card Fraud Prevention and Cyberbullying
-   - source: hand_unit2.pdf
    - subject: CYBER_SECURITY
-   - confidence: 0.8
    - unit: 2
    - page_end: 12
-   - document_type: handwritten_notes
+   - title: Credit Card Fraud Prevention and Cyberbullying
+   - source: hand_unit2.pdf
+   - confidence: 0.8
    - page_start: 11
+   - document_type: handwritten_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Credit Card Fraud Prevention and
 Cyberbullying | Topics: Credit Card Fraud Prevention, Cyberbullying, Cyber
@@ -1847,13 +1847,13 @@ PIN/Password, Secure Wi-Fi, Verify website authenticity, Credit Card l
 [33] ID: CYBER_SECURITY_hand_unit2.pdf_p13-14
 Metadata:
    - confidence: 0.85
-   - unit: 2
-   - page_start: 13
-   - page_end: 14
-   - document_type: handwritten_notes
-   - source: hand_unit2.pdf
    - subject: CYBER_SECURITY
+   - page_start: 13
+   - document_type: handwritten_notes
+   - page_end: 14
+   - unit: 2
    - title: Security Challenges Posed by Mobile Devices
+   - source: hand_unit2.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Security Challenges Posed by Mobile
 Devices | Topics: Lost or stolen devices, Unsecured WiFi Networks, Malware
@@ -1862,14 +1862,14 @@ Software and Patching | Key Concepts: Mobile devices being lost or
 --------------------------------------------------------------------------------
 [34] ID: CYBER_SECURITY_hand_unit2.pdf_p15-16
 Metadata:
+   - confidence: 0.8
    - page_end: 16
-   - unit: 2
+   - document_type: handwritten_notes
+   - source: hand_unit2.pdf
+   - title: Mobile Device Security and Registry Settings Handwritten Notes
    - subject: CYBER_SECURITY
    - page_start: 15
-   - title: Mobile Device Security and Registry Settings Handwritten Notes
-   - source: hand_unit2.pdf
-   - confidence: 0.8
-   - document_type: handwritten_notes
+   - unit: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Mobile Device Security and Registry
 Settings Handwritten Notes | Topics: Security challenges in mobile devices,
@@ -1878,14 +1878,14 @@ macrochallenges, Registry as hidden database, registry editor  Q.7 What is
 --------------------------------------------------------------------------------
 [35] ID: CYBER_SECURITY_hand_unit2.pdf_p17-18
 Metadata:
-   - subject: CYBER_SECURITY
    - source: hand_unit2.pdf
-   - confidence: 0.85
-   - unit: 2
    - page_start: 17
    - title: Authentication Security and System Settings
    - document_type: handwritten_notes
+   - unit: 2
+   - confidence: 0.85
    - page_end: 18
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Authentication Security and System
 Settings | Topics: Settings and customization, Backup and restore,
@@ -1895,13 +1895,13 @@ Settings tell the computer how to behave, Customization requires caution,
 [36] ID: CYBER_SECURITY_hand_unit2.pdf_p19-20
 Metadata:
    - source: hand_unit2.pdf
-   - confidence: 0.8
-   - title: Cryptography Security for Mobile Devices
    - page_start: 19
-   - unit: 2
-   - subject: CYBER_SECURITY
    - page_end: 20
    - document_type: handwritten_notes
+   - subject: CYBER_SECURITY
+   - confidence: 0.8
+   - title: Cryptography Security for Mobile Devices
+   - unit: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Cryptography Security for Mobile
 Devices | Topics: Mobile Device Attacks, Cryptography Security, Secure
@@ -1910,14 +1910,14 @@ Key Concepts: Push attack, Pull attack, Crash attack, End-to-End Encryption
 --------------------------------------------------------------------------------
 [37] ID: CYBER_SECURITY_hand_unit2.pdf_p1-2
 Metadata:
+   - document_type: handwritten_notes
    - subject: CYBER_SECURITY
-   - page_end: 2
+   - title: Cyber Crime: Mobile and Wireless Devices
+   - confidence: 0.8
    - page_start: 1
    - unit: 2
-   - document_type: handwritten_notes
-   - confidence: 0.8
    - source: hand_unit2.pdf
-   - title: Cyber Crime: Mobile and Wireless Devices
+   - page_end: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Cyber Crime: Mobile and Wireless
 Devices | Topics: Rising importance of mobile and wireless devices, Portable
@@ -1926,14 +1926,14 @@ computers, Tablet PCs, Personal Digital Assistants (PDAs), Ultra Mobile PCs
 --------------------------------------------------------------------------------
 [38] ID: CYBER_SECURITY_hand_unit2.pdf_p21-22
 Metadata:
-   - source: hand_unit2.pdf
-   - subject: CYBER_SECURITY
    - page_end: 22
-   - unit: 2
+   - title: Attacks Against Mobile/Cell Phones
    - confidence: 0.9
    - document_type: handwritten_notes
+   - source: hand_unit2.pdf
+   - unit: 2
    - page_start: 21
-   - title: Attacks Against Mobile/Cell Phones
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Attacks Against Mobile/Cell Phones |
 Topics: Mobile Phone Theft, Mobile Viruses, Mishing, Vishing, Smishing, Hacking
@@ -1942,14 +1942,14 @@ phone by an unauthorized person allowing access to personal data
 --------------------------------------------------------------------------------
 [39] ID: CYBER_SECURITY_hand_unit2.pdf_p23-24
 Metadata:
-   - unit: 2
    - page_end: 24
-   - page_start: 23
-   - confidence: 0.85
-   - subject: CYBER_SECURITY
-   - document_type: handwritten_notes
-   - source: hand_unit2.pdf
    - title: Security Implications for organizations related to mobile devices
+   - confidence: 0.85
+   - source: hand_unit2.pdf
+   - page_start: 23
+   - unit: 2
+   - document_type: handwritten_notes
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Security Implications for
 organizations related to mobile devices | Topics: Managing diversity of mobile
@@ -1958,14 +1958,14 @@ Protecting data on lost devices, Educating laptop users | Key Concepts: S
 --------------------------------------------------------------------------------
 [40] ID: CYBER_SECURITY_hand_unit2.pdf_p25-26
 Metadata:
-   - page_end: 26
-   - confidence: 0.85
    - document_type: handwritten_notes
    - page_start: 25
-   - subject: CYBER_SECURITY
-   - source: hand_unit2.pdf
    - title: Safeguarding Information Systems in Mobile Computing Paradigm
    - unit: 2
+   - source: hand_unit2.pdf
+   - subject: CYBER_SECURITY
+   - confidence: 0.85
+   - page_end: 26
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Safeguarding Information Systems in
 Mobile Computing Paradigm | Topics: Encrypting Organizational Database,
@@ -1974,14 +1974,14 @@ encryption, Rijindael algorithm, AES (block encryption algorithm), Mobile Devi
 --------------------------------------------------------------------------------
 [41] ID: CYBER_SECURITY_hand_unit2.pdf_p27-28
 Metadata:
-   - document_type: handwritten_notes
-   - subject: CYBER_SECURITY
-   - unit: 2
-   - confidence: 0.85
-   - title: Mobile Device Security Policies
    - page_end: 28
+   - title: Mobile Device Security Policies
    - source: hand_unit2.pdf
    - page_start: 27
+   - unit: 2
+   - subject: CYBER_SECURITY
+   - document_type: handwritten_notes
+   - confidence: 0.85
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Mobile Device Security Policies |
 Topics: Mobile computing device security policies, Importance of security
@@ -1990,14 +1990,14 @@ security | Key Concepts: Strong authentication methods, Regular OS a
 --------------------------------------------------------------------------------
 [42] ID: CYBER_SECURITY_hand_unit2.pdf_p29-30
 Metadata:
-   - page_end: 30
-   - unit: 2
-   - document_type: handwritten_notes
-   - confidence: 0.88
-   - page_start: 29
-   - source: hand_unit2.pdf
    - title: Creating Policies for Mobile Devices
+   - confidence: 0.88
+   - document_type: handwritten_notes
+   - source: hand_unit2.pdf
    - subject: CYBER_SECURITY
+   - unit: 2
+   - page_start: 29
+   - page_end: 30
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Creating Policies for Mobile Devices
 | Topics: Mobile device security, Policy creation, Needs assessment,
@@ -2006,14 +2006,14 @@ Collaborative development, Legal compliance, Security standards, Risk management
 --------------------------------------------------------------------------------
 [43] ID: CYBER_SECURITY_hand_unit2.pdf_p31-31
 Metadata:
-   - subject: CYBER_SECURITY
    - page_end: 31
-   - unit: 2
+   - subject: CYBER_SECURITY
    - page_start: 31
-   - source: hand_unit2.pdf
+   - confidence: 0.75
+   - unit: 2
    - title: Employee Training and Awareness
    - document_type: handwritten_notes
-   - confidence: 0.75
+   - source: hand_unit2.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Employee Training and Awareness |
 Topics: Employee training integration, Policy development process, Resource
@@ -2022,14 +2022,14 @@ policy development, Create resources for employee education on poli
 --------------------------------------------------------------------------------
 [44] ID: CYBER_SECURITY_hand_unit2.pdf_p3-4
 Metadata:
-   - source: hand_unit2.pdf
-   - page_end: 4
-   - page_start: 3
-   - unit: 2
-   - subject: CYBER_SECURITY
-   - document_type: handwritten_notes
    - title: Wireless Computing and Mobility Concepts
+   - subject: CYBER_SECURITY
+   - page_start: 3
+   - page_end: 4
+   - unit: 2
+   - source: hand_unit2.pdf
    - confidence: 0.9
+   - document_type: handwritten_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Wireless Computing and Mobility
 Concepts | Topics: Wireless Computing, Hand-Held Devices, Mobility Types,
@@ -2038,14 +2038,14 @@ physical cables, uses WiFi/Bluetooth), Mobility definition (ability to mov
 --------------------------------------------------------------------------------
 [45] ID: CYBER_SECURITY_hand_unit2.pdf_p5-6
 Metadata:
-   - title: Recent Trends in Mobility
-   - page_start: 5
-   - subject: CYBER_SECURITY
-   - unit: 2
-   - confidence: 0.9
    - source: hand_unit2.pdf
+   - subject: CYBER_SECURITY
    - page_end: 6
+   - unit: 2
+   - page_start: 5
+   - confidence: 0.9
    - document_type: handwritten_notes
+   - title: Recent Trends in Mobility
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Recent Trends in Mobility | Topics:
 Mobile Devices, Internet of Things (IoT) Devices, Cloud Services, 5G Technology,
@@ -2054,14 +2054,14 @@ storage, entry points for attackers, data privacy concerns, 5G
 --------------------------------------------------------------------------------
 [46] ID: CYBER_SECURITY_hand_unit2.pdf_p7-8
 Metadata:
+   - confidence: 0.85
    - unit: 2
-   - document_type: handwritten_notes
    - page_start: 7
+   - document_type: handwritten_notes
+   - subject: CYBER_SECURITY
    - title: Types of Mobility and Cyber Crime
    - source: hand_unit2.pdf
-   - confidence: 0.85
    - page_end: 8
-   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Types of Mobility and Cyber Crime |
 Topics: Types of Mobility, Cyber Crime, Mobile Network Security | Key Concepts:
@@ -2070,14 +2070,14 @@ viruses and worms, Denial of Service (DoS) Attack, Man in the midd
 --------------------------------------------------------------------------------
 [47] ID: CYBER_SECURITY_hand_unit2.pdf_p9-10
 Metadata:
-   - source: hand_unit2.pdf
    - title: Security Threats in Mobile and Wireless Computing
    - unit: 2
+   - subject: CYBER_SECURITY
+   - confidence: 0.85
+   - page_end: 10
+   - source: hand_unit2.pdf
    - document_type: handwritten_notes
    - page_start: 9
-   - subject: CYBER_SECURITY
-   - page_end: 10
-   - confidence: 0.85
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Security Threats in Mobile and
 Wireless Computing | Topics: Overbilling Attack, Interception of Communication,
@@ -2086,14 +2086,14 @@ Apps | Key Concepts: Overbilling Attack: when attackers manipulate r
 --------------------------------------------------------------------------------
 [48] ID: CYBER_SECURITY_unit2.pdf_p13-14
 Metadata:
-   - confidence: 0.95
-   - unit: 2
-   - page_end: 14
-   - source: unit2.pdf
-   - title: Credit Card Frauds in Mobile and Wireless Computing Era
-   - page_start: 13
    - document_type: printed_notes
+   - page_end: 14
+   - title: Credit Card Frauds in Mobile and Wireless Computing Era
+   - source: unit2.pdf
+   - confidence: 0.95
    - subject: CYBER_SECURITY
+   - page_start: 13
+   - unit: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Credit Card Frauds in Mobile and
 Wireless Computing Era | Topics: Credit card fraud trends in mobile computing,
@@ -2102,14 +2102,14 @@ credit card fraud, Personal Identification Number (PIN) security |
 --------------------------------------------------------------------------------
 [49] ID: CYBER_SECURITY_unit2.pdf_p15-16
 Metadata:
-   - document_type: printed_notes
    - page_end: 16
+   - page_start: 15
    - subject: CYBER_SECURITY
-   - confidence: 0.95
+   - document_type: printed_notes
    - unit: 2
    - title: Questions-Answers
    - source: unit2.pdf
-   - page_start: 15
+   - confidence: 0.95
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Questions-Answers | Topics: Credit
 Card Security Best Practices, Credit Card Fraud Types, Traditional Fraud
@@ -2119,13 +2119,13 @@ Triangulation fraud, Credit card generators  Questions-Answers  B. Don
 [50] ID: CYBER_SECURITY_unit2.pdf_p17-18
 Metadata:
    - document_type: printed_notes
-   - confidence: 0.95
-   - source: unit2.pdf
-   - page_start: 17
-   - subject: CYBER_SECURITY
-   - page_end: 18
    - unit: 2
+   - page_start: 17
+   - page_end: 18
    - title: Mobile Security Challenges Questions-Answers
+   - source: unit2.pdf
+   - confidence: 0.95
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Mobile Security Challenges Questions-
 Answers | Topics: Security challenges posed by mobile devices, Technical
@@ -2134,14 +2134,14 @@ physically controlled environment, Remote access to protected environments,
 --------------------------------------------------------------------------------
 [51] ID: CYBER_SECURITY_unit2.pdf_p19-20
 Metadata:
-   - unit: 2
-   - subject: CYBER_SECURITY
-   - title: Mobile Security Concepts
-   - confidence: 0.95
-   - page_start: 19
-   - page_end: 20
-   - source: unit2.pdf
    - document_type: printed_notes
+   - page_end: 20
+   - page_start: 19
+   - subject: CYBER_SECURITY
+   - source: unit2.pdf
+   - confidence: 0.95
+   - title: Mobile Security Concepts
+   - unit: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Mobile Security Concepts | Topics:
 Remote Access Server (RAS) security, Media player control security, Networking
@@ -2150,13 +2150,13 @@ Concepts: RAS systems enabling remote access to corporate networ
 --------------------------------------------------------------------------------
 [52] ID: CYBER_SECURITY_unit2.pdf_p1-2
 Metadata:
-   - page_start: 1
-   - page_end: 2
-   - source: unit2.pdf
    - document_type: printed_notes
+   - source: unit2.pdf
+   - page_start: 1
+   - subject: CYBER_SECURITY
    - confidence: 0.95
    - unit: 2
-   - subject: CYBER_SECURITY
+   - page_end: 2
    - title: Cyber Security
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Cyber Security | Topics: Mobile and
@@ -2166,13 +2166,13 @@ Security Challenges Posed by Mobile Devices, Registry Settings for
 --------------------------------------------------------------------------------
 [53] ID: CYBER_SECURITY_unit2.pdf_p23-24
 Metadata:
-   - title: Questions-Answers on Cyber Security Threats and Mobile Device Security
+   - document_type: printed_notes
+   - confidence: 0.95
    - source: unit2.pdf
    - subject: CYBER_SECURITY
-   - unit: 2
-   - confidence: 0.95
    - page_end: 24
-   - document_type: printed_notes
+   - title: Questions-Answers on Cyber Security Threats and Mobile Device Security
+   - unit: 2
    - page_start: 23
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Questions-Answers on Cyber Security
@@ -2182,14 +2182,14 @@ organizations | Key Concepts: Definition and risks of vishing, Def
 --------------------------------------------------------------------------------
 [54] ID: CYBER_SECURITY_unit2.pdf_p27-28
 Metadata:
-   - document_type: printed_notes
-   - page_end: 28
-   - title: Security Policies for Mobile Computing Devices
-   - confidence: 0.95
    - source: unit2.pdf
+   - page_end: 28
+   - document_type: printed_notes
    - unit: 2
-   - subject: CYBER_SECURITY
    - page_start: 27
+   - confidence: 0.95
+   - subject: CYBER_SECURITY
+   - title: Security Policies for Mobile Computing Devices
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Security Policies for Mobile
 Computing Devices | Topics: encryption key management, mobile device security
@@ -2198,10 +2198,10 @@ controlled self-destruct policy, case-sensitive keys, data protection, vi
 --------------------------------------------------------------------------------
 [55] ID: CYBER_SECURITY_unit2.pdf_p29-30
 Metadata:
+   - page_end: 30
    - source: unit2.pdf
    - title: Questions-Answers
    - subject: CYBER_SECURITY
-   - page_end: 30
    - page_start: 29
    - confidence: 0.95
    - document_type: printed_notes
@@ -2214,14 +2214,14 @@ safe browsing practices, Security policies educate employees
 --------------------------------------------------------------------------------
 [56] ID: CYBER_SECURITY_unit2.pdf_p5-6
 Metadata:
-   - page_start: 5
-   - source: unit2.pdf
-   - title: Questions-Answers
-   - page_end: 6
-   - unit: 2
-   - subject: CYBER_SECURITY
-   - confidence: 0.95
    - document_type: printed_notes
+   - page_end: 6
+   - confidence: 0.95
+   - unit: 2
+   - title: Questions-Answers
+   - page_start: 5
+   - subject: CYBER_SECURITY
+   - source: unit2.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Questions-Answers | Topics:
 Proliferation of mobile and wireless devices, Mobile computing, Wireless
@@ -2230,14 +2230,14 @@ and 5G networks, Mobile computing, Wireless computing, Hand-held devices, P
 --------------------------------------------------------------------------------
 [57] ID: CYBER_SECURITY_unit2.pdf_p9-10
 Metadata:
-   - subject: CYBER_SECURITY
+   - page_end: 10
+   - unit: 2
    - document_type: printed_notes
    - source: unit2.pdf
-   - unit: 2
-   - page_start: 9
    - title: Questions-Answers on Mobility Concepts
-   - page_end: 10
+   - page_start: 9
    - confidence: 0.95
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 2 | Title: Questions-Answers on Mobility
 Concepts | Topics: Handoff mechanisms, Quality of Service (QoS), Session
@@ -2246,14 +2246,14 @@ Cloud-based solutions | Key Concepts: Handoff mechanisms definition and impo
 --------------------------------------------------------------------------------
 [58] ID: CYBER_SECURITY_hand_unit3.pdf_p11-12
 Metadata:
-   - subject: CYBER_SECURITY
-   - page_start: 11
-   - unit: 3
    - source: hand_unit3.pdf
+   - subject: CYBER_SECURITY
+   - unit: 3
    - confidence: 0.75
+   - page_end: 12
+   - page_start: 11
    - document_type: handwritten_notes
    - title: Backdoors and Steganography
-   - page_end: 12
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Backdoors and Steganography | Topics:
 Backdoors, Steganography, Cryptography | Key Concepts: Backdoors as hidden
@@ -2262,14 +2262,14 @@ malicious use, Steganography as embedding hidden messages in car
 --------------------------------------------------------------------------------
 [59] ID: CYBER_SECURITY_hand_unit3.pdf_p13-14
 Metadata:
-   - confidence: 0.85
-   - subject: CYBER_SECURITY
-   - source: hand_unit3.pdf
-   - document_type: handwritten_notes
-   - unit: 3
    - page_start: 13
+   - unit: 3
+   - confidence: 0.85
    - page_end: 14
+   - subject: CYBER_SECURITY
    - title: Denial of Service (DoS)
+   - document_type: handwritten_notes
+   - source: hand_unit3.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Denial of Service (DoS) | Topics:
 Denial of Service attacks, DoS attack mechanisms, Network security, Attack
@@ -2278,14 +2278,14 @@ inaccessible, Attackers may demand money for restoring service, DoS a
 --------------------------------------------------------------------------------
 [60] ID: CYBER_SECURITY_hand_unit3.pdf_p15-16
 Metadata:
+   - subject: CYBER_SECURITY
+   - document_type: handwritten_notes
    - title: Distributed Denial of Service (DDoS) and Comparison with DoS
-   - source: hand_unit3.pdf
    - page_start: 15
+   - confidence: 0.85
    - unit: 3
    - page_end: 16
-   - confidence: 0.85
-   - document_type: handwritten_notes
-   - subject: CYBER_SECURITY
+   - source: hand_unit3.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Distributed Denial of Service (DDoS)
 and Comparison with DoS | Topics: DDoS attacks, DoS vs DDoS comparison, Botnets,
@@ -2295,12 +2295,12 @@ Denial of Service (DoS), Overwhelming server capacity, Traff
 [61] ID: CYBER_SECURITY_hand_unit3.pdf_p17-18
 Metadata:
    - unit: 3
-   - confidence: 0.85
-   - page_start: 17
-   - subject: CYBER_SECURITY
    - source: hand_unit3.pdf
    - page_end: 18
    - title: Classification of DoS and SQL Injection
+   - confidence: 0.85
+   - page_start: 17
+   - subject: CYBER_SECURITY
    - document_type: handwritten_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Classification of DoS and SQL
@@ -2310,14 +2310,14 @@ Unintentional DOS Attack, Flood Attack, Ping of Death attack, SYN Attack, Te
 --------------------------------------------------------------------------------
 [62] ID: CYBER_SECURITY_hand_unit3.pdf_p19-20
 Metadata:
-   - page_start: 19
-   - subject: CYBER_SECURITY
-   - document_type: handwritten_notes
-   - page_end: 20
-   - confidence: 0.82
-   - source: hand_unit3.pdf
    - unit: 3
    - title: SQL Injection and Buffer Overflow
+   - confidence: 0.82
+   - document_type: handwritten_notes
+   - source: hand_unit3.pdf
+   - page_end: 20
+   - page_start: 19
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: SQL Injection and Buffer Overflow |
 Topics: SQL Injection, Blind SQL Injection, Buffer Overflow | Key Concepts: SQL
@@ -2326,14 +2326,14 @@ and potentially gain unauthorized access, Blind SQL injection i
 --------------------------------------------------------------------------------
 [63] ID: CYBER_SECURITY_hand_unit3.pdf_p1-2
 Metadata:
-   - document_type: handwritten_notes
-   - confidence: 0.9
    - page_start: 1
-   - title: Tools and methods used in cybercrime
-   - source: hand_unit3.pdf
+   - unit: 3
    - subject: CYBER_SECURITY
    - page_end: 2
-   - unit: 3
+   - source: hand_unit3.pdf
+   - document_type: handwritten_notes
+   - confidence: 0.9
+   - title: Tools and methods used in cybercrime
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Tools and methods used in cybercrime
 | Topics: Phishing, Password cracking, Keyloggers, Spyware, Virus & worm, Trojan
@@ -2342,14 +2342,14 @@ injection, Proxy server | Key Concepts: Proxy server definition: c
 --------------------------------------------------------------------------------
 [64] ID: CYBER_SECURITY_hand_unit3.pdf_p21-22
 Metadata:
-   - source: hand_unit3.pdf
+   - title: Security Concepts: Buffer Overflow and Wireless Network Attacks
+   - page_start: 21
    - subject: CYBER_SECURITY
+   - document_type: handwritten_notes
+   - source: hand_unit3.pdf
+   - confidence: 0.85
    - page_end: 22
    - unit: 3
-   - confidence: 0.85
-   - page_start: 21
-   - title: Security Concepts: Buffer Overflow and Wireless Network Attacks
-   - document_type: handwritten_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Security Concepts: Buffer Overflow
 and Wireless Network Attacks | Topics: Buffer Overflow, Wireless Network
@@ -2358,14 +2358,14 @@ Buffer overflow minimization techniques, 802.11 networking standards
 --------------------------------------------------------------------------------
 [65] ID: CYBER_SECURITY_hand_unit3.pdf_p23-24
 Metadata:
-   - unit: 3
+   - page_start: 23
    - document_type: handwritten_notes
-   - confidence: 0.85
    - title: Wireless Networking Concepts and Security Notes
+   - page_end: 24
    - subject: CYBER_SECURITY
    - source: hand_unit3.pdf
-   - page_end: 24
-   - page_start: 23
+   - confidence: 0.85
+   - unit: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Wireless Networking Concepts and
 Security Notes | Topics: WiFi Hotspot, Service Set Identifier (SSID), WiFi
@@ -2374,14 +2374,14 @@ Attacks, Eavesdropping | Key Concepts: WiFi Hotspot: locations with public
 --------------------------------------------------------------------------------
 [66] ID: CYBER_SECURITY_hand_unit3.pdf_p25-26
 Metadata:
-   - page_start: 25
    - unit: 3
-   - document_type: handwritten_notes
-   - page_end: 26
    - subject: CYBER_SECURITY
-   - source: hand_unit3.pdf
-   - title: Unit-5 Network Security Attacks
    - confidence: 0.9
+   - title: Unit-5 Network Security Attacks
+   - page_end: 26
+   - document_type: handwritten_notes
+   - page_start: 25
+   - source: hand_unit3.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Unit-5 Network Security Attacks |
 Topics: Denial of Service (DOS) attacks, Man-in-the-middle (MitM) attacks, WPA
@@ -2391,13 +2391,13 @@ to prevent connection, MitM involves intercepting and altering c
 [67] ID: CYBER_SECURITY_hand_unit3.pdf_p3-4
 Metadata:
    - page_start: 3
-   - document_type: handwritten_notes
-   - title: Anonymizers, Phishing, and Password Cracking
-   - subject: CYBER_SECURITY
+   - confidence: 0.85
    - unit: 3
+   - subject: CYBER_SECURITY
+   - title: Anonymizers, Phishing, and Password Cracking
+   - document_type: handwritten_notes
    - page_end: 4
    - source: hand_unit3.pdf
-   - confidence: 0.85
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Anonymizers, Phishing, and Password
 Cracking | Topics: Anonymizers, Phishing, Password Cracking, Cybersecurity
@@ -2406,14 +2406,14 @@ anonymizer, Phishing steps (planning, setup, attack, collection, identity
 --------------------------------------------------------------------------------
 [68] ID: CYBER_SECURITY_hand_unit3.pdf_p5-6
 Metadata:
-   - title: Password Security and Cracking Methods
-   - document_type: handwritten_notes
-   - subject: CYBER_SECURITY
-   - confidence: 0.8
    - source: hand_unit3.pdf
-   - unit: 3
-   - page_start: 5
+   - subject: CYBER_SECURITY
    - page_end: 6
+   - confidence: 0.8
+   - page_start: 5
+   - document_type: handwritten_notes
+   - unit: 3
+   - title: Password Security and Cracking Methods
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Password Security and Cracking
 Methods | Topics: Purpose of password cracking, Password cracking methods,
@@ -2422,14 +2422,14 @@ Recovering forgotten passwords, Gaining unauthorized access to system, Brute
 --------------------------------------------------------------------------------
 [69] ID: CYBER_SECURITY_hand_unit3.pdf_p7-8
 Metadata:
-   - subject: CYBER_SECURITY
+   - unit: 3
+   - title: Malware Types: Spyware, Keyloggers, and Viruses
+   - document_type: handwritten_notes
    - page_end: 8
    - confidence: 0.9
-   - source: hand_unit3.pdf
-   - title: Malware Types: Spyware, Keyloggers, and Viruses
-   - unit: 3
+   - subject: CYBER_SECURITY
    - page_start: 7
-   - document_type: handwritten_notes
+   - source: hand_unit3.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Malware Types: Spyware, Keyloggers,
 and Viruses | Topics: Spyware, Keyloggers, Viruses, Malware Prevention, Types of
@@ -2438,10 +2438,10 @@ knowledge, Keylogger: software that records keystrokes, Virus: typ
 --------------------------------------------------------------------------------
 [70] ID: CYBER_SECURITY_hand_unit3.pdf_p9-10
 Metadata:
-   - source: hand_unit3.pdf
-   - document_type: handwritten_notes
-   - title: Malware Types: Worms, Viruses, and Trojan Horse
    - unit: 3
+   - title: Malware Types: Worms, Viruses, and Trojan Horse
+   - document_type: handwritten_notes
+   - source: hand_unit3.pdf
    - confidence: 0.8
    - page_end: 10
    - page_start: 9
@@ -2454,14 +2454,14 @@ like waterfalls.scr  Worms - 1. Worms like spreading gums, worms is
 --------------------------------------------------------------------------------
 [71] ID: CYBER_SECURITY_unit3.pdf_p11-12
 Metadata:
-   - page_start: 11
-   - confidence: 0.95
-   - source: unit3.pdf
    - title: Q-7 What is spyware? Explain the type of spyware.
+   - document_type: printed_notes
+   - page_end: 12
    - subject: CYBER_SECURITY
    - unit: 3
-   - page_end: 12
-   - document_type: printed_notes
+   - source: unit3.pdf
+   - confidence: 0.95
+   - page_start: 11
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Q-7 What is spyware? Explain the type
 of spyware. | Topics: Keyloggers, Anti-keyloggers, Spyware, Types of spyware,
@@ -2470,14 +2470,14 @@ Definition of keyloggers (software that captures keystrokes,
 --------------------------------------------------------------------------------
 [72] ID: CYBER_SECURITY_unit3.pdf_p13-14
 Metadata:
+   - confidence: 0.95
+   - title: Q-8 What is virus? Write down the characteristics and its types.
+   - source: unit3.pdf
    - page_start: 13
    - page_end: 14
-   - source: unit3.pdf
-   - title: Q-8 What is virus? Write down the characteristics and its types.
-   - confidence: 0.95
-   - subject: CYBER_SECURITY
-   - unit: 3
    - document_type: printed_notes
+   - unit: 3
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Q-8 What is virus? Write down the
 characteristics and its types. | Topics: Definition of computer viruses,
@@ -2486,14 +2486,14 @@ Infection characteristic, Replication characteristic, Payload character
 --------------------------------------------------------------------------------
 [73] ID: CYBER_SECURITY_unit3.pdf_p1-2
 Metadata:
-   - page_start: 1
    - unit: 3
+   - subject: CYBER_SECURITY
+   - page_start: 1
    - title: CYBER SECURITY Unit 3: Tools and Methods Used in Crime
-   - page_end: 2
-   - document_type: printed_notes
    - source: unit3.pdf
    - confidence: 0.95
-   - subject: CYBER_SECURITY
+   - document_type: printed_notes
+   - page_end: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: CYBER SECURITY Unit 3: Tools and
 Methods Used in Crime | Topics: Proxy Servers and Anonymizers, Phishing,
@@ -2502,14 +2502,14 @@ Backdoors, Steganography, DoS and DDoS Attacks, SQL Injection, Buffer Ov
 --------------------------------------------------------------------------------
 [74] ID: CYBER_SECURITY_unit3.pdf_p23-24
 Metadata:
-   - page_end: 24
    - unit: 3
-   - subject: CYBER_SECURITY
-   - source: unit3.pdf
-   - confidence: 0.95
-   - title: Steganalysis and DOS Attack Classification
-   - document_type: printed_notes
    - page_start: 23
+   - title: Steganalysis and DOS Attack Classification
+   - page_end: 24
+   - confidence: 0.95
+   - document_type: printed_notes
+   - source: unit3.pdf
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Steganalysis and DOS Attack
 Classification | Topics: steganalysis, steganalysis tools, DOS attacks, DOS
@@ -2518,14 +2518,14 @@ streams but uncertainty whether they include hidden messages, StegDetect anal
 --------------------------------------------------------------------------------
 [75] ID: CYBER_SECURITY_unit3.pdf_p25-26
 Metadata:
-   - subject: CYBER_SECURITY
-   - title: DDoS Attacks and Related Concepts
+   - document_type: printed_notes
    - page_end: 26
    - confidence: 0.95
+   - subject: CYBER_SECURITY
    - page_start: 25
-   - source: unit3.pdf
-   - document_type: printed_notes
+   - title: DDoS Attacks and Related Concepts
    - unit: 3
+   - source: unit3.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: DDoS Attacks and Related Concepts |
 Topics: Network-Level Attacks, Server-Level Attacks, Application-Level Attacks,
@@ -2534,14 +2534,14 @@ Attacks, NTP Amplification Attacks, Volumetric Attacks, DoS A
 --------------------------------------------------------------------------------
 [76] ID: CYBER_SECURITY_unit3.pdf_p27-28
 Metadata:
-   - page_end: 28
-   - subject: CYBER_SECURITY
-   - page_start: 27
-   - document_type: printed_notes
    - source: unit3.pdf
+   - page_start: 27
    - unit: 3
-   - confidence: 0.95
+   - subject: CYBER_SECURITY
    - title: DDoS Attacks and Protection Measures
+   - page_end: 28
+   - document_type: printed_notes
+   - confidence: 0.95
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: DDoS Attacks and Protection Measures
 | Topics: DDoS attacks, DDoS tools, DDoS protection methods, Botnets | Key
@@ -2550,13 +2550,13 @@ network of compromised devices, DDoS tools (GoldenEye, Hping, Memcr
 --------------------------------------------------------------------------------
 [77] ID: CYBER_SECURITY_unit3.pdf_p29-30
 Metadata:
+   - subject: CYBER_SECURITY
+   - unit: 3
+   - title: Network Security: DDoS Mitigation and Wireless Network Attacks
    - page_start: 29
    - page_end: 30
-   - subject: CYBER_SECURITY
-   - confidence: 0.95
-   - title: Network Security: DDoS Mitigation and Wireless Network Attacks
-   - unit: 3
    - source: unit3.pdf
+   - confidence: 0.95
    - document_type: printed_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Network Security: DDoS Mitigation and
@@ -2566,14 +2566,14 @@ monitoring for DDoS detection, Anomaly detection systems, Rate limit
 --------------------------------------------------------------------------------
 [78] ID: CYBER_SECURITY_unit3.pdf_p31-32
 Metadata:
+   - subject: CYBER_SECURITY
    - page_start: 31
    - unit: 3
+   - document_type: printed_notes
+   - title: Wi-Fi Security: Frauds, Misuses and Protection Methods
+   - confidence: 0.95
    - page_end: 32
    - source: unit3.pdf
-   - subject: CYBER_SECURITY
-   - confidence: 0.95
-   - title: Wi-Fi Security: Frauds, Misuses and Protection Methods
-   - document_type: printed_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Wi-Fi Security: Frauds, Misuses and
 Protection Methods | Topics: Theft of Internet Hours, Wi-Fi-based Frauds and
@@ -2582,14 +2582,14 @@ DNS Hijacking, Wireless Network Security, Default Settings Confi
 --------------------------------------------------------------------------------
 [79] ID: CYBER_SECURITY_unit3.pdf_p35-36
 Metadata:
-   - confidence: 0.95
-   - unit: 3
-   - title: SQL Injection Attacks: Explanation, Types, and Consequences
-   - page_end: 36
-   - document_type: printed_notes
-   - page_start: 35
    - source: unit3.pdf
+   - document_type: printed_notes
+   - title: SQL Injection Attacks: Explanation, Types, and Consequences
    - subject: CYBER_SECURITY
+   - confidence: 0.95
+   - page_start: 35
+   - page_end: 36
+   - unit: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: SQL Injection Attacks: Explanation,
 Types, and Consequences | Topics: SQL injection definition, Types of SQL
@@ -2598,14 +2598,14 @@ identification, Malicious query crafting and execution | Key Concepts:
 --------------------------------------------------------------------------------
 [80] ID: CYBER_SECURITY_unit3.pdf_p37-38
 Metadata:
-   - page_end: 38
-   - document_type: printed_notes
-   - source: unit3.pdf
-   - unit: 3
+   - confidence: 0.95
    - subject: CYBER_SECURITY
    - page_start: 37
-   - confidence: 0.95
+   - source: unit3.pdf
+   - page_end: 38
    - title: Security Concepts Questions
+   - document_type: printed_notes
+   - unit: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Security Concepts Questions | Topics:
 buffer overflow, identity theft | Key Concepts: Buffer overflow definition: when
@@ -2614,14 +2614,14 @@ allocation process in program execution, Input data validation
 --------------------------------------------------------------------------------
 [81] ID: CYBER_SECURITY_unit3.pdf_p3-4
 Metadata:
-   - page_start: 3
-   - title: Proxy Servers, Anonymizers, and Phishing
    - confidence: 0.95
-   - unit: 3
-   - page_end: 4
+   - title: Proxy Servers, Anonymizers, and Phishing
    - subject: CYBER_SECURITY
-   - source: unit3.pdf
+   - unit: 3
    - document_type: printed_notes
+   - source: unit3.pdf
+   - page_end: 4
+   - page_start: 3
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Proxy Servers, Anonymizers, and
 Phishing | Topics: Proxy servers, Anonymizers, Phishing attacks | Key Concepts:
@@ -2630,14 +2630,14 @@ proxy servers (anonymity, security, performance through caching)
 --------------------------------------------------------------------------------
 [82] ID: CYBER_SECURITY_unit3.pdf_p5-6
 Metadata:
-   - unit: 3
-   - document_type: printed_notes
-   - subject: CYBER_SECURITY
    - title: Phishing and Password Cracking
-   - source: unit3.pdf
-   - confidence: 0.95
-   - page_end: 6
    - page_start: 5
+   - page_end: 6
+   - document_type: printed_notes
+   - unit: 3
+   - subject: CYBER_SECURITY
+   - confidence: 0.95
+   - source: unit3.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Phishing and Password Cracking |
 Topics: Email phishing, Spear phishing, Whaling (CEO fraud), Smishing and
@@ -2646,13 +2646,13 @@ definition: malicious email to trick users into divulging private informati
 --------------------------------------------------------------------------------
 [83] ID: CYBER_SECURITY_unit3.pdf_p7-8
 Metadata:
+   - subject: CYBER_SECURITY
+   - confidence: 0.95
    - title: Password Cracking and Attack Classification
    - source: unit3.pdf
-   - page_end: 8
-   - document_type: printed_notes
-   - confidence: 0.95
-   - subject: CYBER_SECURITY
    - unit: 3
+   - document_type: printed_notes
+   - page_end: 8
    - page_start: 7
 Preview:
 Subject: CYBER_SECURITY | Unit: 3 | Title: Password Cracking and Attack
@@ -2662,14 +2662,14 @@ tables | Key Concepts: GPU acceleration for password cracking, Network protoco
 --------------------------------------------------------------------------------
 [84] ID: CYBER_SECURITY_hand_unit4.pdf_p11-12
 Metadata:
-   - source: hand_unit4.pdf
-   - document_type: handwritten_notes
    - unit: 4
-   - title: Security Concepts and Mobile Device Challenges
-   - page_start: 11
-   - subject: CYBER_SECURITY
+   - document_type: handwritten_notes
    - confidence: 0.85
+   - subject: CYBER_SECURITY
+   - source: hand_unit4.pdf
+   - title: Security Concepts and Mobile Device Challenges
    - page_end: 12
+   - page_start: 11
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Security Concepts and Mobile Device
 Challenges | Topics: Cryptography, Steganography, Anonymizers, Mobile device
@@ -2678,13 +2678,13 @@ for securing information, Steganography as embedding hidden messag
 --------------------------------------------------------------------------------
 [85] ID: CYBER_SECURITY_hand_unit4.pdf_p13-14
 Metadata:
-   - title: Cybersecurity Threats and Digital Evidence Analysis
-   - page_start: 13
-   - subject: CYBER_SECURITY
-   - document_type: handwritten_notes
-   - source: hand_unit4.pdf
    - confidence: 0.9
+   - subject: CYBER_SECURITY
+   - page_start: 13
+   - source: hand_unit4.pdf
    - page_end: 14
+   - title: Cybersecurity Threats and Digital Evidence Analysis
+   - document_type: handwritten_notes
    - unit: 4
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Cybersecurity Threats and Digital
@@ -2694,14 +2694,14 @@ Authentication, Best evidence rule, Hearsay, Virtual Private Networ
 --------------------------------------------------------------------------------
 [86] ID: CYBER_SECURITY_hand_unit4.pdf_p15-16
 Metadata:
-   - page_end: 16
-   - confidence: 0.75
-   - unit: 4
    - title: Digital Forensics Notes
-   - page_start: 15
+   - page_end: 16
    - subject: CYBER_SECURITY
-   - document_type: handwritten_notes
+   - unit: 4
    - source: hand_unit4.pdf
+   - page_start: 15
+   - confidence: 0.75
+   - document_type: handwritten_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Digital Forensics Notes | Topics:
 Metadata examination, Content analysis, Email header analysis, Attachments and
@@ -2710,14 +2710,14 @@ Concepts: Metadata includes sender/recipient details, timestamps, server
 --------------------------------------------------------------------------------
 [87] ID: CYBER_SECURITY_hand_unit4.pdf_p17-18
 Metadata:
-   - page_start: 17
    - page_end: 18
    - unit: 4
-   - confidence: 0.75
    - document_type: handwritten_notes
-   - title: Cybercrime and Computer Forensic Investigation
+   - page_start: 17
    - subject: CYBER_SECURITY
+   - title: Cybercrime and Computer Forensic Investigation
    - source: hand_unit4.pdf
+   - confidence: 0.75
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Cybercrime and Computer Forensic
 Investigation | Topics: Network Forensic, Digital Forensic, Computer Forensic
@@ -2726,14 +2726,14 @@ Thorough Documentation, Legal Procedure | Key Concepts: Network fo
 --------------------------------------------------------------------------------
 [88] ID: CYBER_SECURITY_hand_unit4.pdf_p19-20
 Metadata:
-   - unit: 4
    - document_type: handwritten_notes
+   - unit: 4
    - subject: CYBER_SECURITY
-   - confidence: 0.85
-   - title: Forensic and Social Networking Site
-   - page_end: 20
    - page_start: 19
+   - title: Forensic and Social Networking Site
    - source: hand_unit4.pdf
+   - confidence: 0.85
+   - page_end: 20
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Forensic and Social Networking Site |
 Topics: Collaboration, Evidence Preservation, Social networking site security
@@ -2742,14 +2742,14 @@ networking site definition, Identity theft, Phishing Scam, Malware
 --------------------------------------------------------------------------------
 [89] ID: CYBER_SECURITY_hand_unit4.pdf_p1-2
 Metadata:
-   - page_end: 2
-   - page_start: 1
-   - subject: CYBER_SECURITY
    - document_type: handwritten_notes
-   - unit: 4
+   - source: hand_unit4.pdf
+   - subject: CYBER_SECURITY
    - confidence: 0.9
    - title: Understanding Computer Forensic
-   - source: hand_unit4.pdf
+   - page_start: 1
+   - unit: 4
+   - page_end: 2
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Understanding Computer Forensic |
 Topics: Cyber forensic, Digital forensic, Computer forensic, Computer Forensic
@@ -2758,14 +2758,14 @@ deals with the investigation, analysis technique on computer, Cy
 --------------------------------------------------------------------------------
 [90] ID: CYBER_SECURITY_hand_unit4.pdf_p21-22
 Metadata:
-   - page_end: 22
-   - document_type: handwritten_notes
-   - title: Digital Evidence Preservation and Expert Witness Testimony
-   - unit: 4
-   - source: hand_unit4.pdf
    - confidence: 0.8
-   - page_start: 21
+   - title: Digital Evidence Preservation and Expert Witness Testimony
    - subject: CYBER_SECURITY
+   - unit: 4
+   - document_type: handwritten_notes
+   - page_end: 22
+   - page_start: 21
+   - source: hand_unit4.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Digital Evidence Preservation and
 Expert Witness Testimony | Topics: Digital Evidence preservation, Expert witness
@@ -2774,14 +2774,14 @@ to communicate complex technical information  ③ Digital Evide
 --------------------------------------------------------------------------------
 [91] ID: CYBER_SECURITY_hand_unit4.pdf_p3-4
 Metadata:
-   - page_start: 3
+   - title: Digital Forensics and Computer Forensics
+   - document_type: handwritten_notes
    - confidence: 0.85
+   - page_start: 3
    - unit: 4
    - subject: CYBER_SECURITY
-   - document_type: handwritten_notes
-   - source: hand_unit4.pdf
-   - title: Digital Forensics and Computer Forensics
    - page_end: 4
+   - source: hand_unit4.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Digital Forensics and Computer
 Forensics | Topics: Difference between cyber forensic and digital forensic, Role
@@ -2790,14 +2790,14 @@ Concepts: Cyber forensic involves computer systems for cyber crime
 --------------------------------------------------------------------------------
 [92] ID: CYBER_SECURITY_hand_unit4.pdf_p5-6
 Metadata:
+   - title: Chain of Custody and Digital Evidence
+   - page_start: 5
+   - confidence: 0.85
+   - page_end: 6
    - document_type: handwritten_notes
    - unit: 4
-   - page_end: 6
-   - subject: CYBER_SECURITY
    - source: hand_unit4.pdf
-   - confidence: 0.85
-   - page_start: 5
-   - title: Chain of Custody and Digital Evidence
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Chain of Custody and Digital Evidence
 | Topics: Chain of Custody, Importance of Chain of Custody, Digital Evidence,
@@ -2806,14 +2806,14 @@ definition, Maintaining integrity of evidence, Admissibility in
 --------------------------------------------------------------------------------
 [93] ID: CYBER_SECURITY_hand_unit4.pdf_p9-10
 Metadata:
-   - page_end: 10
-   - confidence: 0.85
-   - unit: 4
-   - page_start: 9
-   - source: hand_unit4.pdf
-   - title: Keylogging and Anti-Keyloggers
-   - subject: CYBER_SECURITY
    - document_type: handwritten_notes
+   - title: Keylogging and Anti-Keyloggers
+   - confidence: 0.85
+   - subject: CYBER_SECURITY
+   - unit: 4
+   - source: hand_unit4.pdf
+   - page_start: 9
+   - page_end: 10
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Keylogging and Anti-Keyloggers |
 Topics: Definition of keylogging, Classification of keyloggers, Software-based
@@ -2822,14 +2822,14 @@ of anti-keyloggers | Key Concepts: Keylogging as a cyber threat
 --------------------------------------------------------------------------------
 [94] ID: CYBER_SECURITY_unit4.pdf_p11-12
 Metadata:
-   - document_type: printed_notes
-   - subject: CYBER_SECURITY
    - page_end: 12
-   - title: Digital Evidence and Cyber Forensics Process
-   - page_start: 11
-   - source: unit4.pdf
    - unit: 4
+   - title: Digital Evidence and Cyber Forensics Process
+   - document_type: printed_notes
+   - source: unit4.pdf
    - confidence: 0.95
+   - subject: CYBER_SECURITY
+   - page_start: 11
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Digital Evidence and Cyber Forensics
 Process | Topics: Cyber forensics process steps, Digital evidence definition,
@@ -2838,14 +2838,14 @@ experts | Key Concepts: Identification, Preservation, Analysis,
 --------------------------------------------------------------------------------
 [95] ID: CYBER_SECURITY_unit4.pdf_p13-14
 Metadata:
-   - source: unit4.pdf
    - page_end: 14
-   - title: FORENSIC ANALYSIS OF E-mail
-   - document_type: printed_notes
    - page_start: 13
-   - unit: 4
+   - title: FORENSIC ANALYSIS OF E-mail
    - subject: CYBER_SECURITY
+   - source: unit4.pdf
+   - unit: 4
    - confidence: 0.95
+   - document_type: printed_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: FORENSIC ANALYSIS OF E-mail | Topics:
 Email forensics, Email header analysis, Components of email headers for forensic
@@ -2855,13 +2855,13 @@ address, ISP details, Message-ID, RFC2822, SPF, DKIM signature, M
 [96] ID: CYBER_SECURITY_unit4.pdf_p15-16
 Metadata:
    - page_start: 15
-   - subject: CYBER_SECURITY
    - document_type: printed_notes
-   - confidence: 0.9
-   - source: unit4.pdf
    - unit: 4
+   - confidence: 0.9
    - title: Email Forensics and Digital Forensics Life Cycle
    - page_end: 16
+   - source: unit4.pdf
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Email Forensics and Digital Forensics
 Life Cycle | Topics: Email forensics, Message-ID structure, Email server
@@ -2870,14 +2870,14 @@ Concepts: RFC2822 email identifier requirements, Message-ID syntax
 --------------------------------------------------------------------------------
 [97] ID: CYBER_SECURITY_unit4.pdf_p17-18
 Metadata:
-   - page_end: 18
-   - page_start: 17
-   - subject: CYBER_SECURITY
-   - source: unit4.pdf
-   - confidence: 0.95
    - title: DIGITAL FORENSIC LIFECYCLE
+   - page_start: 17
    - document_type: printed_notes
+   - subject: CYBER_SECURITY
+   - page_end: 18
    - unit: 4
+   - confidence: 0.95
+   - source: unit4.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: DIGITAL FORENSIC LIFECYCLE | Topics:
 Digital forensic lifecycle stages, Evidence identification and preparation,
@@ -2886,14 +2886,14 @@ examination, Forensic analysis techniques, Reporting digital forensic findi
 --------------------------------------------------------------------------------
 [98] ID: CYBER_SECURITY_unit4.pdf_p19-20
 Metadata:
-   - unit: 4
-   - page_start: 19
-   - title: DIGITAL FORENSIC LIFECYCLE
    - document_type: printed_notes
+   - page_start: 19
+   - unit: 4
+   - title: DIGITAL FORENSIC LIFECYCLE
    - confidence: 0.95
+   - subject: CYBER_SECURITY
    - source: unit4.pdf
    - page_end: 20
-   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: DIGITAL FORENSIC LIFECYCLE | Topics:
 Storing and Transporting Digital Evidence, Examining/Investigating Digital
@@ -2902,14 +2902,14 @@ Concepts: Dead analysis (forensic investigation on data at rest),
 --------------------------------------------------------------------------------
 [99] ID: CYBER_SECURITY_unit4.pdf_p1-2
 Metadata:
-   - source: unit4.pdf
-   - unit: 4
-   - page_start: 1
-   - page_end: 2
    - subject: CYBER_SECURITY
-   - document_type: syllabus
-   - confidence: 0.95
+   - unit: 4
    - title: Understanding Computer Forensics
+   - source: unit4.pdf
+   - document_type: syllabus
+   - page_end: 2
+   - page_start: 1
+   - confidence: 0.95
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Understanding Computer Forensics |
 Topics: Introduction, Digital Forensics Science, The Need for Computer
@@ -2918,14 +2918,14 @@ Digital Forensics Life Cycle, Chain of Custody Concept, Network Forensic
 --------------------------------------------------------------------------------
 [100] ID: CYBER_SECURITY_unit4.pdf_p21-22
 Metadata:
-   - confidence: 0.95
-   - subject: CYBER_SECURITY
-   - unit: 4
    - title: Chain of Custody
-   - document_type: printed_notes
-   - source: unit4.pdf
+   - subject: CYBER_SECURITY
    - page_start: 21
+   - source: unit4.pdf
    - page_end: 22
+   - unit: 4
+   - document_type: printed_notes
+   - confidence: 0.95
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Chain of Custody | Topics: evidence
 integrity, legal admissibility, preservation of rights, role of police in chain
@@ -2934,14 +2934,14 @@ broken chain of custody | Key Concepts: Chain of Custody refers to
 --------------------------------------------------------------------------------
 [101] ID: CYBER_SECURITY_unit4.pdf_p23-24
 Metadata:
-   - unit: 4
-   - title: Network Forensic
-   - confidence: 0.95
-   - document_type: printed_notes
-   - page_end: 24
-   - source: unit4.pdf
-   - page_start: 23
    - subject: CYBER_SECURITY
+   - page_start: 23
+   - source: unit4.pdf
+   - title: Network Forensic
+   - document_type: printed_notes
+   - confidence: 0.95
+   - page_end: 24
+   - unit: 4
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Network Forensic | Topics: Processes
 Involved in Network Forensics, Network Forensics Challenges, Advantages of
@@ -2951,13 +2951,13 @@ forensics definition, Identification process, Safeguarding process,
 [102] ID: CYBER_SECURITY_unit4.pdf_p25-26
 Metadata:
    - unit: 4
-   - confidence: 0.92
-   - page_end: 26
-   - source: unit4.pdf
-   - page_start: 25
-   - subject: CYBER_SECURITY
-   - title: Approaching a Computer Forensics Investigation
    - document_type: printed_notes
+   - page_end: 26
+   - title: Approaching a Computer Forensics Investigation
+   - subject: CYBER_SECURITY
+   - page_start: 25
+   - source: unit4.pdf
+   - confidence: 0.92
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Approaching a Computer Forensics
 Investigation | Topics: Computer forensics investigation phases, Steps in
@@ -2966,14 +2966,14 @@ cycle | Key Concepts: Secure the subject system, Take a copy of hard driv
 --------------------------------------------------------------------------------
 [103] ID: CYBER_SECURITY_unit4.pdf_p27-28
 Metadata:
-   - confidence: 0.9
-   - source: unit4.pdf
-   - page_start: 27
-   - title: Forensic and social networking site:
-   - unit: 4
-   - subject: CYBER_SECURITY
    - document_type: printed_notes
+   - page_start: 27
+   - unit: 4
+   - source: unit4.pdf
+   - confidence: 0.9
    - page_end: 28
+   - title: Forensic and social networking site:
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Forensic and social networking site:
 | Topics: Social networking forensics, Content preservation challenges, Security
@@ -2983,13 +2983,13 @@ Definition of social networking sites, Security threats: XSS, Phi
 [104] ID: CYBER_SECURITY_unit4.pdf_p29-30
 Metadata:
    - source: unit4.pdf
-   - page_start: 29
-   - subject: CYBER_SECURITY
-   - confidence: 0.95
-   - unit: 4
-   - document_type: printed_notes
-   - page_end: 30
    - title: Challenges in Computer Forensic
+   - page_end: 30
+   - page_start: 29
+   - document_type: printed_notes
+   - subject: CYBER_SECURITY
+   - unit: 4
+   - confidence: 0.95
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Challenges in Computer Forensic |
 Topics: Evolving Technology, Encryption and Security Measures, Data Volume and
@@ -2998,14 +2998,14 @@ Digital Evidence, International Jurisdiction, Skill Shortages and
 --------------------------------------------------------------------------------
 [105] ID: CYBER_SECURITY_unit4.pdf_p3-4
 Metadata:
-   - document_type: printed_notes
-   - page_end: 4
-   - confidence: 0.95
-   - source: unit4.pdf
-   - subject: CYBER_SECURITY
-   - unit: 4
-   - page_start: 3
    - title: Digital Forensic Science
+   - confidence: 0.95
+   - page_start: 3
+   - source: unit4.pdf
+   - unit: 4
+   - page_end: 4
+   - document_type: printed_notes
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: Digital Forensic Science | Topics:
 Digital Forensic Science, Computer Forensics, Types of Digital Forensics, Memory
@@ -3014,14 +3014,14 @@ Forensics, Email Forensics, Mobile Phone Forensics | Key Concepts:
 --------------------------------------------------------------------------------
 [106] ID: CYBER_SECURITY_unit4.pdf_p5-6
 Metadata:
-   - document_type: printed_notes
-   - confidence: 0.95
    - title: COMPUTER FORENSIC
-   - subject: CYBER_SECURITY
+   - page_start: 5
    - source: unit4.pdf
    - page_end: 6
+   - subject: CYBER_SECURITY
+   - confidence: 0.95
    - unit: 4
-   - page_start: 5
+   - document_type: printed_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: COMPUTER FORENSIC | Topics:
 Advantages of Computer Forensics, Disadvantages of Computer Forensics,
@@ -3032,13 +3032,13 @@ Preservat
 [107] ID: CYBER_SECURITY_unit4.pdf_p7-8
 Metadata:
    - page_end: 8
-   - page_start: 7
-   - subject: CYBER_SECURITY
-   - unit: 4
    - title: NEED OF COMPUTER FORENSIC
+   - unit: 4
+   - confidence: 0.95
    - document_type: printed_notes
    - source: unit4.pdf
-   - confidence: 0.95
+   - subject: CYBER_SECURITY
+   - page_start: 7
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: NEED OF COMPUTER FORENSIC | Topics:
 Digital Evidence, Cybercrime Investigations, Legal Admissibility, Data Recovery,
@@ -3047,14 +3047,14 @@ Prevention, Civil Litigation Support, Network Security, Com
 --------------------------------------------------------------------------------
 [108] ID: CYBER_SECURITY_unit4.pdf_p9-10
 Metadata:
+   - unit: 4
+   - confidence: 0.95
    - title: CYBER FORENSIC
    - document_type: printed_notes
    - page_start: 9
-   - confidence: 0.95
-   - unit: 4
-   - page_end: 10
    - subject: CYBER_SECURITY
    - source: unit4.pdf
+   - page_end: 10
 Preview:
 Subject: CYBER_SECURITY | Unit: 4 | Title: CYBER FORENSIC | Topics: Definition
 and importance of cyber forensics, Capabilities of cyber forensics, Process
@@ -3063,14 +3063,14 @@ Advantages of cyber forensics | Key Concepts: Cyber forensics is a
 --------------------------------------------------------------------------------
 [109] ID: CYBER_SECURITY_hand_unit5.pdf_p11-12
 Metadata:
-   - confidence: 0.8
-   - page_start: 11
-   - unit: 5
-   - title: Intellectual Property (IP)
-   - page_end: 12
    - source: hand_unit5.pdf
-   - document_type: handwritten_notes
+   - page_end: 12
+   - unit: 5
    - subject: CYBER_SECURITY
+   - page_start: 11
+   - document_type: handwritten_notes
+   - confidence: 0.8
+   - title: Intellectual Property (IP)
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Intellectual Property (IP) | Topics:
 Definition of Intellectual Property, Types of Intellectual Property, Patents,
@@ -3079,14 +3079,14 @@ Concepts: Intellectual Property refers to creations of the mind - inn
 --------------------------------------------------------------------------------
 [110] ID: CYBER_SECURITY_hand_unit5.pdf_p13-14
 Metadata:
-   - source: hand_unit5.pdf
+   - page_end: 14
+   - confidence: 0.9
    - subject: CYBER_SECURITY
+   - document_type: handwritten_notes
+   - source: hand_unit5.pdf
+   - unit: 5
    - title: Intellectual Property Infringement Types and Definitions
    - page_start: 13
-   - page_end: 14
-   - document_type: handwritten_notes
-   - unit: 5
-   - confidence: 0.9
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Intellectual Property Infringement
 Types and Definitions | Topics: Copyright Infringement, Trademark Infringement,
@@ -3095,14 +3095,14 @@ Definition, Copyright Definition, Trademark Definition | Key Conce
 --------------------------------------------------------------------------------
 [111] ID: CYBER_SECURITY_hand_unit5.pdf_p15-16
 Metadata:
-   - title: Trademark and Patent Requirements
-   - page_start: 15
-   - unit: 5
-   - confidence: 0.85
-   - page_end: 16
-   - document_type: handwritten_notes
    - source: hand_unit5.pdf
+   - page_end: 16
+   - confidence: 0.85
+   - document_type: handwritten_notes
+   - title: Trademark and Patent Requirements
    - subject: CYBER_SECURITY
+   - unit: 5
+   - page_start: 15
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Trademark and Patent Requirements |
 Topics: Trademark registration, Patent requirements | Key Concepts: Uniqueness,
@@ -3111,14 +3111,14 @@ Commerce, Novelty, Non-obviousness, Useful, Not already known  name
 --------------------------------------------------------------------------------
 [112] ID: CYBER_SECURITY_hand_unit5.pdf_p17-18
 Metadata:
-   - title: Copyright Requirements and Invention Criteria
    - unit: 5
-   - page_start: 17
-   - source: hand_unit5.pdf
-   - subject: CYBER_SECURITY
-   - confidence: 0.85
-   - document_type: handwritten_notes
    - page_end: 18
+   - page_start: 17
+   - document_type: handwritten_notes
+   - subject: CYBER_SECURITY
+   - source: hand_unit5.pdf
+   - title: Copyright Requirements and Invention Criteria
+   - confidence: 0.85
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Copyright Requirements and Invention
 Criteria | Topics: Invention criteria, Copyright definition, Copyright
@@ -3127,14 +3127,14 @@ Originality, Fixation, Authorship, Copyright duration (lifetime + 60
 --------------------------------------------------------------------------------
 [113] ID: CYBER_SECURITY_hand_unit5.pdf_p1-2
 Metadata:
-   - page_end: 2
-   - confidence: 0.85
-   - page_start: 1
-   - subject: CYBER_SECURITY
-   - unit: 5
-   - document_type: handwritten_notes
-   - title: Information Security Policy
    - source: hand_unit5.pdf
+   - document_type: handwritten_notes
+   - confidence: 0.85
+   - unit: 5
+   - page_end: 2
+   - subject: CYBER_SECURITY
+   - title: Information Security Policy
+   - page_start: 1
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Information Security Policy | Topics:
 Protecting secrets, Preventing Accidents, Keeping order, Legal Compliance, Trust
@@ -3143,14 +3143,14 @@ Confidentiality, Integrity & Availability (CIA), Formal document ou
 --------------------------------------------------------------------------------
 [114] ID: CYBER_SECURITY_hand_unit5.pdf_p3-4
 Metadata:
-   - document_type: handwritten_notes
-   - confidence: 0.85
-   - source: hand_unit5.pdf
+   - unit: 5
    - page_end: 4
+   - document_type: handwritten_notes
+   - source: hand_unit5.pdf
    - page_start: 3
    - title: Indian Cyber Law
-   - unit: 5
    - subject: CYBER_SECURITY
+   - confidence: 0.85
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Indian Cyber Law | Topics: Indian
 Cyber Law, ITA 2000 Act, Primary objectives of cyber law, Legal recognition of
@@ -3160,13 +3160,13 @@ Digital evidence, Cyber security | Key Concepts: Indian Cyber Law i
 [115] ID: CYBER_SECURITY_hand_unit5.pdf_p5-6
 Metadata:
    - unit: 5
-   - confidence: 0.95
-   - subject: CYBER_SECURITY
-   - title: Rights under Indian Cyber Law
-   - page_start: 5
-   - page_end: 6
    - source: hand_unit5.pdf
+   - subject: CYBER_SECURITY
+   - page_start: 5
+   - title: Rights under Indian Cyber Law
    - document_type: handwritten_notes
+   - confidence: 0.95
+   - page_end: 6
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Rights under Indian Cyber Law |
 Topics: Rights of individuals, Rights of organizations, Indian Cyber Law | Key
@@ -3175,14 +3175,14 @@ Right to access Electronic Records, Right to cyberSecurity, Right
 --------------------------------------------------------------------------------
 [116] ID: CYBER_SECURITY_hand_unit5.pdf_p7-8
 Metadata:
+   - page_end: 8
+   - title: Latest Developments in Indian Cyber Law
+   - confidence: 0.9
+   - unit: 5
+   - subject: CYBER_SECURITY
    - source: hand_unit5.pdf
    - page_start: 7
    - document_type: handwritten_notes
-   - title: Latest Developments in Indian Cyber Law
-   - page_end: 8
-   - subject: CYBER_SECURITY
-   - unit: 5
-   - confidence: 0.9
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Latest Developments in Indian Cyber
 Law | Topics: Digital Personal Data Protection Act 2023, IT Intermediary
@@ -3191,13 +3191,13 @@ Coordination Center (IC3), National Cyber Security Strategy 2020 | Key Concep
 --------------------------------------------------------------------------------
 [117] ID: CYBER_SECURITY_hand_unit5.pdf_p9-10
 Metadata:
-   - confidence: 0.9
    - source: hand_unit5.pdf
-   - unit: 5
-   - page_start: 9
-   - subject: CYBER_SECURITY
    - document_type: handwritten_notes
+   - unit: 5
+   - subject: CYBER_SECURITY
    - page_end: 10
+   - confidence: 0.9
+   - page_start: 9
    - title: Digital Personal Data Protection Act (DPDPA)
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Digital Personal Data Protection Act
@@ -3207,14 +3207,14 @@ Organizational obligations under DPDPA | Key Concepts: Digital personal d
 --------------------------------------------------------------------------------
 [118] ID: CYBER_SECURITY_unit5.pdf_p11-12
 Metadata:
-   - confidence: 0.95
-   - source: unit5.pdf
-   - title: Latest Developments in Cyber Law
+   - page_start: 11
    - page_end: 12
+   - title: Latest Developments in Cyber Law
    - document_type: printed_notes
+   - source: unit5.pdf
+   - confidence: 0.95
    - unit: 5
    - subject: CYBER_SECURITY
-   - page_start: 11
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Latest Developments in Cyber Law |
 Topics: Digital Personal Data Protection Act, 2023, Information Technology
@@ -3223,14 +3223,14 @@ Crime Coordination Centre (IC3), National Cyber Security Strategy,
 --------------------------------------------------------------------------------
 [119] ID: CYBER_SECURITY_unit5.pdf_p13-14
 Metadata:
-   - subject: CYBER_SECURITY
-   - page_end: 14
-   - source: unit5.pdf
-   - confidence: 0.95
-   - unit: 5
    - page_start: 13
-   - title: Rights and Obligations of Individuals and Organizations under Indian DPDP Act
+   - confidence: 0.95
+   - source: unit5.pdf
+   - subject: CYBER_SECURITY
    - document_type: printed_notes
+   - unit: 5
+   - page_end: 14
+   - title: Rights and Obligations of Individuals and Organizations under Indian DPDP Act
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Rights and Obligations of Individuals
 and Organizations under Indian DPDP Act | Topics: Rights under Indian DPDP Act,
@@ -3239,13 +3239,13 @@ Trademarks, Trade secrets | Key Concepts: Access personal da
 --------------------------------------------------------------------------------
 [120] ID: CYBER_SECURITY_unit5.pdf_p15-16
 Metadata:
-   - subject: CYBER_SECURITY
-   - page_start: 15
-   - confidence: 0.95
-   - source: unit5.pdf
+   - unit: 5
    - title: Intellectual Property (IP) Issues
    - page_end: 16
-   - unit: 5
+   - page_start: 15
+   - confidence: 0.95
+   - subject: CYBER_SECURITY
+   - source: unit5.pdf
    - document_type: printed_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Intellectual Property (IP) Issues |
@@ -3256,13 +3256,13 @@ importance | Key Concepts: Copyright infringement: Unauthorized
 [121] ID: CYBER_SECURITY_unit5.pdf_p17-18
 Metadata:
    - source: unit5.pdf
-   - page_end: 18
-   - subject: CYBER_SECURITY
-   - page_start: 17
-   - unit: 5
-   - document_type: printed_notes
-   - confidence: 0.95
    - title: Intellectual Property Rights: Protection Strategies and Indian Legislation
+   - unit: 5
+   - page_start: 17
+   - confidence: 0.95
+   - subject: CYBER_SECURITY
+   - document_type: printed_notes
+   - page_end: 18
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Intellectual Property Rights:
 Protection Strategies and Indian Legislation | Topics: IP protection for
@@ -3272,14 +3272,14 @@ policy
 --------------------------------------------------------------------------------
 [122] ID: CYBER_SECURITY_unit5.pdf_p19-20
 Metadata:
+   - unit: 5
+   - page_end: 20
    - confidence: 0.95
    - document_type: printed_notes
-   - unit: 5
    - title: Patent
-   - subject: CYBER_SECURITY
-   - page_end: 20
    - source: unit5.pdf
    - page_start: 19
+   - subject: CYBER_SECURITY
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Patent | Topics: Patent definition
 and purpose, Requirements for obtaining a patent, Rights of a patent holder,
@@ -3288,14 +3288,14 @@ document granting exclusive rights, Novelty requirement, Non-obvio
 --------------------------------------------------------------------------------
 [123] ID: CYBER_SECURITY_unit5.pdf_p1-2
 Metadata:
-   - title: UNIT -5 INTRODUCTION TO SECURITY POLICIES AND CYBER LAWS
    - page_start: 1
-   - source: unit5.pdf
-   - document_type: printed_notes
-   - unit: 5
-   - page_end: 2
-   - subject: CYBER_SECURITY
    - confidence: 0.95
+   - unit: 5
+   - title: UNIT -5 INTRODUCTION TO SECURITY POLICIES AND CYBER LAWS
+   - document_type: printed_notes
+   - subject: CYBER_SECURITY
+   - page_end: 2
+   - source: unit5.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: UNIT -5 INTRODUCTION TO SECURITY
 POLICIES AND CYBER LAWS | Topics: Need for An Information Security Policy,
@@ -3304,14 +3304,14 @@ Data Protection Act 2023, Intellectual Property Issues, Overview of Int
 --------------------------------------------------------------------------------
 [124] ID: CYBER_SECURITY_unit5.pdf_p21-22
 Metadata:
-   - title: Copyright and Trademark
-   - unit: 5
-   - page_start: 21
+   - page_end: 22
    - confidence: 0.9
    - source: unit5.pdf
    - subject: CYBER_SECURITY
+   - unit: 5
    - document_type: printed_notes
-   - page_end: 22
+   - page_start: 21
+   - title: Copyright and Trademark
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Copyright and Trademark | Topics:
 Copyright definition and requirements, Copyright duration, Copyright holder
@@ -3320,14 +3320,14 @@ requirements, Trademark registration requirements, Trademark holder rights
 --------------------------------------------------------------------------------
 [125] ID: CYBER_SECURITY_unit5.pdf_p23-24
 Metadata:
-   - document_type: printed_notes
-   - title: Fundamental differences between patents, copyrights, and trademarks
-   - subject: CYBER_SECURITY
-   - unit: 5
    - source: unit5.pdf
-   - confidence: 0.95
-   - page_end: 24
+   - unit: 5
    - page_start: 23
+   - page_end: 24
+   - subject: CYBER_SECURITY
+   - confidence: 0.95
+   - title: Fundamental differences between patents, copyrights, and trademarks
+   - document_type: printed_notes
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Fundamental differences between
 patents, copyrights, and trademarks | Topics: Trademark application process in
@@ -3336,14 +3336,14 @@ Trademark search, Classes of goods/services, Patent purpose, Copyri
 --------------------------------------------------------------------------------
 [126] ID: CYBER_SECURITY_unit5.pdf_p3-4
 Metadata:
-   - document_type: printed_notes
    - subject: CYBER_SECURITY
+   - unit: 5
+   - document_type: printed_notes
+   - source: unit5.pdf
+   - title: Information Security Policy
    - confidence: 0.95
    - page_start: 3
    - page_end: 4
-   - unit: 5
-   - title: Information Security Policy
-   - source: unit5.pdf
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Information Security Policy | Topics:
 Benefits of Information Security Policy, Key components of an Information
@@ -3352,14 +3352,14 @@ compliance with laws and regulations, Reduced financial losses, Prot
 --------------------------------------------------------------------------------
 [127] ID: CYBER_SECURITY_unit5.pdf_p5-6
 Metadata:
-   - unit: 5
-   - document_type: printed_notes
-   - title: Indian Cyber Law
-   - source: unit5.pdf
-   - subject: CYBER_SECURITY
    - page_start: 5
    - page_end: 6
+   - document_type: printed_notes
+   - source: unit5.pdf
+   - subject: CYBER_SECURITY
    - confidence: 0.95
+   - title: Indian Cyber Law
+   - unit: 5
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Indian Cyber Law | Topics:
 Cybersecurity policy development, Indian Cyber Law (IT Act 2000), Primary
@@ -3368,14 +3368,14 @@ Policy development, Employee training, IT Act 2000, Legal recognition of electr
 --------------------------------------------------------------------------------
 [128] ID: CYBER_SECURITY_unit5.pdf_p7-8
 Metadata:
-   - unit: 5
-   - title: Evolution and Legal Framework of Indian Cyber Law
-   - document_type: printed_notes
-   - page_end: 8
    - subject: CYBER_SECURITY
-   - confidence: 0.95
-   - page_start: 7
    - source: unit5.pdf
+   - confidence: 0.95
+   - page_end: 8
+   - document_type: printed_notes
+   - title: Evolution and Legal Framework of Indian Cyber Law
+   - page_start: 7
+   - unit: 5
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Evolution and Legal Framework of
 Indian Cyber Law | Topics: Evolution of Indian Cyber Law, IT Act 2000,
@@ -3384,14 +3384,14 @@ Intermediary liability, Cyber terrorism, Subsequent amendments, Cyber secu
 --------------------------------------------------------------------------------
 [129] ID: CYBER_SECURITY_unit5.pdf_p9-10
 Metadata:
-   - page_start: 9
-   - document_type: printed_notes
-   - title: Rights and Obligations of Individuals and Organizations under Indian Cyber Law
-   - page_end: 10
-   - subject: CYBER_SECURITY
-   - source: unit5.pdf
-   - unit: 5
    - confidence: 0.95
+   - document_type: printed_notes
+   - page_end: 10
+   - title: Rights and Obligations of Individuals and Organizations under Indian Cyber Law
+   - source: unit5.pdf
+   - subject: CYBER_SECURITY
+   - page_start: 9
+   - unit: 5
 Preview:
 Subject: CYBER_SECURITY | Unit: 5 | Title: Rights and Obligations of Individuals
 and Organizations under Indian Cyber Law | Topics: Rights of individuals under

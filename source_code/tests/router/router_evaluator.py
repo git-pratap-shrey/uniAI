@@ -3,13 +3,13 @@ import sys
 import json
 
 # -------------------------------------------------
-# Fix import path (because test/ is inside source_code/)
+# Fix import path
 # -------------------------------------------------
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../"))
 
 if PROJECT_ROOT not in sys.path:
-    sys.path.append(PROJECT_ROOT)
+    sys.path.insert(0, PROJECT_ROOT)
 
 from rag.router import detect_subject
 
@@ -18,18 +18,13 @@ from rag.router import detect_subject
 # Real router wrapper
 # -------------------------------------------------
 def real_router(question):
-    """
-    Returns:
-        route (str): "SYLLABUS" or "GENERIC"
-        used_llm (bool): whether LLM fallback was triggered
-    """
     subject, used_llm = detect_subject(question, debug=True)
     route = "SYLLABUS" if subject else "GENERIC"
     return route, used_llm
 
 
 # -------------------------------------------------
-# Evaluation Function
+# Evaluation
 # -------------------------------------------------
 def evaluate_router(router_function, test_file=None):
 
@@ -41,13 +36,12 @@ def evaluate_router(router_function, test_file=None):
 
     total = len(test_cases)
     correct = 0
+    llm_fallback_count = 0
 
     category_stats = {
         "SYLLABUS": {"total": 0, "correct": 0},
         "GENERIC": {"total": 0, "correct": 0},
     }
-
-    llm_fallback_count = 0
 
     for case in test_cases:
         question = case["question"]
@@ -64,7 +58,8 @@ def evaluate_router(router_function, test_file=None):
             correct += 1
             category_stats[expected]["correct"] += 1
         else:
-            print(f"Mismatch: {question}")
+            print(f"\nMismatch:")
+            print(f"Question: {question}")
             print(f"Expected: {expected}, Got: {predicted}")
             print("-" * 40)
 
@@ -77,10 +72,7 @@ def evaluate_router(router_function, test_file=None):
     for category, stats in category_stats.items():
         if stats["total"] > 0:
             cat_acc = (stats["correct"] / stats["total"]) * 100
-            print(
-                f"{category}: {cat_acc:.2f}% "
-                f"({stats['correct']}/{stats['total']})"
-            )
+            print(f"{category}: {cat_acc:.2f}% ({stats['correct']}/{stats['total']})")
 
     print("\n========== LLM FALLBACK ==========")
     print(
@@ -91,8 +83,5 @@ def evaluate_router(router_function, test_file=None):
     return accuracy
 
 
-# -------------------------------------------------
-# Entry Point
-# -------------------------------------------------
 if __name__ == "__main__":
     evaluate_router(real_router)

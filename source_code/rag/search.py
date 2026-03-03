@@ -1,20 +1,39 @@
 """
 search.py
 ─────────
-Retrieves candidate chunks from ChromaDB.
+Retrieves candidate chunks from ChromaDB across three isolated collections:
 
-Handles two document types in one collection:
-  - notes / handwritten_notes / printed_notes / question_paper
-  - syllabus
+  multimodal_notes    — lecture notes, handwritten notes, printed slides
+  multimodal_syllabus — syllabus unit topics, course outcomes, book lists
+  multimodal_pyq      — past year question papers
 
-Both share the same metadata schema so a single function works for all.
-Callers can filter by doc_type if needed.
+Public API
+----------
+  retrieve_notes(query, subject, unit, k, threshold)   → list[Chunk]
+  retrieve_syllabus(query, subject, unit, k, threshold) → list[Chunk]
+  retrieve_pyq(query, subject, unit, k, threshold)      → list[Chunk]
 
-Returns raw ChromaDB-style dicts — no prompt formatting here.
+Each function returns a list of Chunk dicts:
+  {
+    "text":       str,
+    "metadata":   dict,   # raw ChromaDB metadata
+    "distance":   float,  # cosine distance (lower = more similar)
+    "similarity": float,  # 1 - distance (higher = more similar)
+    "collection": str,    # which collection this came from
+  }
+
+Unit normalisation
+------------------
+Both ingestion pipelines now write plain numeric strings ("1", "2" …).
+Older ingest runs may have written "unit1". The _unit_filter() helper
+builds a ChromaDB $or clause that matches both forms so old data works
+transparently.
 """
 
 import os
+import re
 import sys
+from typing import TypedDict
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
@@ -25,210 +44,270 @@ import config
 from pipeline.embeddings.local_embedding import embed
 
 # ---------------------------------------------------------------------------
-# ChromaDB — single persistent client shared across all calls
+# Types
+# ---------------------------------------------------------------------------
+
+class Chunk(TypedDict):
+    text:       str
+    metadata:   dict
+    distance:   float
+    similarity: float
+    collection: str
+
+
+# ---------------------------------------------------------------------------
+# ChromaDB — one persistent client, lazy-loaded collections
 # ---------------------------------------------------------------------------
 
 _client = chromadb.PersistentClient(path=config.CHROMA_DB_PATH)
-_collection = None
+
+# Collection handles, populated on first access
+_collections: dict[str, chromadb.Collection] = {}
+
+_COLLECTION_NAMES = {
+    "notes":    config.CHROMA_COLLECTION_NAME,          # multimodal_notes
+    "syllabus": config.CHROMA_SYLLABUS_COLLECTION_NAME,  # multimodal_syllabus
+    "pyq":      config.CHROMA_PYQ_COLLECTION_NAME,       # multimodal_pyq
+}
 
 
-def _get_collection():
-    global _collection
-    if _collection is None:
+def _get(alias: str) -> chromadb.Collection:
+    """Return (and cache) a ChromaDB collection by alias."""
+    if alias not in _collections:
+        name = _COLLECTION_NAMES[alias]
         try:
-            _collection = _client.get_collection(config.CHROMA_COLLECTION_NAME)
-        except Exception as e:
+            _collections[alias] = _client.get_collection(name)
+        except Exception as exc:
             raise RuntimeError(
-                f"ChromaDB collection '{config.CHROMA_COLLECTION_NAME}' not found.\n"
-                f"Run ingest_multimodal.py and ingest_multimodal_syllabus.py first.\n"
-                f"Original error: {e}"
+                f"ChromaDB collection '{name}' not found. "
+                f"Run the corresponding ingest script first.\n"
+                f"Original error: {exc}"
             )
-    return _collection
+    return _collections[alias]
+
+
+def collection_exists(alias: str) -> bool:
+    """Check whether a collection is present without raising."""
+    try:
+        _get(alias)
+        return True
+    except RuntimeError:
+        return False
 
 
 # ---------------------------------------------------------------------------
-# Core retrieval
+# Unit normalisation
 # ---------------------------------------------------------------------------
 
-def retrieve(
-    query: str,
+def normalize_unit(raw: str | int | None) -> str | None:
+    """
+    Return a plain numeric string ("1", "3" …) or None.
+
+    Handles:  1, "1", "unit1", "Unit 1", "unit-1", "unit 03"
+    """
+    if raw is None:
+        return None
+    s = str(raw).strip().lower()
+    m = re.search(r"\d+", s)
+    if m:
+        return str(int(m.group()))   # strips leading zeros
+    return None
+
+
+def _unit_filter(unit: str) -> dict:
+    """
+    Build a ChromaDB $or clause that matches both storage formats.
+
+    Notes ingest (current):   unit = "1"
+    Notes ingest (old):       unit = "unit1"
+    Syllabus ingest:          unit = "1"
+    """
+    return {
+        "$or": [
+            {"unit": unit},
+            {"unit": f"unit{unit}"},
+        ]
+    }
+
+
+# ---------------------------------------------------------------------------
+# Where-clause builder
+# ---------------------------------------------------------------------------
+
+def _build_where(
     subject: str | None = None,
     unit: str | None = None,
-    doc_type: str | None = None,   # e.g. "syllabus", "notes", None = all
-    k: int = 8,
-    similarity_threshold: float | None = None,
-) -> list[dict]:
+    extra: list[dict] | None = None,
+) -> dict | None:
     """
-    Retrieve relevant chunks with metadata filtering and similarity threshold.
+    Compose a ChromaDB where clause from optional subject, unit, and extra filters.
 
-    Returns a list of dicts:
-    [
-        {
-            "text": "...",
-            "metadata": { source, unit, subject, title, document_type, confidence, ... },
-            "distance": 0.42,
-            "similarity": 0.58,
-        },
-        ...
-    ]
+    Returns None if no filters are needed (avoids passing empty where= to Chroma).
     """
-    if similarity_threshold is None:
-        similarity_threshold = config.SIMILARITY_THRESHOLD
-
-    collection = _get_collection()
-
-    # Build ChromaDB where clause
-    filters = []
+    filters: list[dict] = []
 
     if subject:
-        filters.append({"subject": subject})
+        filters.append({"subject": subject.upper()})
 
     if unit:
-        # Notes ingest stores unit as "unit1"; syllabus ingest stores it as "1"
-        # Use $or to match both formats
-        filters.append({
-            "$or": [
-                {"unit": unit},
-                {"unit": f"unit{unit}"},
-            ]
-        })
+        n = normalize_unit(unit)
+        if n:
+            filters.append(_unit_filter(n))
 
-    if doc_type:
-        filters.append({"document_type": doc_type})
+    if extra:
+        filters.extend(extra)
 
-    where_clause = None
+    if not filters:
+        return None
     if len(filters) == 1:
-        where_clause = filters[0]
-    elif len(filters) > 1:
-        where_clause = {"$and": filters}
+        return filters[0]
+    return {"$and": filters}
 
-    # Embed query
+
+# ---------------------------------------------------------------------------
+# Core retrieval helper
+# ---------------------------------------------------------------------------
+
+def _query_collection(
+    alias: str,
+    query: str,
+    where: dict | None,
+    k: int,
+    threshold: float,
+) -> list[Chunk]:
+    """
+    Embed the query, run a ChromaDB similarity search, and filter by threshold.
+    """
+    collection = _get(alias)
     query_vector = embed([query])[0]
 
-    query_params = {
+    params: dict = {
         "query_embeddings": [query_vector],
         "n_results": k,
         "include": ["documents", "metadatas", "distances"],
     }
-    if where_clause:
-        query_params["where"] = where_clause
+    if where is not None:
+        params["where"] = where
 
     try:
-        results = collection.query(**query_params)
-    except Exception as e:
-        print(f"[search] ChromaDB query failed: {e}")
+        results = collection.query(**params)
+    except Exception as exc:
+        print(f"[search] {alias} query failed: {exc}")
         return []
 
     if not results or not results.get("documents"):
         return []
 
-    docs = results["documents"][0]
+    docs  = results["documents"][0]
     metas = results["metadatas"][0]
     dists = results["distances"][0]
 
-    # Apply similarity threshold (cosine space: distance = 1 - similarity)
-    max_distance = 1.0 - similarity_threshold
+    # cosine space: distance = 1 − similarity → keep if distance ≤ max_distance
+    max_dist = 1.0 - threshold
 
-    chunks = []
-    for doc, meta, dist in zip(docs, metas, dists):
-        if dist <= max_distance:
-            chunks.append({
-                "text": doc,
-                "metadata": meta,
-                "distance": dist,
-                "similarity": round(1.0 - dist, 4),
-            })
+    return [
+        Chunk(
+            text=doc,
+            metadata=meta,
+            distance=round(dist, 6),
+            similarity=round(1.0 - dist, 4),
+            collection=alias,
+        )
+        for doc, meta, dist in zip(docs, metas, dists)
+        if dist <= max_dist
+    ]
 
-    return chunks
 
+# ---------------------------------------------------------------------------
+# Public retrieval functions
+# ---------------------------------------------------------------------------
 
 def retrieve_notes(
     query: str,
     subject: str | None = None,
     unit: str | None = None,
     k: int = 8,
-    similarity_threshold: float | None = None,
-) -> list[dict]:
-    """Retrieve note chunks (excludes syllabus)."""
-    # Don't filter by doc_type=notes because ingestion uses varied values
-    # (printed_notes, handwritten_notes, question_paper etc.)
-    # Instead exclude only syllabus explicitly.
-    if similarity_threshold is None:
-        similarity_threshold = config.SIMILARITY_THRESHOLD
+    threshold: float | None = None,
+) -> list[Chunk]:
+    """
+    Retrieve lecture note chunks from multimodal_notes.
 
-    collection = _get_collection()
+    Excludes syllabus chunks (they have their own collection).
+    """
+    if threshold is None:
+        threshold = config.SIMILARITY_THRESHOLD
 
-    filters = []
-    if subject:
-        filters.append({"subject": subject})
-    if unit:
-        filters.append({
-            "$or": [
-                {"unit": unit},
-                {"unit": f"unit{unit}"},
-            ]
-        })
-
-    # Exclude syllabus chunks
-    filters.append({"document_type": {"$ne": "syllabus"}})
-
-    where_clause = None
-    if len(filters) == 1:
-        where_clause = filters[0]
-    elif len(filters) > 1:
-        where_clause = {"$and": filters}
-
-    query_vector = embed([query])[0]
-    query_params = {
-        "query_embeddings": [query_vector],
-        "n_results": k,
-        "include": ["documents", "metadatas", "distances"],
-    }
-    if where_clause:
-        query_params["where"] = where_clause
-
-    try:
-        results = collection.query(**query_params)
-    except Exception as e:
-        print(f"[search] Notes query failed: {e}")
-        return []
-
-    if not results or not results.get("documents"):
-        return []
-
-    docs = results["documents"][0]
-    metas = results["metadatas"][0]
-    dists = results["distances"][0]
-    max_distance = 1.0 - similarity_threshold
-
-    return [
-        {
-            "text": doc,
-            "metadata": meta,
-            "distance": dist,
-            "similarity": round(1.0 - dist, 4),
-        }
-        for doc, meta, dist in zip(docs, metas, dists)
-        if dist <= max_distance
-    ]
+    where = _build_where(
+        subject=subject,
+        unit=unit,
+        extra=[{"document_type": {"$ne": "syllabus"}}],
+    )
+    return _query_collection("notes", query, where, k, threshold)
 
 
 def retrieve_syllabus(
     query: str,
     subject: str | None = None,
     unit: str | None = None,
-    k: int = 3,
-    similarity_threshold: float | None = None,
-) -> list[dict]:
-    """Retrieve syllabus chunks only."""
-    if similarity_threshold is None:
-        similarity_threshold = config.SIMILARITY_THRESHOLD
+    k: int = 5,
+    threshold: float | None = None,
+) -> list[Chunk]:
+    """
+    Retrieve syllabus chunks from multimodal_syllabus.
 
-    return retrieve(
-        query=query,
-        subject=subject,
-        unit=unit,
-        doc_type="syllabus",
-        k=k,
-        similarity_threshold=similarity_threshold,
-    )
+    This is the correct collection — NOT a filter inside multimodal_notes.
+    chunk_type values:  unit_1…unit_5, course_outcomes, books_references
+    """
+    if threshold is None:
+        threshold = config.SIMILARITY_THRESHOLD
+
+    where = _build_where(subject=subject, unit=unit)
+    return _query_collection("syllabus", query, where, k, threshold)
+
+
+def retrieve_pyq(
+    query: str,
+    subject: str | None = None,
+    unit: str | None = None,
+    k: int = 5,
+    threshold: float = 0.60,
+    marks: int | None = None,
+    year: int | None = None,
+) -> list[Chunk]:
+    """
+    Retrieve past year question chunks from multimodal_pyq.
+
+    Uses a higher default threshold (0.60) because PYQ questions are short
+    and low-similarity hits are almost always noise.
+
+    Optional filters:
+      marks — e.g. 10 for ten-mark questions
+      year  — e.g. 2023
+    """
+    extra: list[dict] = []
+    if marks is not None:
+        extra.append({"marks": marks})
+    if year is not None:
+        extra.append({"year": year})
+
+    where = _build_where(subject=subject, unit=unit, extra=extra or None)
+    return _query_collection("pyq", query, where, k, threshold)
+
+
+def retrieve_all(
+    query: str,
+    subject: str | None = None,
+    unit: str | None = None,
+    notes_k: int = 6,
+    syllabus_k: int = 3,
+    threshold: float | None = None,
+) -> list[Chunk]:
+    """
+    Retrieve from notes + syllabus and return them interleaved (notes first).
+
+    Useful for unit-overview queries where you want both conceptual content
+    and the official topic list.
+    """
+    notes = retrieve_notes(query, subject=subject, unit=unit, k=notes_k, threshold=threshold)
+    syllabus = retrieve_syllabus(query, subject=subject, unit=unit, k=syllabus_k, threshold=threshold)
+    return notes + syllabus
