@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import re
 from pathlib import Path
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -20,47 +21,80 @@ BASE_PATH = config.BASE_DATA_DIR
 # HELPERS
 # ------------------------------------------------------------------
 
+def normalize_unit(unit):
+    """
+    Normalize unit to a clean numeric string.
+
+    Accepts:
+        1
+        "1"
+        "unit1"
+        "Unit 1"
+        "UNIT-1"
+        "unit 03"
+
+    Returns:
+        "1", "2", etc.
+        or "unknown" if invalid
+    """
+
+    if unit is None:
+        return "unknown"
+
+    unit_str = str(unit).strip().lower()
+
+    if not unit_str:
+        return "unknown"
+
+    match = re.search(r"\d+", unit_str)
+    if match:
+        return str(int(match.group()))  # remove leading zeros
+
+    return "unknown"
+
+
 def build_embedding_text(data: dict) -> str:
     """
-    Build a rich embedding string from extracted metadata.
-    Prioritizes full_text for semantic search quality,
-    with structured metadata as supplementary context.
+    Build rich embedding text.
     """
+
     meta = data.get("extracted_metadata", {})
 
-    # Primary: full OCR text (the most important for search)
     full_text = meta.get("full_text", "").strip()
-
-    # Secondary: structured metadata for enrichment
     title = meta.get("title", "")
-    unit = data.get("unit", meta.get("unit", ""))
-    topics = ", ".join(meta.get("topics", []))
-    concepts = ", ".join(meta.get("key_concepts", []))
     subject = data.get("subject", "")
 
+    raw_unit = data.get("unit")
+    normalized_unit = normalize_unit(raw_unit)
+
+    topics = ", ".join(meta.get("topics", []))
+    concepts = ", ".join(meta.get("key_concepts", []))
+
     prefix_parts = []
+
     if subject:
         prefix_parts.append(f"Subject: {subject}")
-    if unit:
-        prefix_parts.append(f"Unit: {unit}")
+
+    if normalized_unit != "unknown":
+        prefix_parts.append(f"Unit: {normalized_unit}")
+
     if title:
         prefix_parts.append(f"Title: {title}")
+
     if topics:
         prefix_parts.append(f"Topics: {topics}")
+
     if concepts:
         prefix_parts.append(f"Key Concepts: {concepts}")
 
     prefix = " | ".join(prefix_parts)
 
     if full_text:
-        # Combine metadata prefix with actual content
         max_text_len = 4000
         truncated = full_text[:max_text_len]
         return f"{prefix}\n\n{truncated}" if prefix else truncated
-    elif prefix:
-        return prefix
-    else:
-        return data.get("description", "")
+
+    return prefix or data.get("description", "")
 
 
 # ------------------------------------------------------------------
@@ -86,20 +120,21 @@ def ingest_descriptions():
             with open(json_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
-            if data.get("extracted_metadata", {}).get("document_type") == "question_paper":
-                print(f"   -> Skipping {json_file.name} (question_paper, belongs in PYQ pipeline)")
+            meta = data.get("extracted_metadata", {})
+
+            # Skip question papers (handled elsewhere)
+            if meta.get("document_type") == "question_paper":
                 skipped += 1
                 continue
 
-            confidence = data.get("extracted_metadata", {}).get("confidence", 1.0)
+            # Skip low confidence
+            confidence = meta.get("confidence", 1.0)
             if confidence < config.MIN_INGEST_CONFIDENCE:
-                print(f"   -> Skipping {json_file.name} (confidence {confidence:.2f} below threshold {config.MIN_INGEST_CONFIDENCE})")
                 skipped += 1
                 continue
 
             embedding_text = build_embedding_text(data)
             if not embedding_text.strip():
-                print(f"   -> Skipping {json_file.name} (empty content)")
                 skipped += 1
                 continue
 
@@ -107,17 +142,20 @@ def ingest_descriptions():
             page_start = data.get("page_start", 0)
             page_end = data.get("page_end", 0)
             subject = data.get("subject", "unknown")
+
             doc_id = f"{subject}_{file_name}_p{page_start}-{page_end}"
 
+            # Skip if already exists
             existing = collection.get(ids=[doc_id])
             if existing and existing["ids"]:
                 skipped += 1
                 continue
 
-            # qwen3-embedding:4B supports 32K tokens — 4000 chars is well within limit
             vector = get_embedding(embedding_text[:4000])
 
-            meta = data.get("extracted_metadata", {})
+            raw_unit = meta.get("unit") or data.get("unit")
+            normalized_unit = normalize_unit(raw_unit)
+
             collection.upsert(
                 ids=[doc_id],
                 embeddings=[vector],
@@ -126,13 +164,17 @@ def ingest_descriptions():
                     "source": file_name,
                     "page_start": page_start,
                     "page_end": page_end,
-                    "unit": str(meta.get("unit", data.get("unit", "unknown"))),
-                    "subject": data.get("subject", "unknown"),
+                    "unit": normalized_unit,
+                    "subject": subject,
                     "title": meta.get("title", "unknown"),
                     "document_type": meta.get("document_type", "unknown"),
-                    "confidence": meta.get("confidence", 0),
+                    "confidence": confidence,
                 }]
             )
+
+            if normalized_unit == "unknown":
+                print(f"⚠ Unknown unit for {doc_id}")
+
             ingested += 1
             print(f"   ✅ {doc_id} — {meta.get('title', 'untitled')}")
 
