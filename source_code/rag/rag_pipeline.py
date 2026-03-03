@@ -117,7 +117,7 @@ def _generate(prompt: str) -> str:
             response = client.chat(
                 model=config.MODEL_CHAT,
                 messages=[{"role": "user", "content": prompt}],
-                options={"num_ctx": 8192, "think": False},
+                 options={"num_ctx": 8192, "think": False, "temperature": 0.25},
             )
             return response["message"]["content"]
 
