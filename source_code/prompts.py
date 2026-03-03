@@ -163,26 +163,15 @@ User question:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def subject_router(query: str, subjects_list: str) -> str:
-    """
-    Build the subject-classification prompt for the router model.
-
-    Args:
-        query:         The user's raw query string.
-        subjects_list: Comma-separated list of known subject names.
-    """
-    valid_answers = "\n".join(subjects_list.split(", ") + ["NONE"])
-    return f"""\
-Known Subjects: {subjects_list}
-
-Classify the query into one of these subjects.
-
-Query: {query}
-
-Answer must be exactly one of:
-{valid_answers}
-
-Answer:"""
-
+    return (
+        "/no_think\n"
+        "You are a routing agent for a university study assistant.\n"
+        f"Known subjects: {subjects_list}\n\n"
+        f'User query: "{query}"\n\n'
+        "Reply ONLY with one of these exact strings: "
+        f"{subjects_list}, NONE\n"
+        "No explanation. No punctuation. Just the name."
+    )
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 4. PIPELINE PROMPTS

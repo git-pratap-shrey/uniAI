@@ -1,31 +1,28 @@
 """
 router.py
-─────────
+----------
 Detects which subject a query belongs to.
 
 Strategy:
-  1. Score query against keyword map (fast, deterministic)
-  2. If ambiguous or no match → LLM fallback (slow, accurate)
-  3. Returns None if subject cannot be resolved
+1. Score query against keyword map (fast, deterministic)
+2. If ambiguous or no match → LLM fallback (slower, semantic)
+3. Returns subject name or None
 
-No database calls. No retrieval logic.
+Optional debug mode:
+- Returns (subject, used_llm_bool)
 """
 
 import json
 import os
-import sys
-
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if ROOT_DIR not in sys.path:
-    sys.path.append(ROOT_DIR)
-
 import config
 import ollama
 
-# ---------------------------------------------------------------------------
-# Load keyword map once at module import
-# ---------------------------------------------------------------------------
 
+# -------------------------------------------------
+# Load keyword map once
+# -------------------------------------------------
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 KEYWORDS_FILE = os.path.join(ROOT_DIR, "data", "subject_keywords.json")
 
 _keyword_map: dict[str, list[str]] = {}
@@ -37,23 +34,32 @@ if os.path.exists(KEYWORDS_FILE):
     except (json.JSONDecodeError, IOError) as e:
         print(f"[router] WARNING: Could not load keyword map: {e}")
 else:
-    print(f"[router] WARNING: Keyword map not found at {KEYWORDS_FILE}.")
-    print("         Run source_code/pipeline/generate_keyword_map.py first.")
+    print(f"[router] WARNING: Keyword map not found at {KEYWORDS_FILE}")
+    print("         Run generate_keyword_map.py first.")
 
-# ---------------------------------------------------------------------------
 
-def detect_subject(query: str) -> str | None:
+# -------------------------------------------------
+# Public API
+# -------------------------------------------------
+
+def detect_subject(query: str, debug: bool = False):
     """
-    Detect the subject a query belongs to.
+    Detect subject of a query.
 
-    Returns the subject name (e.g. 'PYTHON', 'COA') or None.
+    Returns:
+        subject (str | None)
+        If debug=True → returns (subject, used_llm_bool)
     """
+
     if not _keyword_map:
-        return None
+        return (None, False) if debug else None
 
     query_lower = query.lower()
     scores = {subject: 0 for subject in _keyword_map}
 
+    # -------------------------
+    # Keyword Scoring
+    # -------------------------
     for subject, keywords in _keyword_map.items():
         for kw in keywords:
             if kw in query_lower:
@@ -62,38 +68,59 @@ def detect_subject(query: str) -> str | None:
     max_score = max(scores.values())
 
     if max_score > 0:
-        top = [s for s, v in scores.items() if v == max_score]
-        if len(top) == 1:
-            return top[0]  # clear winner
+        top_subjects = [s for s, v in scores.items() if v == max_score]
 
-    # Ambiguous or zero score — ask the LLM
-    return _llm_classify(query)
+        if len(top_subjects) == 1:
+            result = top_subjects[0]
+            return (result, False) if debug else result
 
+    # -------------------------
+    # Fallback to LLM
+    # -------------------------
+    llm_result = _llm_classify(query)
+
+    return (llm_result, True) if debug else llm_result
+
+
+# -------------------------------------------------
+# LLM Classification
+# -------------------------------------------------
 
 def _llm_classify(query: str) -> str | None:
-    """Fallback: ask a fast local model to classify the query."""
+    """Ask local LLM to classify subject."""
+
+    if not _keyword_map:
+        return None
+
     subjects_list = ", ".join(_keyword_map.keys())
 
     prompt = (
-        f"You are a routing agent for a university study assistant.\n"
+        "You are a routing agent for a university study assistant.\n"
         f"Known subjects: {subjects_list}\n\n"
         f'User query: "{query}"\n\n'
-        f"Which subject is this query about?\n"
-        f"Reply ONLY with the exact subject name from the list above. "
-        f"If none match, reply NONE."
+        "Which subject is this query about?\n"
+        "Reply ONLY with the exact subject name from the list above.\n"
+        "If none match, reply NONE."
     )
 
     try:
         client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
+
         response = client.chat(
             model=config.MODEL_ROUTER,
             messages=[{"role": "user", "content": prompt}],
-            options={"think": False},
+            options={
+                "temperature": 0,
+                "num_predict": 20,  # put this back — think: False alone isn't enough
+                "think": False,
+            },
         )
+
         llm_choice = response["message"]["content"].strip()
+        print(f"[LLM RAW OUTPUT]: '{llm_choice}'")  # add this
 
         for subject in _keyword_map:
-            if subject.lower() in llm_choice.lower():
+            if subject.lower() == llm_choice.lower():
                 return subject
 
     except Exception as e:
@@ -101,6 +128,10 @@ def _llm_classify(query: str) -> str | None:
 
     return None
 
+
+# -------------------------------------------------
+# Utility
+# -------------------------------------------------
 
 def list_subjects() -> list[str]:
     """Return all known subjects."""
