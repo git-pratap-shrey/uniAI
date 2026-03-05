@@ -125,12 +125,6 @@ def rag_answer(
     mode: str = "syllabus",
     subject: str | None = None,
 ) -> str:
-    """
-    Build the full prompt sent to the generation model.
-
-    mode="syllabus"  → strict, grounded in notes, exam tone
-    mode="generic"   → general knowledge, labeled clearly
-    """
     if mode == "syllabus":
         subject_line = f" for {subject}" if subject else ""
         system = f"""\
@@ -172,10 +166,9 @@ Rules:
     elif mode == "syllabus":
         sections.append("(No relevant notes were found in the database for this query.)")
 
-    sections.append(f"Student question:\n{query}")
+    sections.append(f"Student question:\n{query}\n\nRemember, the student question is:\n{query}")
 
     return "\n\n".join(sections)
-
 
 def topic_list(subject: str, unit: str) -> str:
     """Prompt for listing topics in a unit — used when the query is a unit overview."""
@@ -199,30 +192,58 @@ def subject_router(query: str, subjects_list: str) -> str:
         "No explanation. No punctuation. Just the name."
     )
 
+def subject_unit_router(query: str, subjects_units_list: str) -> str:
+    return (
+        "You are a routing agent for a university study assistant.\n"
+        f"Known subject_units: {subjects_units_list}\n\n"
+        f'User query: "{query}"\n\n'
+        "Reply ONLY with one of these exact strings: "
+        f"{subjects_units_list}, NONE\n"
+        "No explanation. No punctuation. Just the name."
+    )
+
 # ══════════════════════════════════════════════════════════════════════════════
 # 4. PIPELINE PROMPTS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def keyword_extraction(subject: str, items_list: str) -> str:
+def keyword_extraction(subject: str, items_list: str, unit: str | None = None) -> str:
     """
     Build the keyword extraction prompt for generate_keyword_map.py.
 
     Args:
         subject:    Subject name (e.g. 'COA', 'PYTHON').
         items_list: Comma-separated discovered content titles/topics.
+        unit:       If provided, extract keywords specific to just this unit.
     """
-    return f"""\
+    if unit is not None:
+        return f"""\
 You are a taxonomy expert extracting academic keywords.
-I will give you a Subject Name and a list of internal topics/titles found in that subject's syllabus.
+I will give you a Subject Name, a Unit number, and a list of topics covered ONLY in that unit.
+
+Subject: {subject}
+Unit: {unit}
+Unit Topics: {items_list}
+
+Extract a comma-separated list of 8-12 precise technical terms or concepts that are \
+SPECIFIC to this unit's content.
+CRITICAL rules:
+- Do NOT include generic subject-wide terms (e.g. the subject name itself, broad field names).
+- Do NOT include words like "introduction", "overview", "unit", "basics", "concepts".
+- Every keyword must be a concrete term a student would use when studying THIS specific unit.
+- Do not repeat keywords that would appear in every unit of this subject.
+ONLY output the comma-separated list. No introductory text. No numbering. No markdown.\
+"""
+    else:
+        return f"""\
+You are a taxonomy expert extracting academic keywords.
+I will give you a Subject Name and a list of internal topics/titles found in that subject.
 
 Subject: {subject}
 Discovered Content: {items_list}
 
-Extract a concise, comma-separated list of the 10-15 most defining key phrases, \
-concepts, or terms that definitively represent this subject.
+Extract a comma-separated list of 10-15 defining key phrases or terms for this subject overall.
 Do not include generic words like "introduction", "overview", or "unit".
-ONLY output the comma-separated list of keywords. \
-No introductory text. No numbering. No markdown.\
+ONLY output the comma-separated list. No introductory text. No numbering. No markdown.\
 """
 
 # ══════════════════════════════════════════════════════════════════════════════

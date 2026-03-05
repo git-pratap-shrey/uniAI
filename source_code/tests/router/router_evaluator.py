@@ -11,22 +11,12 @@ PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../"))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from rag.router import detect_subject
-
-
-# -------------------------------------------------
-# Real router wrapper
-# -------------------------------------------------
-def real_router(question):
-    subject, used_llm = detect_subject(question, debug=True)
-    route = "SYLLABUS" if subject else "GENERIC"
-    return route, used_llm
-
+from rag.hybrid_router import route
 
 # -------------------------------------------------
 # Evaluation
 # -------------------------------------------------
-def evaluate_router(router_function, test_file=None):
+def evaluate_router(test_file=None):
 
     if test_file is None:
         test_file = os.path.join(CURRENT_DIR, "router_test_cases.json")
@@ -35,53 +25,61 @@ def evaluate_router(router_function, test_file=None):
         test_cases = json.load(f)
 
     total = len(test_cases)
-    correct = 0
-    llm_fallback_count = 0
-
-    category_stats = {
-        "SYLLABUS": {"total": 0, "correct": 0},
-        "GENERIC": {"total": 0, "correct": 0},
-    }
+    
+    overall_correct = 0
+    subject_correct = 0
+    unit_correct = 0
+    unit_total = 0
+    
+    methods = {"keyword": 0, "embedding": 0, "llm": 0, "none": 0}
 
     for case in test_cases:
-        question = case["question"]
-        expected = case["expected_route"]
+        question = case.get("question")
+        expected_route = case.get("expected_route")
+        
+        expected_subject = case.get("expected_subject")
+        expected_unit = case.get("expected_unit")
 
-        predicted, used_llm = router_function(question)
+        res = route(question)
+        
+        predicted_route = "SYLLABUS" if res.subject else "GENERIC"
+        
+        if expected_route and predicted_route == expected_route:
+            overall_correct += 1
+            
+        methods[res.method] = methods.get(res.method, 0) + 1
+            
+        if expected_subject:
+            if res.subject == expected_subject:
+                subject_correct += 1
+                
+        if expected_unit and expected_subject:
+            unit_total += 1
+            if res.unit == str(expected_unit) and res.subject == expected_subject:
+                unit_correct += 1
+            else:
+                print(f"\nMismatch (Subject/Unit):")
+                print(f"Question: {question}")
+                print(f"Expected: {expected_subject}_{expected_unit}, Got: {res.subject}_{res.unit} (Method: {res.method})")
+                print("-" * 40)
 
-        if used_llm:
-            llm_fallback_count += 1
+    print("\n========== OVERALL ROUTE ==========")
+    if total > 0:
+        print(f"Accuracy: {(overall_correct / total) * 100:.2f}% ({overall_correct}/{total})")
 
-        category_stats[expected]["total"] += 1
+    subject_cases_count = sum(1 for c in test_cases if "expected_subject" in c)
+    if subject_cases_count > 0:
+        print("\n========== SUBJECT ACCURACY ==========")
+        print(f"Accuracy: {(subject_correct / subject_cases_count) * 100:.2f}% ({subject_correct}/{subject_cases_count})")
+        
+    if unit_total > 0:
+        print("\n========== UNIT ACCURACY ==========")
+        print(f"Accuracy: {(unit_correct / unit_total) * 100:.2f}% ({unit_correct}/{unit_total})")
 
-        if predicted == expected:
-            correct += 1
-            category_stats[expected]["correct"] += 1
-        else:
-            print(f"\nMismatch:")
-            print(f"Question: {question}")
-            print(f"Expected: {expected}, Got: {predicted}")
-            print("-" * 40)
-
-    accuracy = (correct / total) * 100
-
-    print("\n========== OVERALL ==========")
-    print(f"Accuracy: {accuracy:.2f}% ({correct}/{total})")
-
-    print("\n========== PER CATEGORY ==========")
-    for category, stats in category_stats.items():
-        if stats["total"] > 0:
-            cat_acc = (stats["correct"] / stats["total"]) * 100
-            print(f"{category}: {cat_acc:.2f}% ({stats['correct']}/{stats['total']})")
-
-    print("\n========== LLM FALLBACK ==========")
-    print(
-        f"LLM used in {llm_fallback_count}/{total} cases "
-        f"({(llm_fallback_count / total) * 100:.2f}%)"
-    )
-
-    return accuracy
-
+    print("\n========== ROUTING METHODS ==========")
+    for m, count in methods.items():
+        if count > 0:
+            print(f"{m}: {count}/{total} ({(count / total) * 100:.2f}%)")
 
 if __name__ == "__main__":
-    evaluate_router(real_router)
+    evaluate_router()

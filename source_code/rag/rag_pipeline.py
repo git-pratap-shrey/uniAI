@@ -30,8 +30,7 @@ if ROOT_DIR not in sys.path:
 import config
 import ollama
 
-from rag.router import detect_subject
-from rag.unit_detector import detect_unit
+from rag.hybrid_router import route as hybrid_route
 from rag.search import retrieve_notes, retrieve_syllabus
 # from rag.reranker import rerank              # heuristic — kept as fallback
 from rag.cross_encoder import rerank_cross_encoder
@@ -160,13 +159,10 @@ def answer_query(
     """
     history = _trim_history(history or [])
 
-    # ── 1. Detect subject ──────────────────────────────────────────────────
-    subject = session_subject
-    if not subject:
-        subject = detect_subject(query)
-
-    # ── 2. Detect unit ────────────────────────────────────────────────────
-    unit = detect_unit(query)
+    # ── 1 & 2. Hybrid Routing (Subject & Unit) ────────────────────────────
+    route_res = hybrid_route(query, session_subject=session_subject)
+    subject = route_res.subject
+    unit = route_res.unit
 
     # ── 3. Detect mode ────────────────────────────────────────────────────
     mode = _detect_mode(query)

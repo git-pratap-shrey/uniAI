@@ -11,7 +11,7 @@ if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
 import config
-from utils import build_vlm_client
+from utils import build_vlm_client, pil_to_base64, pil_to_jpeg_bytes
 from prompts import pyq_unit_classification
 
 # ------------------------------------------------------------------
@@ -19,7 +19,14 @@ from prompts import pyq_unit_classification
 # ------------------------------------------------------------------
 
 BASE_PATH = config.BASE_DATA_DIR
-OLLAMA_CLIENT = build_vlm_client()
+BACKEND = config.MODEL_VISION_BACKEND.lower()
+
+if BACKEND == "huggingface":
+    from huggingface_hub import InferenceClient as _HFClient
+    HF_CLIENT = _HFClient(base_url="https://router.huggingface.co/v1", api_key=config.HF_TOKEN)
+    HF_MODEL_ID = config.MODEL_VISION_HF
+else:
+    OLLAMA_CLIENT = build_vlm_client()
 
 def get_syllabus_topics(subject: str) -> str:
     """Finds the syllabus JSON for the subject and extracts units."""
@@ -43,23 +50,50 @@ def load_pdf(pdf_path: Path):
     from prompts import PYQ_VLM_TRANSCRIPTION
     doc = fitz.open(str(pdf_path))
     text = ""
+    # Ollama cloud: 1.0 avoids Cloudflare 524 timeouts; HuggingFace: 1.5 for better OCR
+    _scale = 1.0 if BACKEND == "ollama" else 1.5
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
-        pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
+        pix = page.get_pixmap(matrix=fitz.Matrix(_scale, _scale))
 
         MAX_RETRIES = 3
         raw_response = None
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                response = OLLAMA_CLIENT.chat(
-                    model=config.MODEL_VISION,
-                    messages=[{
-                        'role': 'user',
-                        'content': PYQ_VLM_TRANSCRIPTION,
-                        'images': [pix.tobytes("png")]
+                if BACKEND == "huggingface":
+                    from PIL import Image
+                    import io
+                    img = Image.open(io.BytesIO(pix.tobytes("png")))
+                    hf_messages = [{
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": pil_to_base64(img)},
+                            },
+                            {"type": "text", "text": PYQ_VLM_TRANSCRIPTION},
+                        ],
                     }]
-                )
-                raw_response = response['message']['content'].strip()
+                    hf_response = HF_CLIENT.chat_completion(
+                        model=HF_MODEL_ID,
+                        messages=hf_messages,
+                        max_tokens=8192,
+                    )
+                    raw_response = hf_response.choices[0].message.content.strip()
+                else:
+                    # Convert to PIL then JPEG (5-10x smaller than raw PNG bytes)
+                    from PIL import Image as _PIL
+                    import io as _io
+                    img = _PIL.open(_io.BytesIO(pix.tobytes("png")))
+                    response = OLLAMA_CLIENT.chat(
+                        model=config.MODEL_VISION,
+                        messages=[{
+                            'role': 'user',
+                            'content': PYQ_VLM_TRANSCRIPTION,
+                            'images': [pil_to_jpeg_bytes(img)]
+                        }]
+                    )
+                    raw_response = response['message']['content'].strip()
                 break
             except Exception as e:
                 err_str = str(e)
@@ -317,4 +351,8 @@ def process_pyq_folders(base_path_str: str):
 
 
 if __name__ == "__main__":
-    process_pyq_folders(BASE_PATH)
+    import argparse
+    parser = argparse.ArgumentParser(description="Extract multimodal pyqs from PDFs.")
+    parser.add_argument("--path", default=BASE_PATH, help="Target directory for pyq PDFs")
+    args = parser.parse_args()
+    process_pyq_folders(args.path)

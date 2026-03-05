@@ -11,7 +11,7 @@ if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
 import config
-from utils import pil_to_base64, extract_first_json, build_vlm_client
+from utils import pil_to_base64, pil_to_jpeg_bytes, extract_first_json, build_vlm_client
 from prompts import NOTES_EXTRACTION
 
 # ------------------------------------------------------------------
@@ -78,7 +78,7 @@ def render_pages_to_images(doc, start_page: int, end_page: int, return_bytes=Fal
     """
     Render PDF pages to images.
     scale: DPI multiplier — lower = smaller payload, higher = better OCR quality.
-    Ollama cloud uses 1.5 to avoid 524 timeouts; HuggingFace uses 2.0.
+    Ollama cloud: scale=1.0 + JPEG avoids Cloudflare 524 timeouts; HuggingFace: scale=2.0 PNG.
     """
     import io
     from PIL import Image
@@ -155,7 +155,9 @@ def process_pdf(pdf_path: Path):
         for attempt in range(1, MAX_RETRIES + 1):
             try:
                 if BACKEND == "ollama":
-                    images = render_pages_to_images(doc, start_page, end_page, return_bytes=True, scale=1.5)
+                    # Render as PIL then re-encode as JPEG (5-10x smaller than PNG)
+                    images_pil = render_pages_to_images(doc, start_page, end_page, return_bytes=False, scale=1.0)
+                    images = [pil_to_jpeg_bytes(img) for img in images_pil]
                     response = _ollama_client.chat(
                         model=MODEL_NAME,
                         messages=[{
@@ -236,14 +238,18 @@ def process_pdf(pdf_path: Path):
 def process_all_folders(base_path_str: str):
     root_path = Path(base_path_str)
 
-    pdfs = sorted(root_path.rglob("*.pdf"))
-    print(f"Found {len(pdfs)} PDFs in {base_path_str}")
+    pdfs = [p for p in sorted(root_path.rglob("*.pdf")) if "notes" in p.parts]
+    print(f"Found {len(pdfs)} notes PDFs in {base_path_str}")
 
     for pdf in pdfs:
         process_pdf(pdf)
 
-    print("\n--- All PDFs processed successfully ---")
+    print("\n--- All notes PDFs processed successfully ---")
 
 
 if __name__ == "__main__":
-    process_all_folders(BASE_PATH)
+    import argparse
+    parser = argparse.ArgumentParser(description="Extract multimodal notes from PDFs.")
+    parser.add_argument("--path", default=BASE_PATH, help="Target directory for notes PDFs")
+    args = parser.parse_args()
+    process_all_folders(args.path)

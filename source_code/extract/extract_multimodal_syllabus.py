@@ -45,7 +45,7 @@ if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
 import config
-from utils import pil_to_base64, pil_to_bytes, extract_first_json, build_vlm_client
+from utils import pil_to_base64, pil_to_bytes, pil_to_jpeg_bytes, extract_first_json, build_vlm_client
 from prompts import SYLLABUS_EXTRACTION
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -154,7 +154,7 @@ def call_vlm(images: list, max_retries: int = 3) -> dict | None:
             raw = None
 
             if BACKEND == "ollama":
-                img_bytes = [pil_to_bytes(img) for img in images]
+                img_bytes = [pil_to_jpeg_bytes(img) for img in images]  # JPEG: ~5-10x smaller than PNG
                 response = _ollama_client.chat(
                     model=MODEL_NAME,
                     messages=[{
@@ -324,9 +324,11 @@ def process_syllabus(pdf_path: Path, force: bool = False):
         return
 
     # ── Render PDF to images ──
+    # Ollama cloud: 1.0 avoids Cloudflare 524 timeouts; HuggingFace: 2.0 for better OCR
+    _render_scale = 1.0 if BACKEND == "ollama" else 2.0
     print("   Rendering pages...", end="", flush=True)
     try:
-        images = render_pdf_to_images(pdf_path, scale=2.0)
+        images = render_pdf_to_images(pdf_path, scale=_render_scale)
     except Exception as exc:
         print(f"\n   ❌ Could not render PDF: {exc}")
         return

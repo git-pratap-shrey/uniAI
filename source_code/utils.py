@@ -47,6 +47,13 @@ def pil_to_bytes(img: Image.Image) -> bytes:
     return buf.getvalue()
 
 
+def pil_to_jpeg_bytes(img: Image.Image, quality: int = 85) -> bytes:
+    """Encode a PIL image as JPEG bytes (for Ollama cloud — ~5-10x smaller than PNG)."""
+    buf = io.BytesIO()
+    img.convert("RGB").save(buf, format="JPEG", quality=quality)
+    return buf.getvalue()
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # JSON PARSING
 # ──────────────────────────────────────────────────────────────────────────────

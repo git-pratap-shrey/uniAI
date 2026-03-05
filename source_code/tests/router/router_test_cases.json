@@ -198,5 +198,215 @@
   {
     "question": "Okay cool.",
     "expected_route": "GENERIC"
+  },
+  {
+    "question": "What is cyber stalking and bullying?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "1"
+  },
+  {
+    "question": "Define botnets and how they work",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "1"
+  },
+  {
+    "question": "Explain social engineering",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "1"
+  },
+  {
+    "question": "Classifications of cybercrimes",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "1"
+  },
+  {
+    "question": "Attacks on mobile phones",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "2"
+  },
+  {
+    "question": "What is credit card fraud?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "2"
+  },
+  {
+    "question": "Explain authentication service security",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "2"
+  },
+  {
+    "question": "How to secure mobile devices?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "2"
+  },
+  {
+    "question": "What is SQL injection?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "3"
+  },
+  {
+    "question": "Explain phishing and identity theft",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "3"
+  },
+  {
+    "question": "Difference between virus and worms",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "3"
+  },
+  {
+    "question": "What are DDOS attacks?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "3"
+  },
+  {
+    "question": "Explain keyloggers and spyware",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "3"
+  },
+  {
+    "question": "What is computer forensics investigation?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "4"
+  },
+  {
+    "question": "Explain chain of custody",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "4"
+  },
+  {
+    "question": "Digital forensics life cycle",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "4"
+  },
+  {
+    "question": "What is email forensics analysis?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "4"
+  },
+  {
+    "question": "Indian cyber law and IT act",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "5"
+  },
+  {
+    "question": "Intellectual property rights and patents",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "5"
+  },
+  {
+    "question": "Copyright and trademark law",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "CYBER_SECURITY",
+    "expected_unit": "5"
+  },
+  {
+    "question": "What is human aspirations and value education?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "1"
+  },
+  {
+    "question": "Explain continuous happiness vs excitement",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "1"
+  },
+  {
+    "question": "Natural acceptance and experiential validation",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "1"
+  },
+  {
+    "question": "Explain the difference between sukh and suvidha",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "2"
+  },
+  {
+    "question": "What is sanyam and swasthya?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "2"
+  },
+  {
+    "question": "Harmony of self with the body",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "2"
+  },
+  {
+    "question": "Respect, differentiation, and trust",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "3"
+  },
+  {
+    "question": "What is undivided society (akhand samaj)?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "3"
+  },
+  {
+    "question": "Explain universal human order",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "3"
+  },
+  {
+    "question": "Harmony in nature with four orders",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "4"
+  },
+  {
+    "question": "What is holistic perception of existence?",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "4"
+  },
+  {
+    "question": "Coexistence and ecological balance",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "4"
+  },
+  {
+    "question": "Definitiveness of ethical human conduct",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "5"
+  },
+  {
+    "question": "Professional ethics in society",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "5"
+  },
+  {
+    "question": "Holistic technologies and management models",
+    "expected_route": "SYLLABUS",
+    "expected_subject": "UHV",
+    "expected_unit": "5"
   }
 ]

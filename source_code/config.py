@@ -69,7 +69,8 @@ MIN_STRONG_SIM = float(os.getenv("MIN_STRONG_SIM", "0.6"))
 # ------------------------------------------------------------------
 
 # HuggingFace model ID for cross-encoder reranker
-CROSS_ENCODER_MODEL = os.getenv("CROSS_ENCODER_MODEL", "Qwen/Qwen3-Reranker-0.6B")
+CROSS_ENCODER_MODEL = os.getenv("CROSS_ENCODER_MODEL", "tomaarsen/Qwen3-Reranker-0.6B-seq-cls")
+# CROSS_ENCODER_MODEL = os.getenv("CROSS_ENCODER_MODEL", "Qwen/Qwen3-Reranker-0.6B")
 
 # Gate threshold: if the top cross-encoder score is below this, fall back to generic
 MIN_CROSS_SCORE = float(os.getenv("MIN_CROSS_SCORE", "0.65"))
@@ -120,6 +121,14 @@ RERANK_SYLLABUS_PENALTY = float(os.getenv("RERANK_SYLLABUS_PENALTY", "0.90"))
 # rag/router.py
 OLLAMA_ROUTER_TEMPERATURE = float(os.getenv("OLLAMA_ROUTER_TEMPERATURE", "0.0"))
 OLLAMA_ROUTER_NUM_PREDICT = int(os.getenv("OLLAMA_ROUTER_NUM_PREDICT", "10"))
+
+# Hybrid router thresholds
+KEYWORD_MIN_SCORE = int(os.getenv("KEYWORD_MIN_SCORE", "2"))
+EMBEDDING_ROUTER_THRESHOLD = float(os.getenv("EMBEDDING_ROUTER_THRESHOLD", "0.55"))
+UNIT_EMBEDDINGS_PATH = os.getenv(
+    "UNIT_EMBEDDINGS_PATH",
+    str(_SOURCE_CODE_DIR / "pipeline" / "embeddings" / "unit_embeddings.pkl"),
+)
 
 # rag/search.py
 SEARCH_NOTES_K_DEFAULT = int(os.getenv("SEARCH_NOTES_K_DEFAULT", "8"))

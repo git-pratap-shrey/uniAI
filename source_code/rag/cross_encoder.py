@@ -31,7 +31,7 @@ import config
 # Model loading — eager, one-time, on GPU
 # ---------------------------------------------------------------------------
 
-_MODEL_ID = "tomaarsen/Qwen3-Reranker-0.6B-seq-cls"
+_MODEL_ID = config.CROSS_ENCODER_MODEL
 _MAX_LENGTH = 8192
 
 _device = "cuda" if torch.cuda.is_available() else "cpu"
