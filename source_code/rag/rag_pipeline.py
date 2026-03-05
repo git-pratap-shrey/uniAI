@@ -33,7 +33,8 @@ import ollama
 from rag.router import detect_subject
 from rag.unit_detector import detect_unit
 from rag.search import retrieve_notes, retrieve_syllabus
-from rag.reranker import rerank
+# from rag.reranker import rerank              # heuristic — kept as fallback
+from rag.cross_encoder import rerank_cross_encoder
 from rag.context_builder import build_context, build_history_block
 import prompts
 
@@ -193,19 +194,22 @@ def answer_query(
     # ── 5. Retrieve ───────────────────────────────────────────────────────
     note_chunks = retrieve_notes(query, subject=subject, unit=unit, k=config.PIPELINE_NOTES_K)
 
-    # For unit overview queries, also pull syllabus chunks
-    syllabus_chunks = []
-    if _is_unit_overview(query, unit):
-        syllabus_chunks = retrieve_syllabus(query, subject=subject, unit=unit, k=config.PIPELINE_SYLLABUS_K)
+    # Always retrieve syllabus chunks to give the cross-encoder more candidates
+    syllabus_chunks = retrieve_syllabus(query, subject=subject, unit=unit, k=config.PIPELINE_SYLLABUS_K)
 
     all_chunks = note_chunks + syllabus_chunks
 
-    # ── 6. Rerank ─────────────────────────────────────────────────────────
-    ranked = rerank(all_chunks, predicted_unit=unit, top_n=config.PIPELINE_RERANK_TOP_N)
+    # ── 6. Cross-encoder rerank ───────────────────────────────────────────
+    ranked = rerank_cross_encoder(
+        query,
+        all_chunks,
+        top_n=config.PIPELINE_CROSS_RERANK_TOP_N,
+        candidates=config.CROSS_ENCODER_CANDIDATES,
+    )
 
     if not ranked:
         mode = "generic"
-    elif ranked[0]["final_score"] < config.MIN_STRONG_SIM:
+    elif ranked[0]["final_score"] < config.MIN_CROSS_SCORE:
         mode = "generic"
         ranked = []
 

@@ -65,6 +65,22 @@ SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.35"))
 MIN_STRONG_SIM = float(os.getenv("MIN_STRONG_SIM", "0.6"))
 
 # ------------------------------------------------------------------
+# CROSS-ENCODER CONFIGURATION
+# ------------------------------------------------------------------
+
+# HuggingFace model ID for cross-encoder reranker
+CROSS_ENCODER_MODEL = os.getenv("CROSS_ENCODER_MODEL", "Qwen/Qwen3-Reranker-0.6B")
+
+# Gate threshold: if the top cross-encoder score is below this, fall back to generic
+MIN_CROSS_SCORE = float(os.getenv("MIN_CROSS_SCORE", "0.65"))
+
+# Max (query, chunk) pairs to send to the cross-encoder (controls latency)
+CROSS_ENCODER_CANDIDATES = int(os.getenv("CROSS_ENCODER_CANDIDATES", "6"))
+
+# Top N chunks to keep after cross-encoder reranking
+PIPELINE_CROSS_RERANK_TOP_N = int(os.getenv("PIPELINE_CROSS_RERANK_TOP_N", "4"))
+
+# ------------------------------------------------------------------
 # PATH CONFIGURATION
 # ------------------------------------------------------------------
 
