@@ -158,15 +158,19 @@ def process_pdf(pdf_path: Path):
                     # Render as PIL then re-encode as JPEG (5-10x smaller than PNG)
                     images_pil = render_pages_to_images(doc, start_page, end_page, return_bytes=False, scale=1.0)
                     images = [pil_to_jpeg_bytes(img) for img in images_pil]
-                    response = _ollama_client.chat(
+                    response_stream = _ollama_client.chat(
                         model=MODEL_NAME,
                         messages=[{
                             'role': 'user',
                             'content': NOTES_EXTRACTION,
                             'images': images,
-                        }]
+                        }],
+                        stream=True
                     )
-                    raw_response = response['message']['content'].strip()
+                    raw_parts = []
+                    for chunk in response_stream:
+                        raw_parts.append(chunk.get("message", {}).get("content", ""))
+                    raw_response = "".join(raw_parts).strip()
 
                 elif BACKEND == "huggingface":
                     images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)

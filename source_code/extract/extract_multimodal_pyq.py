@@ -87,15 +87,19 @@ def load_pdf(pdf_path: Path):
                     import io as _io
                     img = _PIL.open(_io.BytesIO(pix.tobytes("png")))
                     print(f"   -> Call Ollama Vision API (Page {page_num+1})...", end="", flush=True)
-                    response = OLLAMA_CLIENT.chat(
+                    response_stream = OLLAMA_CLIENT.chat(
                         model=config.MODEL_VISION,
                         messages=[{
                             'role': 'user',
                             'content': PYQ_VLM_TRANSCRIPTION,
                             'images': [pil_to_jpeg_bytes(img)]
-                        }]
+                        }],
+                        stream=True
                     )
-                    raw_response = response['message']['content'].strip()
+                    raw_parts = []
+                    for chunk in response_stream:
+                        raw_parts.append(chunk.get('message', {}).get('content', ''))
+                    raw_response = "".join(raw_parts).strip()
                     print(" done.")
                 break
             except Exception as e:

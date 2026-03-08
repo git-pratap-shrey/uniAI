@@ -155,15 +155,19 @@ def call_vlm(images: list, max_retries: int = 3) -> dict | None:
 
             if BACKEND == "ollama":
                 img_bytes = [pil_to_jpeg_bytes(img) for img in images]  # JPEG: ~5-10x smaller than PNG
-                response = _ollama_client.chat(
+                response_stream = _ollama_client.chat(
                     model=MODEL_NAME,
                     messages=[{
                         "role": "user",
                         "content": SYLLABUS_EXTRACTION,
                         "images": img_bytes,
                     }],
+                    stream=True
                 )
-                raw = response["message"]["content"].strip()
+                raw_parts = []
+                for chunk in response_stream:
+                    raw_parts.append(chunk.get("message", {}).get("content", ""))
+                raw = "".join(raw_parts).strip()
 
             elif BACKEND == "huggingface":
                 messages = [{
