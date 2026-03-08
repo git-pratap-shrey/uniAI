@@ -20,13 +20,12 @@ from prompts import pyq_unit_classification
 
 BASE_PATH = config.BASE_DATA_DIR
 BACKEND = config.MODEL_VISION_BACKEND.lower()
+OLLAMA_CLIENT = build_vlm_client()
 
 if BACKEND == "huggingface":
     from huggingface_hub import InferenceClient as _HFClient
-    HF_CLIENT = _HFClient(base_url="https://router.huggingface.co/v1", api_key=config.HF_TOKEN)
+    HF_CLIENT = _HFClient(base_url="https://router.huggingface.co/v1", api_key=config.HF_TOKEN, timeout=60)
     HF_MODEL_ID = config.MODEL_VISION_HF
-else:
-    OLLAMA_CLIENT = build_vlm_client()
 
 def get_syllabus_topics(subject: str) -> str:
     """Finds the syllabus JSON for the subject and extracts units."""
@@ -74,17 +73,20 @@ def load_pdf(pdf_path: Path):
                             {"type": "text", "text": PYQ_VLM_TRANSCRIPTION},
                         ],
                     }]
+                    print(f"   -> Call HF Vision API (Page {page_num+1})...", end="", flush=True)
                     hf_response = HF_CLIENT.chat_completion(
                         model=HF_MODEL_ID,
                         messages=hf_messages,
                         max_tokens=8192,
                     )
                     raw_response = hf_response.choices[0].message.content.strip()
+                    print(" done.")
                 else:
                     # Convert to PIL then JPEG (5-10x smaller than raw PNG bytes)
                     from PIL import Image as _PIL
                     import io as _io
                     img = _PIL.open(_io.BytesIO(pix.tobytes("png")))
+                    print(f"   -> Call Ollama Vision API (Page {page_num+1})...", end="", flush=True)
                     response = OLLAMA_CLIENT.chat(
                         model=config.MODEL_VISION,
                         messages=[{
@@ -94,6 +96,7 @@ def load_pdf(pdf_path: Path):
                         }]
                     )
                     raw_response = response['message']['content'].strip()
+                    print(" done.")
                 break
             except Exception as e:
                 err_str = str(e)

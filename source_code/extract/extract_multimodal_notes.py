@@ -19,7 +19,7 @@ from prompts import NOTES_EXTRACTION
 # ------------------------------------------------------------------
 
 BASE_PATH = config.BASE_DATA_DIR
-CHUNK_SIZE = 2  # Pages per chunk — kept small for OCR accuracy
+CHUNK_SIZE = 1  # Pages per chunk — kept small for OCR accuracy
 
 # Backend options (set MODEL_VISION_BACKEND in config.py or .env)
 # "ollama"      -> local/cloud Ollama model (MODEL_VISION tag)

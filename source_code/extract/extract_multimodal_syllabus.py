@@ -184,8 +184,6 @@ def call_vlm(images: list, max_retries: int = 3) -> dict | None:
             parsed = extract_first_json(raw)
             if parsed:
                 return parsed
-            print(f"   ⚠ Attempt {attempt}: VLM returned no valid JSON. Raw preview:\n   {raw[:200]}")
-
         except Exception as exc:
             err = str(exc)[:120]
             if attempt < max_retries:
@@ -335,20 +333,42 @@ def process_syllabus(pdf_path: Path, force: bool = False):
     print(f" {len(images)} page(s).")
 
     # ── Call VLM ──
-    print("   Calling VLM...", end="", flush=True)
-    parsed = call_vlm(images)
-    if not parsed:
-        print("\n   ❌ VLM extraction failed. Skipping this syllabus.")
-        return
-    print(" ✅ Parsed.")
+    print("   Calling VLM (page by page)...", flush=True)
+    
+    syllabus_version = "unknown"
+    subject_name     = subject
+    units            = []
+    cos              = []
+    textbooks        = []
+    reference_books  = []
 
-    # ── Extract fields ──
-    syllabus_version = parsed.get("syllabus_version", "unknown")
-    subject_name     = parsed.get("subject_name", subject)
-    units            = parsed.get("units", [])
-    cos              = parsed.get("course_outcomes", [])
-    textbooks        = parsed.get("textbooks", [])
-    reference_books  = parsed.get("reference_books", [])
+    success = False
+    for i, img in enumerate(images):
+        print(f"      -> Page {i+1}/{len(images)}... ", end="", flush=True)
+        parsed = call_vlm([img])
+        if not parsed:
+            print("❌ Failed or no data.")
+            continue
+            
+        print("✅ Parsed.")
+        success = True
+
+        if parsed.get("syllabus_version") and parsed.get("syllabus_version") != "unknown":
+            syllabus_version = parsed.get("syllabus_version")
+        if parsed.get("subject_name") and parsed.get("subject_name") != subject:
+            subject_name = parsed.get("subject_name")
+
+        units.extend(parsed.get("units", []))
+        cos.extend(parsed.get("course_outcomes", []))
+
+        for tb in parsed.get("textbooks", []):
+            if tb not in textbooks: textbooks.append(tb)
+        for rb in parsed.get("reference_books", []):
+            if rb not in reference_books: reference_books.append(rb)
+
+    if not success:
+        print("\n   ❌ VLM extraction failed for all pages. Skipping this syllabus.")
+        return
 
     model_id = MODEL_NAME if BACKEND != "huggingface" else config.MODEL_VISION_HF
     base = _base_meta(subject, syllabus_version, pdf_path.name, model_id)
