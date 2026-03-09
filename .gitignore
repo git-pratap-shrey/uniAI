@@ -76,4 +76,5 @@ __pypackages__/
 # ======================
 *.json
 *.jsonl
+*.pkl
 db_dump_output.txt
