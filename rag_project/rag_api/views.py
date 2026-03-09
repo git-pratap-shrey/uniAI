@@ -65,9 +65,11 @@ def query_view(request):
 
         # The frontend isn't currently sending a locked session_subject, 
         # but if it does in the future, we can extract it here.
-        session_subject = "DIGITAL_ELECTRONICS"
-                # TEMPORARY!!!!!
-                # session_subject = data.get("subject", None)
+
+                                                                            # TEMPORARY!!!!!
+                                                                            # session_subject = "DIGITAL_ELECTRONICS"
+
+        session_subject = data.get("subject", None)
 
         print(f"ROUTING => Provided Subject: {session_subject}")
 

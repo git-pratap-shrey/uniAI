@@ -10,7 +10,15 @@ Pillow>=10.0.0
 
 # AI / LLM clients
 ollama>=0.1.7
+google-generativeai>=0.3.2
 huggingface_hub>=0.20.0
+transformers>=4.40.0
+accelerate>=0.20.0
+sentencepiece>=0.1.99
+
+# ML / Numerical
+numpy>=1.24.0
+torch>=2.0.0
 
 # Django add-ons
 django-cors-headers>=4.0.0
@@ -18,3 +26,6 @@ django-cors-headers>=4.0.0
 # Utilities
 requests>=2.31.0
 python-dotenv>=1.0.1
+
+# Testing
+pytest>=7.0.0

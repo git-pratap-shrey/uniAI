@@ -50,12 +50,18 @@ transformers>=4.40.0
 accelerate>=0.20.0
 sentencepiece>=0.1.99
 
+# ML / Numerical
+numpy>=1.24.0
+
 # Django add-ons
 django-cors-headers>=4.0.0
 
 # Utilities
 requests>=2.31.0
 python-dotenv>=1.0.1
+
+# Testing
+pytest>=7.0.0
 
 # NOTE: torch is intentionally excluded here.
 # Install it manually with the CUDA index URL in Step 3 above.
