@@ -49,6 +49,8 @@ def _print_answer(result: dict):
         print(f"  Subject: {result['subject']}", end="")
     if result["unit"]:
         print(f"  Unit: {result['unit']}", end="")
+    if result.get("expanded_query"):
+        print(f"  Expanded: '{result['expanded_query']}'", end="")
     print()
     print("-" * 60)
     print(result["answer"])

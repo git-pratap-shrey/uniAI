@@ -146,8 +146,7 @@
         <div class="messages" id="messages"></div>
 
         <div class="input-box">
-            <input type="text" id="input" placeholder="Ask about Python, COA, DE..."
-                onkeypress="if(event.key==='Enter') send()">
+            <input type="text" id="input" placeholder="Ask about DE..." onkeypress="if(event.key==='Enter') send()">
             <button onclick="send()" id="btn">Send</button>
         </div>
     </div>
@@ -208,7 +207,12 @@
                 }
 
 
-                addMessage(data.answer || '⚠ No response received from server.', 'assistant');
+                let ansText = data.answer || '⚠ No response received from server.';
+                if (data.expanded_query && data.expanded_query !== query.toLowerCase() && data.expanded_query !== query) {
+                    ansText = `<small style="color: gray;"><em>Expanded search: ${data.expanded_query}</em></small>\n\n` + ansText;
+                }
+
+                addMessage(ansText, 'assistant');
 
                 chatHistory.push({
                     role: "assistant",

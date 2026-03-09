@@ -65,7 +65,9 @@ def query_view(request):
 
         # The frontend isn't currently sending a locked session_subject, 
         # but if it does in the future, we can extract it here.
-        session_subject = data.get("subject", None)
+        session_subject = "DIGITAL_ELECTRONICS"
+                # TEMPORARY!!!!!
+                # session_subject = data.get("subject", None)
 
         print(f"ROUTING => Provided Subject: {session_subject}")
 
@@ -88,6 +90,7 @@ def query_view(request):
 
         return JsonResponse({
             "query": query,
+            "expanded_query": result.get("expanded_query", query),
             "answer": result["answer"],
             "mode": result["mode"],
             "sources": sources,

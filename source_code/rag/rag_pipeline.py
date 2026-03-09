@@ -35,6 +35,7 @@ from rag.search import retrieve_notes, retrieve_syllabus
 # from rag.reranker import rerank              # heuristic — kept as fallback
 from rag.cross_encoder import rerank_cross_encoder
 from rag.context_builder import build_context, build_history_block
+from rag.query_expander import expand_query
 import prompts
 
 # ---------------------------------------------------------------------------
@@ -159,19 +160,21 @@ def answer_query(
     """
     history = _trim_history(history or [])
 
+    expanded_query = expand_query(query)
+
     # ── 1 & 2. Hybrid Routing (Subject & Unit) ────────────────────────────
-    route_res = hybrid_route(query, session_subject=session_subject)
+    route_res = hybrid_route(expanded_query, session_subject=session_subject)
     subject = route_res.subject
     unit = route_res.unit
 
     # ── 3. Detect mode ────────────────────────────────────────────────────
-    mode = _detect_mode(query)
+    mode = _detect_mode(expanded_query)
 
     # ── 4. Handle followup — skip retrieval ───────────────────────────────
-    if _is_followup(query) and history:
+    if _is_followup(expanded_query) and history:
         history_block = build_history_block(history)
         prompt = prompts.rag_answer(
-            query=query,
+            query=expanded_query,
             notes_context="",
             history_block=history_block,
             mode=mode,
@@ -185,19 +188,20 @@ def answer_query(
             "mode": mode,
             "sources": [],
             "chunks": [],
+            "expanded_query": expanded_query,
         }
 
     # ── 5. Retrieve ───────────────────────────────────────────────────────
-    note_chunks = retrieve_notes(query, subject=subject, unit=unit, k=config.PIPELINE_NOTES_K)
+    note_chunks = retrieve_notes(expanded_query, subject=subject, unit=unit, k=config.PIPELINE_NOTES_K)
 
     # Always retrieve syllabus chunks to give the cross-encoder more candidates
-    syllabus_chunks = retrieve_syllabus(query, subject=subject, unit=unit, k=config.PIPELINE_SYLLABUS_K)
+    syllabus_chunks = retrieve_syllabus(expanded_query, subject=subject, unit=unit, k=config.PIPELINE_SYLLABUS_K)
 
     all_chunks = note_chunks + syllabus_chunks
 
     # ── 6. Cross-encoder rerank ───────────────────────────────────────────
     ranked = rerank_cross_encoder(
-        query,
+        expanded_query,
         all_chunks,
         top_n=config.PIPELINE_CROSS_RERANK_TOP_N,
         candidates=config.CROSS_ENCODER_CANDIDATES,
@@ -215,7 +219,7 @@ def answer_query(
 
     # ── 8. Build prompt ───────────────────────────────────────────────────
     prompt = prompts.rag_answer(
-        query=query,
+        query=expanded_query,
         notes_context=notes_context,
         history_block=history_block,
         mode=mode,
@@ -233,4 +237,5 @@ def answer_query(
         "mode": mode,
         "sources": format_sources_for_display(ranked),
         "chunks": ranked,
+        "expanded_query": expanded_query,
     }
