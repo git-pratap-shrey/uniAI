@@ -20,29 +20,30 @@ OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "")
 
 # Embedding Model
 # qwen3-embedding:4B has a 32K token context window
-MODEL_EMBEDDING = "qwen3-embedding:4B"
+MODEL_EMBEDDING = os.getenv("MODEL_EMBEDDING", "qwen3-embedding:4B")
 
 # Vision / OCR Model Backend (ollama | huggingface)
-MODEL_VISION_BACKEND = "ollama"
+MODEL_VISION_BACKEND = os.getenv("MODEL_VISION_BACKEND", "ollama")
 
 # Vision model name
-MODEL_VISION = "qwen3-vl:235b-cloud"
+MODEL_VISION = os.getenv("MODEL_VISION", "qwen3-vl:235b-cloud")
 
 # HuggingFace cloud Inference API settings
 HF_TOKEN = os.getenv("HF_TOKEN", "") 
-MODEL_VISION_HF = "Qwen/Qwen3-VL-235B-A22B-Instruct"
+MODEL_VISION_HF = os.getenv("MODEL_VISION_HF", "Qwen/Qwen3-VL-235B-A22B-Instruct")
 
 # Control whether to use Ollama Cloud API or Local
-USE_OLLAMA_CLOUD = False
+USE_OLLAMA_CLOUD = os.getenv("USE_OLLAMA_CLOUD", "True").lower() == "true"
 
 # Chat / Generative Model
-MODEL_CHAT = "qwen3.5:2b"
+MODEL_CHAT = os.getenv("MODEL_CHAT", "gemini-3-flash-preview:latest")
 
 # Optional API key for Gemini models
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 # Router / Classification Model
-MODEL_ROUTER = "qwen3.5:2b"
+# If MODEL_ROUTER is not in env, fallback to qwen3.5:4b
+MODEL_ROUTER = os.getenv("MODEL_ROUTER", "qwen3.5:4B")
 
 # ------------------------------------------------------------------
 # RETRIEVAL CONFIGURATION
