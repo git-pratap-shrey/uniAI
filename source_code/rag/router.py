@@ -63,7 +63,7 @@ _WEIGHTS = {
 # Load keyword map once
 # -------------------------------------------------
 
-KEYWORDS_FILE = os.path.join(ROOT_DIR, "data", "subject_keywords.json")
+KEYWORDS_FILE = config.KEYWORDS_FILE_PATH
 
 _keyword_map: dict = {}
 

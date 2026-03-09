@@ -38,7 +38,7 @@ MODEL_VISION = os.getenv("MODEL_VISION", "qwen3-vl:235b-cloud")
 
 # HuggingFace cloud Inference API settings
 # Get your token from: https://huggingface.co/settings/tokens
-HF_TOKEN = os.getenv("HF_TOKEN")                                              # required
+HF_TOKEN = os.getenv("HF_TOKEN", "")                                              # required
 MODEL_VISION_HF = os.getenv("MODEL_VISION_HF", "Qwen/Qwen3-VL-235B-A22B-Instruct")
 
 # Control whether to use Ollama Cloud API or Local
@@ -47,6 +47,9 @@ USE_OLLAMA_CLOUD = os.getenv("USE_OLLAMA_CLOUD", "True").lower() in ("true", "1"
 # Chat / Generative Model
 # Used for RAG chat and general text generation
 MODEL_CHAT = os.getenv("MODEL_CHAT", "gemini-3-flash-preview:latest")
+
+# Optional API key for Gemini models
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 # Router / Classification Model
 # Fast local model used specifically for extracting keywords and context switching
@@ -90,6 +93,10 @@ PIPELINE_CROSS_RERANK_TOP_N = int(os.getenv("PIPELINE_CROSS_RERANK_TOP_N", "4"))
 _SOURCE_CODE_DIR = Path(__file__).parent
 
 BASE_DATA_DIR = os.getenv("BASE_DATA_DIR", str(_SOURCE_CODE_DIR / "data" / "year_2"))
+
+# Query Expander & Router Maps
+ALIASES_FILE_PATH = os.getenv("ALIASES_FILE_PATH", str(_SOURCE_CODE_DIR / "data" / "subject_aliases.json"))
+KEYWORDS_FILE_PATH = os.getenv("KEYWORDS_FILE_PATH", str(_SOURCE_CODE_DIR / "data" / "subject_keywords.json"))
 CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", str(_SOURCE_CODE_DIR / "chroma"))
 CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "multimodal_notes")
 CHROMA_SYLLABUS_COLLECTION_NAME = os.getenv("CHROMA_SYLLABUS_COLLECTION_NAME", "multimodal_syllabus")
@@ -137,3 +144,6 @@ SEARCH_PYQ_K_DEFAULT = int(os.getenv("SEARCH_PYQ_K_DEFAULT", "5"))
 SEARCH_PYQ_THRESHOLD = float(os.getenv("SEARCH_PYQ_THRESHOLD", "0.60"))
 SEARCH_ALL_NOTES_K = int(os.getenv("SEARCH_ALL_NOTES_K", "6"))
 SEARCH_ALL_SYLLABUS_K = int(os.getenv("SEARCH_ALL_SYLLABUS_K", "3"))
+
+# rag/query_expander.py
+QUERY_EXPANDER_MAX_KEYWORDS = int(os.getenv("QUERY_EXPANDER_MAX_KEYWORDS", "6"))
