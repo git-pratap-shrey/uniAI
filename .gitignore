@@ -74,7 +74,6 @@ __pypackages__/
 # ======================
 # Test & Evaluator Outputs
 # ======================
-results.jsonl
-sweep_*.json*
+*.json
+*.jsonl
 db_dump_output.txt
-chunks_ready_for_embedding.jsonl
