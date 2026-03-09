@@ -62,3 +62,19 @@ out/
 source_code/data/
 source_code/data - Copy/
 
+# ======================
+# Analysis & Caching
+# ======================
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+__pypackages__/
+
+# ======================
+# Test & Evaluator Outputs
+# ======================
+results.jsonl
+sweep_*.json*
+db_dump_output.txt
+chunks_ready_for_embedding.jsonl
