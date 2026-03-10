@@ -66,7 +66,7 @@ PDFs are chunked and stored alongside their extracted JSON files.
 
 ### 2️⃣ Ingestion Pipeline
 
-* PDF → Text extraction (PyMuPDF, optional OCR) running in parallel, page by page.
+* PDF → Text extraction (Vision language model - OCR) running in parallel, page by page.
 * Text cleaning and normalization
 * Fixed-size chunking
 * Metadata tagging:
@@ -213,8 +213,6 @@ End-to-end pipeline is functional:
 
 ### Limitations
 * Fixed-size chunking (semantic chunking planned)
-* No reranking or evaluation metrics yet for full RAG answers
-* Only one subject fully ingested (Python)
 * Cloud LLM rate limits during heavy testing
 * CSRF is disabled for the Django query endpoint (requires securing before production).
 * Production auth and rate limiting are not implemented.
