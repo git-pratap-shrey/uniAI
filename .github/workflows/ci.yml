@@ -1,0 +1,33 @@
+name: uniAI CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Syntax Check
+        run: |
+          python -m py_compile $(git ls-files '*.py')
+
+      - name: Django Health Check
+        run: |
+          cd rag_project
+          python manage.py check
+
+      - name: Run Tests
+        run: |
+          python -m pytest source_code/tests/ci
