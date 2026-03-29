@@ -1,14 +1,16 @@
 """
 reranker.py
 ───────────
-Adjusts chunk scores using metadata signals after initial retrieval.
+A heuristic-based reranking module used as a fast, rule-based alternative
+or supplement to the neural Cross-Encoder.
 
-Boosting signals:
-  - confidence   (OCR quality stored at ingestion, 0.0–1.0)
-  - unit match   (bump if chunk unit matches predicted unit)
-  - doc_type     (slight preference for notes over syllabus in mixed results)
+This module adjusts the 'similarity' score from the vector search using
+metadata signals like OCR confidence, unit matching, and document type.
 
-No database calls. Pure scoring logic.
+Boosting Logic:
+1. **OCR Confidence**: Multiplies score by a factor (0.5 to 1.0) based on extraction quality.
+2. **Unit Match**: Significant boost if the chunk's unit matches the predicted unit.
+3. **Doc Type**: Slight preference for lecture notes over syllabus chunks.
 """
 
 
@@ -27,16 +29,15 @@ def rerank(
     top_n: int = None,
 ) -> list[dict]:
     """
-    Re-score and sort chunks by relevance.
+    Apply heuristic boosts and penalties to a list of retrieved chunks.
 
-    Each chunk is expected to have:
-      chunk["similarity"]          — cosine similarity (0–1)
-      chunk["metadata"]["confidence"]   — OCR confidence (0–1)
-      chunk["metadata"]["unit"]         — unit string
-      chunk["metadata"]["document_type"] — e.g. "printed_notes", "syllabus"
+    Args:
+        chunks:         List of chunk dicts (must have "similarity" and "metadata").
+        predicted_unit: The unit identifier detected by the router.
+        top_n:          Number of top-scored chunks to return.
 
-    Returns top_n chunks sorted by final_score descending,
-    with "final_score" added to each chunk dict.
+    Returns:
+        A list of chunks sorted by 'final_score' in descending order.
     """
     if top_n is None:
         top_n = config.RERANK_DEFAULT_TOP_N

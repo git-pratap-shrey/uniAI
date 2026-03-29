@@ -16,13 +16,12 @@ import io
 import json
 
 import chromadb
-import ollama
+from source_code import models
 from PIL import Image
 
-import config
+from source_code.config import CONFIG
 
-# ── Persistent Ollama client for embeddings (keeps model warm in VRAM) ─────────
-_embed_client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
+# Persistent clients are now managed by models.py
 
 # ── Cached ChromaDB collections (keyed by collection name) ───────────────────
 _chroma_collections: dict[str, chromadb.Collection] = {}
@@ -86,15 +85,9 @@ def extract_first_json(text: str) -> dict | None:
 
 def get_embedding(text: str) -> list[float]:
     """
-    Generate a vector embedding for `text` using the configured local Ollama model.
-    Uses a persistent client with keep_alive to avoid cold-start delays.
+    Generate a vector embedding for `text` using the centralized models registry.
     """
-    response = _embed_client.embeddings(
-        model=config.MODEL_EMBEDDING,
-        prompt=text,
-        keep_alive="10m",
-    )
-    return response["embedding"]
+    return models.embed([text])[0]
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -110,9 +103,9 @@ def get_chroma_collection(collection_name: str = None) -> chromadb.Collection:
         collection_name: Name of the collection to open. Defaults to
                          config.CHROMA_COLLECTION_NAME when omitted.
     """
-    name = collection_name or config.CHROMA_COLLECTION_NAME
+    name = collection_name or CONFIG["paths"]["collections"]["notes"]
     if name not in _chroma_collections:
-        client = chromadb.PersistentClient(path=config.CHROMA_DB_PATH)
+        client = chromadb.PersistentClient(path=CONFIG["paths"]["chroma"])
         _chroma_collections[name] = client.get_or_create_collection(
             name=name,
             metadata={"hnsw:space": "cosine"},
@@ -124,12 +117,4 @@ def get_chroma_collection(collection_name: str = None) -> chromadb.Collection:
 # VLM CLIENT
 # ──────────────────────────────────────────────────────────────────────────────
 
-def build_vlm_client() -> ollama.Client:
-    """
-    Build an Ollama client for the vision model.
-    Uses OLLAMA_BASE_URL (may be cloud) + optional Bearer auth.
-    """
-    headers = {}
-    if config.OLLAMA_API_KEY:
-        headers["Authorization"] = f"Bearer {config.OLLAMA_API_KEY}"
-    return ollama.Client(host=config.OLLAMA_BASE_URL, headers=headers)
+# build_vlm_client is deprecated. Use models.vision() instead.

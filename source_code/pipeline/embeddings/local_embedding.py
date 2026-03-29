@@ -8,19 +8,11 @@ source_code_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
 if source_code_root not in sys.path:
     sys.path.append(source_code_root)
 
-import config
-
-# Persistent client with keep_alive — avoids cold-start on every query
-_client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
-
+from source_code.config import CONFIG
+from source_code import models
 
 def embed(texts: list[str]) -> list[list[float]]:
-    vectors = []
-    for text in texts:
-        res = _client.embeddings(
-            model=config.MODEL_EMBEDDING,
-            prompt=text,
-            keep_alive="10m",
-        )
-        vectors.append(res["embedding"])
-    return vectors
+    """
+    Generate vector embeddings for a list of strings using the models registry.
+    """
+    return models.embed(texts, provider=CONFIG["providers"].get("embedding", "ollama"))

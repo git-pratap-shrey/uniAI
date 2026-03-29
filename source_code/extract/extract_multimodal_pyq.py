@@ -10,21 +10,25 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
-from utils import build_vlm_client, pil_to_base64, pil_to_jpeg_bytes
+from source_code.config import CONFIG
+from source_code import models
+from utils import (
+    pil_to_base64,
+    pil_to_jpeg_bytes,
+    extract_first_json,
+)
 from prompts import pyq_unit_classification
 
 # ------------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------------
 
-BASE_PATH = config.BASE_DATA_DIR
-BACKEND = config.MODEL_VISION_BACKEND.lower()
+BASE_PATH = CONFIG["paths"]["base_data"]
+BACKEND = CONFIG["providers"]["vision"].lower()
 OLLAMA_CLIENT = build_vlm_client()
 
 if BACKEND == "huggingface":
     from huggingface_hub import InferenceClient as _HFClient
-    HF_CLIENT = _HFClient(base_url="https://router.huggingface.co/v1", api_key=config.HF_TOKEN, timeout=60)
     HF_MODEL_ID = config.MODEL_VISION_HF
 
 def get_syllabus_topics(subject: str) -> str:

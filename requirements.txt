@@ -10,11 +10,11 @@ Pillow>=10.0.0
 
 # AI / LLM clients
 ollama>=0.1.7
-google-generativeai>=0.3.2
 huggingface_hub>=0.20.0
 transformers>=4.40.0
 accelerate>=0.20.0
 sentencepiece>=0.1.99
+google-genai
 
 # ML / Numerical
 numpy>=1.24.0

@@ -28,7 +28,7 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
+from source_code.config import CONFIG
 from utils import get_embedding, get_chroma_collection
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -75,11 +75,11 @@ def build_syllabus_embedding_text(data: dict) -> str:
 
 def ingest_syllabuses():
     print("--- Syllabus Ingestion Start ---")
-    print(f"Target Collection : {config.CHROMA_SYLLABUS_COLLECTION_NAME}")
-    print(f"Scanning           : {config.BASE_DATA_DIR}")
+    print(f"Target Collection : {CONFIG['paths']['collections']['syllabus']}")
+    print(f"Scanning           : {CONFIG['paths']['base_data']}")
 
-    collection = get_chroma_collection(config.CHROMA_SYLLABUS_COLLECTION_NAME)
-    root_path  = Path(config.BASE_DATA_DIR)
+    collection = get_chroma_collection(CONFIG['paths']['collections']['syllabus'])
+    root_path  = Path(CONFIG['paths']['base_data'])
 
     json_files = sorted(root_path.rglob("syllabus_*.json"))
     print(f"Found {len(json_files)} syllabus chunk JSON(s).\n")

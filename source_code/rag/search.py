@@ -40,7 +40,7 @@ if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
 import chromadb
-import config
+from source_code.config import CONFIG
 from pipeline.embeddings.local_embedding import embed
 
 # ---------------------------------------------------------------------------
@@ -64,6 +64,10 @@ _client = chromadb.PersistentClient(path=config.CHROMA_DB_PATH)
 # Collection handles, populated on first access
 _collections: dict[str, chromadb.Collection] = {}
 
+# Mapping of collection aliases to their actual names in ChromaDB.
+# - notes:    Contains PDF/Slide chunks (lecture content).
+# - syllabus: Contains Unit descriptions and course outcomes.
+# - pyq:      Contains short, standalone exam questions.
 _COLLECTION_NAMES = {
     "notes":    config.CHROMA_COLLECTION_NAME,          # multimodal_notes
     "syllabus": config.CHROMA_SYLLABUS_COLLECTION_NAME,  # multimodal_syllabus
@@ -72,7 +76,20 @@ _COLLECTION_NAMES = {
 
 
 def _get(alias: str) -> chromadb.Collection:
-    """Return (and cache) a ChromaDB collection by alias."""
+    """
+    Retrieve a ChromaDB collection object by its internal alias.
+
+    This uses a lazy-loading pattern to minimize initialization overhead.
+
+    Args:
+        alias: One of "notes", "syllabus", or "pyq".
+
+    Returns:
+        The corresponding chromadb.Collection object.
+
+    Raises:
+        RuntimeError: If the collection does not exist in the database.
+    """
     if alias not in _collections:
         name = _COLLECTION_NAMES[alias]
         try:
@@ -87,7 +104,15 @@ def _get(alias: str) -> chromadb.Collection:
 
 
 def collection_exists(alias: str) -> bool:
-    """Check whether a collection is present without raising."""
+    """
+    Check if a specific search collection is available in ChromaDB.
+
+    Args:
+        alias: The collection alias to check.
+
+    Returns:
+        True if available, False otherwise.
+    """
     try:
         _get(alias)
         return True
@@ -101,9 +126,16 @@ def collection_exists(alias: str) -> bool:
 
 def normalize_unit(raw: str | int | None) -> str | None:
     """
-    Return a plain numeric string ("1", "3" …) or None.
+    Standardize unit identifiers into a clean numeric string.
 
-    Handles:  1, "1", "unit1", "Unit 1", "unit-1", "unit 03"
+    This handles various input formats like "unit 3", "Unit3", or just 3.
+    The resulting string ("1", "2", "3", etc.) is used for filtering.
+
+    Args:
+        raw: The raw unit input.
+
+    Returns:
+        A numeric string or None if no number is found.
     """
     if raw is None:
         return None
@@ -116,11 +148,13 @@ def normalize_unit(raw: str | int | None) -> str | None:
 
 def _unit_filter(unit: str) -> dict:
     """
-    Build a ChromaDB $or clause that matches both storage formats.
+    Build a flexible ChromaDB filter for unit numbers.
 
-    Notes ingest (current):   unit = "1"
-    Notes ingest (old):       unit = "unit1"
-    Syllabus ingest:          unit = "1"
+    This creates an $or clause to support both the current ("1")
+    and legacy ("unit1") storage formats.
+
+    Args:
+        unit: The normalized numeric unit string.
     """
     return {
         "$or": [
@@ -140,9 +174,15 @@ def _build_where(
     extra: list[dict] | None = None,
 ) -> dict | None:
     """
-    Compose a ChromaDB where clause from optional subject, unit, and extra filters.
+    Construct a nested ChromaDB 'where' clause for metadata filtering.
 
-    Returns None if no filters are needed (avoids passing empty where= to Chroma).
+    Args:
+        subject: Optional subject name to filter by.
+        unit:    Optional unit number to filter by.
+        extra:   A list of additional ChromaDB filter dictionaries.
+
+    Returns:
+        A combined ChromaDB filter dict, or None if no filters are provided.
     """
     filters: list[dict] = []
 
@@ -176,7 +216,20 @@ def _query_collection(
     threshold: float,
 ) -> list[Chunk]:
     """
-    Embed the query, run a ChromaDB similarity search, and filter by threshold.
+    Internal helper to execute a vector similarity search.
+
+    This function handles query embedding, searching the specific collection,
+    and post-filtering results based on distance.
+
+    Args:
+        alias:     Collection alias ("notes", "syllabus", "pyq").
+        query:     The user's query text.
+        where:     The pre-constructed metadata filter.
+        k:         Number of results to fetch.
+        threshold: Minimum similarity score (0.0 to 1.0) to keep a result.
+
+    Returns:
+        A list of Chunk objects sorted by similarity.
     """
     collection = _get(alias)
     query_vector = embed([query])[0]
@@ -230,14 +283,22 @@ def retrieve_notes(
     threshold: float | None = None,
 ) -> list[Chunk]:
     """
-    Retrieve lecture note chunks from multimodal_notes.
+    Fetch relevant lecture note chunks while explicitly excluding syllabus metadata.
 
-    Excludes syllabus chunks (they have their own collection).
+    Args:
+        query:     Search text.
+        subject:   Subject filter.
+        unit:      Unit filter.
+        k:         Max results (overrides config if provided).
+        threshold: Score threshold (overrides config if provided).
+
+    Returns:
+        List of candidate chunks from lecture notes.
     """
     if k is None:
-        k = config.SEARCH_NOTES_K_DEFAULT
+        k = CONFIG["rag"]["notes_k_default"]
     if threshold is None:
-        threshold = config.SIMILARITY_THRESHOLD
+        threshold = CONFIG["rag"]["similarity_threshold"]
 
     where = _build_where(
         subject=subject,
@@ -255,15 +316,25 @@ def retrieve_syllabus(
     threshold: float | None = None,
 ) -> list[Chunk]:
     """
-    Retrieve syllabus chunks from multimodal_syllabus.
+    Retrieve syllabus topics and learning outcomes.
 
-    This is the correct collection — NOT a filter inside multimodal_notes.
-    chunk_type values:  unit_1…unit_5, course_outcomes, books_references
+    This searches the dedicated syllabus collection, which is more
+    structured and higher-density than lecture notes.
+
+    Args:
+        query:     Search text.
+        subject:   Subject filter.
+        unit:      Unit filter.
+        k:         Max results.
+        threshold: Score threshold.
+
+    Returns:
+        List of syllabus-specific chunks.
     """
     if k is None:
-        k = config.SEARCH_SYLLABUS_K_DEFAULT
+        k = CONFIG["rag"]["syllabus_k_default"]
     if threshold is None:
-        threshold = config.SIMILARITY_THRESHOLD
+        threshold = CONFIG["rag"]["similarity_threshold"]
 
     where = _build_where(subject=subject, unit=unit)
     return _query_collection("syllabus", query, where, k, threshold)
@@ -279,19 +350,27 @@ def retrieve_pyq(
     year: int | None = None,
 ) -> list[Chunk]:
     """
-    Retrieve past year question chunks from multimodal_pyq.
+    Retrieve historical exam questions from the PYQ collection.
 
-    Uses a higher default threshold (0.60) because PYQ questions are short
-    and low-similarity hits are almost always noise.
+    This collection uses a higher similarity threshold by default because
+    questions are short and generic matches are common but often irrelevant.
 
-    Optional filters:
-      marks — e.g. 10 for ten-mark questions
-      year  — e.g. 2023
+    Args:
+        query:     Search text.
+        subject:   Subject filter.
+        unit:      Unit filter.
+        k:         Max results.
+        threshold: Score threshold.
+        marks:     Filter for question mark value (e.g., 2, 5, 10).
+        year:      Filter for a specific exam year.
+
+    Returns:
+        List of matching past-year questions.
     """
     if k is None:
-        k = config.SEARCH_PYQ_K_DEFAULT
+        k = CONFIG["rag"]["pyq_k_default"]
     if threshold is None:
-        threshold = config.SEARCH_PYQ_THRESHOLD
+        threshold = CONFIG["rag"]["pyq_threshold"]
 
     extra: list[dict] = []
     if marks is not None:
@@ -312,15 +391,26 @@ def retrieve_all(
     threshold: float | None = None,
 ) -> list[Chunk]:
     """
-    Retrieve from notes + syllabus and return them interleaved (notes first).
+    Retrieve from both notes and syllabus and return them interleaved.
 
-    Useful for unit-overview queries where you want both conceptual content
-    and the official topic list.
+    This is primarily used for unit overview requests where the user wants
+    to see both what is officially in the syllabus and the detailed notes for it.
+
+    Args:
+        query:      Search text.
+        subject:    Subject filter.
+        unit:       Unit filter.
+        notes_k:    Max note results.
+        syllabus_k: Max syllabus results.
+        threshold:  Score threshold.
+
+    Returns:
+        A combined list of chunks.
     """
     if notes_k is None:
-        notes_k = config.SEARCH_ALL_NOTES_K
+        notes_k = CONFIG["rag"]["all_notes_k"]
     if syllabus_k is None:
-        syllabus_k = config.SEARCH_ALL_SYLLABUS_K
+        syllabus_k = CONFIG["rag"]["all_syllabus_k"]
 
     notes = retrieve_notes(query, subject=subject, unit=unit, k=notes_k, threshold=threshold)
     syllabus = retrieve_syllabus(query, subject=subject, unit=unit, k=syllabus_k, threshold=threshold)

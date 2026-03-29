@@ -44,32 +44,22 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
-from utils import pil_to_base64, pil_to_bytes, pil_to_jpeg_bytes, extract_first_json, build_vlm_client
+from source_code.config import CONFIG
+from source_code import models
+from utils import (
+    pil_to_base64,
+    pil_to_jpeg_bytes,
+    extract_first_json,
+)
 from prompts import SYLLABUS_EXTRACTION
 
 # ──────────────────────────────────────────────────────────────────────────────
 # BACKEND SETUP
 # ──────────────────────────────────────────────────────────────────────────────
-BACKEND    = config.MODEL_VISION_BACKEND.lower()
-MODEL_NAME = config.MODEL_VISION
-
-if BACKEND == "ollama":
-    _ollama_client = build_vlm_client()
-
-elif BACKEND == "huggingface":
-    HF_MODEL_ID = config.MODEL_VISION_HF
-    if not config.HF_TOKEN:
-        print("⚠️  HuggingFace backend selected but HF_TOKEN not set.")
-    else:
-        from huggingface_hub import InferenceClient as _HFClient
-        HF_CLIENT = _HFClient(
-            base_url="https://router.huggingface.co/v1",
-            api_key=config.HF_TOKEN,
-        )
-
-else:
-    raise ValueError(f"Unsupported MODEL_VISION_BACKEND: '{BACKEND}'. Choose 'ollama' or 'huggingface'.")
+BASE_PATH = CONFIG["paths"]["base_data"]
+# Backend configuration is now handled in models.py
+BACKEND = CONFIG["providers"]["vision"].lower()
+MODEL_NAME = CONFIG["model"]["model"]
 
 # ──────────────────────────────────────────────────────────────────────────────
 # HELPERS

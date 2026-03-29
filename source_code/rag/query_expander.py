@@ -1,13 +1,16 @@
 """
 query_expander.py
 ─────────────────
-Enriches the raw query before embedding to bridge vocabulary gaps
-between student phrasing and note/syllabus terminology.
+Enhances user queries to bridge the vocabulary gap between student
+phrasing and formal academic materials.
 
-Three expansion layers:
-  1. Exam phrasing normalization  — strips question format tokens
-  2. Abbreviation expansion       — driven by subject_aliases.json + hardcoded map
-  3. Syllabus keyword injection   — appends unit keywords from subject_keywords.json
+Expansion Strategy:
+1. **Syllabus Normalization**: Removes common exam phrases (e.g., "Write a short note on").
+2. **Abbreviation Expansion**: Replaces technical shorthand (e.g., "CIA" → "Confidentiality Integrity Availability").
+3. **Keyword Injection**: Appends high-value keywords from the target subject/unit to anchor the search.
+
+This module ensures that even a loosely phrased student query can find
+precisely relevant technical content in the database.
 """
 
 import json
@@ -40,6 +43,15 @@ _EXAM_PHRASING = re.compile(
 )
 
 def normalize_exam_phrasing(query: str) -> str:
+    """
+    Remove common academic/exam prefixes that don't add semantic value.
+
+    Args:
+        query: User input query.
+
+    Returns:
+        The query string without leading/trailing exam-style phrasing.
+    """
     cleaned = _EXAM_PHRASING.sub(' ', query)
     return re.sub(r'\s+', ' ', cleaned).strip()
 
@@ -92,9 +104,13 @@ if os.path.exists(ALIASES_FILE):
 
 def expand_abbreviations(query: str) -> tuple[str, set[str]]:
     """
-    Returns (query_unchanged, set_of_expansion_terms).
-    Expansions are collected separately so the caller
-    can append them without duplicating the original query.
+    Identify and expand known abbreviations in the query.
+
+    Args:
+        query: The raw or normalized query.
+
+    Returns:
+        A tuple of (original_query, set_of_expansion_terms).
     """
     q = query.lower()
     expansions: set[str] = set()
@@ -131,8 +147,15 @@ if os.path.exists(KEYWORDS_FILE):
 
 def get_unit_keywords(subject: str, unit: str | None, top_n: int = config.QUERY_EXPANDER_MAX_KEYWORDS) -> list[str]:
     """
-    Retrieve the top N keywords for a subject/unit from subject_keywords.json.
-    Falls back to core keywords if unit is unknown.
+    Retrieve the most descriptive keywords for a specific subject/unit.
+
+    Args:
+        subject: The detected subject name.
+        unit:    The detected unit number.
+        top_n:   Maximum number of keywords to retrieve.
+
+    Returns:
+        A list of academic keywords associated with the unit.
     """
     if not subject or subject not in _keyword_map:
         return []
@@ -178,15 +201,15 @@ def expand_query(
     unit: str | None = None,
 ) -> str:
     """
-    Expand a raw user query for better semantic retrieval.
+    The main entry point for query enrichment.
 
     Args:
-        user_query: Raw student question.
-        subject:    Detected subject (e.g. "CYBER_SECURITY"). Optional.
-        unit:       Detected unit number string (e.g. "3"). Optional.
+        user_query: The student's raw input.
+        subject:    Detected subject for keyword injection.
+        unit:       Detected unit for keyword injection.
 
     Returns:
-        Enriched query string for embedding.
+        An expanded, high-signal query string ready for vector embedding.
     """
     # Layer 1: Normalize exam phrasing
     normalized = normalize_exam_phrasing(user_query)

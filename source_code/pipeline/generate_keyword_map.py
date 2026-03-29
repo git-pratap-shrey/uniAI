@@ -11,21 +11,21 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
+from source_code.config import CONFIG
 import prompts
 
 # -----------------------------------------------------------------
 # Paths & constants
 # -----------------------------------------------------------------
 
-CHROMA_PATH = config.CHROMA_DB_PATH
-MODEL       = config.MODEL_ROUTER
+CHROMA_PATH = CONFIG["paths"]["chroma"]
+MODEL       = CONFIG["providers"]["router"]
 OUTPUT_FILE = os.path.join(ROOT_DIR, "data", "subject_keywords.json")
 
 COLLECTIONS = {
-    "notes":    config.CHROMA_COLLECTION_NAME,
-    "syllabus": config.CHROMA_SYLLABUS_COLLECTION_NAME,
-    "pyq":      config.CHROMA_PYQ_COLLECTION_NAME,
+    "notes":    CONFIG["paths"]["collections"]["notes"],
+    "syllabus": CONFIG["paths"]["collections"]["syllabus"],
+    "pyq":      CONFIG["paths"]["collections"]["pyq"],
 }
 
 STOP_WORDS = {
@@ -285,7 +285,7 @@ def generate_keyword_map():
     )
     print(f"\nFound {len(all_subjects)} unique subjects across all collections.")
 
-    ollama_client = ollama.Client(host=config.OLLAMA_LOCAL_URL, timeout=90)
+    ollama_client = ollama.Client(host=CONFIG["OLLAMA_LOCAL_URL"], timeout=90)
     final_map     = load_checkpoint()
 
     for subject in all_subjects:

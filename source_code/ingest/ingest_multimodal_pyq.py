@@ -7,14 +7,14 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
+from source_code.config import CONFIG
 from utils import get_embedding, get_chroma_collection
 
 # ------------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------------
 
-BASE_PATH = config.BASE_DATA_DIR
+BASE_PATH = CONFIG["paths"]["base_data"]
 
 # ------------------------------------------------------------------
 # HELPERS
@@ -51,11 +51,11 @@ def build_pyq_embedding_text(q: dict) -> str:
 
 def ingest_pyqs():
     print("--- PYQ Ingestion Start ---")
-    print(f"Target Collection: {config.CHROMA_PYQ_COLLECTION_NAME}")
-
-    collection = get_chroma_collection(config.CHROMA_PYQ_COLLECTION_NAME)
-
-    root_path = Path(BASE_PATH)
+    print(f"Target Collection : {CONFIG['paths']['collections']['pyq']}")
+    print(f"Scanning           : {CONFIG['paths']['base_data']}")
+    
+    collection = get_chroma_collection(CONFIG['paths']['collections']['pyq'])
+    root_path  = Path(CONFIG['paths']['base_data'])
     # the processed jsons are put in pyqs_processed subfolders
     json_files = sorted(root_path.rglob("pyqs_processed/*_processed.json"))
 

@@ -1,16 +1,15 @@
 """
 chat_cli.py
 ───────────
-CLI chat loop for uniAI.
+The primary Command Line Interface (CLI) for interacting with uniAI.
 
 Responsibilities:
-  - Session-level subject locking
-  - Conversation history management
-  - /commands handling
-  - Display formatting
-  - Calls rag_pipeline.answer_query() for all intelligence
+1. **Session Management**: Maintains conversation history and subject-level locking.
+2. **Command Handling**: Processes specialized user commands (e.g., /switch, /history).
+3. **Display Orchestration**: Formats and prints LLM answers and retrieval sources.
+4. **Pipeline Invocation**: Routes user queries to the RAG pipeline.
 
-No retrieval logic. No prompt logic.
+This module acts as the thin 'View/Controller' layer for the RAG system.
 """
 
 import os
@@ -29,6 +28,7 @@ from rag.router import list_subjects
 # ---------------------------------------------------------------------------
 
 def _print_header():
+    """Display the welcome message and available CLI commands."""
     print("\n" + "=" * 60)
     print("  🎓  uniAI — Syllabus-Aware Exam Assistant")
     print("=" * 60)
@@ -44,6 +44,12 @@ def _print_header():
 
 
 def _print_answer(result: dict):
+    """
+    Format and display the RAG pipeline's response.
+
+    Args:
+        result: The result dictionary returned by rag_pipeline.answer_query().
+    """
     print(f"\n🤖  [{result['mode'].upper()}]", end="")
     if result["subject"]:
         print(f"  Subject: {result['subject']}", end="")
@@ -63,6 +69,12 @@ def _print_answer(result: dict):
 
 
 def _print_history(history: list[dict]):
+    """
+    Print a summary of the current conversation history.
+
+    Args:
+        history: List of role/content turn dictionaries.
+    """
     if not history:
         print("  (no history yet)")
         return
@@ -82,11 +94,15 @@ def _handle_command(
     history: list[dict],
 ) -> tuple[str | None, bool]:
     """
-    Process a /command.
+    Parse and execute a user command (starting with '/').
 
-    Returns (new_session_subject, should_continue).
-    should_continue=False means the command was handled and the loop
-    should skip the normal query flow for this turn.
+    Args:
+        query:           The raw command string.
+        session_subject: The current subject lock (if any).
+        history:         The conversation history.
+
+    Returns:
+        A tuple of (new_session_subject, should_continue_loop).
     """
     parts = query.strip().split(maxsplit=1)
     cmd = parts[0].lower()
@@ -134,6 +150,10 @@ def _handle_command(
 # ---------------------------------------------------------------------------
 
 def chat():
+    """
+    The main interactive loop for the uniAI CLI.
+    Handles input, command routing, pipeline execution, and result display.
+    """
     _print_header()
 
     history: list[dict] = []

@@ -1,22 +1,17 @@
 """
 rag_pipeline.py
 ───────────────
-Orchestrates the full RAG pipeline.
+The central orchestration module for the Retrieval-Augmented Generation (RAG) system.
 
-Flow:
-  1. detect_subject(query)
-  2. detect_unit(query)
-  3. retrieve_notes(query, subject, unit)
-  4. retrieve_syllabus(query, subject, unit)   ← only for topic-listing queries
-  5. rerank(notes + syllabus chunks, unit)
-  6. build_context(ranked_chunks)
-  7. build_history_block(history)
-  8. detect_mode(query)
-  9. build prompt
-  10. call generation model
-  11. return answer + metadata
+This module coordinates the entire lifecycle of a user query:
+1.  **Query Expansion**: Enriches the query with context and keywords.
+2.  **Routing**: Determines the relevant subject and unit.
+3.  **Retrieval**: Fetches candidate chunks from multiple vector collections.
+4.  **Reranking**: Refines the order of retrieved chunks using a cross-encoder.
+5.  **Context Construction**: Formats the best chunks and history for the LLM.
+6.  **Generation**: Calls the LLM (local or cloud) to produce the final answer.
 
-This file contains orchestration only — no business logic.
+The pipeline is designed to be modular, with each stage delegated to separate modules.
 """
 
 import os
@@ -27,8 +22,8 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
-import ollama
+from source_code.config import CONFIG
+from source_code import models
 
 from rag.hybrid_router import route as hybrid_route
 from rag.search import retrieve_notes, retrieve_syllabus
@@ -65,6 +60,15 @@ GENERIC_PATTERNS = [
 # ---------------------------------------------------------------------------
 
 def _is_followup(query: str) -> bool:
+    """
+    Check if the user's query is likely a follow-up to the previous context.
+
+    Args:
+        query: The raw user query.
+
+    Returns:
+        True if the query matches common follow-up patterns, False otherwise.
+    """
     q = query.strip().lower()
     for pattern in FOLLOWUP_PATTERNS:
         if re.search(pattern, q):
@@ -73,7 +77,16 @@ def _is_followup(query: str) -> bool:
 
 
 def _is_unit_overview(query: str, unit: str | None) -> bool:
-    """Detect "list topics in unit 3" style queries."""
+    """
+    Detect if the user is asking for a general overview of a unit's topics.
+
+    Args:
+        query: User input query.
+        unit:  The unit being discussed.
+
+    Returns:
+        True if "list topics" or similar intent is detected.
+    """
     if not unit:
         return False
     q = query.lower()
@@ -82,6 +95,15 @@ def _is_unit_overview(query: str, unit: str | None) -> bool:
 
 
 def _detect_mode(query: str) -> str:
+    """
+    Determine whether to use 'syllabus-aware' mode or 'generic' chat mode.
+
+    Args:
+        query: User input query.
+
+    Returns:
+        "syllabus" for retrieval-based answers, "generic" for general LLM knowledge.
+    """
     q = query.lower()
     for pattern in GENERIC_PATTERNS:
         if re.search(pattern, q):
@@ -90,6 +112,15 @@ def _detect_mode(query: str) -> str:
 
 
 def _trim_history(history: list[dict]) -> list[dict]:
+    """
+    Keep only the most recent turns in the conversation history to save tokens.
+
+    Args:
+        history: The full conversation history.
+
+    Returns:
+        A trimmed list of history turns.
+    """
     return history[-(MAX_HISTORY_TURNS * 2):]
 
 
@@ -98,37 +129,19 @@ def _trim_history(history: list[dict]) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 def _generate(prompt: str) -> str:
-    """Call the configured generation model.
+    """
+    Execute the generation step by calling the centralized models registry.
 
     Args:
-        prompt: The full prompt to send.
+        prompt: The fully constructed system and user prompt.
+
+    Returns:
+        The generated text response.
     """
-    try:
-        if config.MODEL_CHAT.startswith("gemini") and not getattr(config, "USE_OLLAMA_CLOUD", False):
-            import google.generativeai as genai
-            if not getattr(config, "GEMINI_API_KEY", ""):
-                return "⚠ GEMINI_API_KEY not set in config."
-            genai.configure(api_key=config.GEMINI_API_KEY)
-            model = genai.GenerativeModel(config.MODEL_CHAT)
-            response = model.generate_content(prompt)
-            return response.text or "⚠ Empty response from Gemini."
-
-        else:
-            if getattr(config, "USE_OLLAMA_CLOUD", False):
-                headers = {"Authorization": f"Bearer {config.OLLAMA_API_KEY}"} if getattr(config, "OLLAMA_API_KEY", "") else None
-                client = ollama.Client(host=config.OLLAMA_BASE_URL, headers=headers)
-            else:
-                client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
-                
-            response = client.chat(
-                model=config.MODEL_CHAT,
-                messages=[{"role": "user", "content": prompt}],
-                 options={"num_ctx": config.OLLAMA_CHAT_NUM_CTX, "think": False, "temperature": config.OLLAMA_CHAT_TEMPERATURE},
-            )
-            return response["message"]["content"]
-
-    except Exception as e:
-        return f"⚠ Generation error: {e}"
+    return models.chat(
+        prompt=prompt,
+        temperature=CONFIG["model"].get("temperature", 0.3),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -141,22 +154,20 @@ def answer_query(
     session_subject: str | None = None,
 ) -> dict:
     """
-    Run the full RAG pipeline for a query.
+    The main entry point for the RAG system to process a query and return an answer.
 
     Args:
         query:           The student's question.
-        history:         List of {"role": ..., "content": ...} turns.
-        session_subject: Subject locked for this session (from chat_cli).
+        history:         A list of previous turns (role, content).
+        session_subject: An optional subject lock for the current session.
 
-    Returns a dict:
-    {
-        "answer":   str,
-        "subject":  str | None,
-        "unit":     str | None,
-        "mode":     str,
-        "sources":  list[str],
-        "chunks":   list[dict],   ← ranked chunks (for CLI display)
-    }
+    Returns:
+        A dictionary containing:
+          - answer: The final generated text.
+          - subject/unit: The detected routing metadata.
+          - mode: The intent mode (syllabus vs. generic).
+          - sources: Human-readable source citations.
+          - chunks: The raw ranked chunks used in the context.
     """
     history = _trim_history(history or [])
 

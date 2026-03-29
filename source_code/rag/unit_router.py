@@ -1,8 +1,13 @@
 """
 unit_router.py
-────────────────
-Infers unit number from a query string, either via explicit regex
-or by scoring keyword matches against a subject's dictionary.
+──────────────
+Responsible for identifying which unit of a subject the user is asking about.
+It uses a two-stage approach:
+1. Regex matching for explicit mentions (e.g., "unit 3").
+2. Weighted keyword scoring against the subject's internal structure.
+
+This module is a key part of the RAG pipeline's 'Routing' stage, narrowing
+down retrieval to relevant syllabus sections.
 """
 
 import re
@@ -15,10 +20,14 @@ _WEIGHTS = {
 
 def detect_unit(query: str) -> str | None:
     """
-    Extract the unit number from the query.
+    Extract the unit number from the query using regular expressions.
 
-    Returns a string like "1", "3", "5" or None.
-    The returned value matches the format stored in ChromaDB metadata.
+    Args:
+        query: The raw user query string.
+
+    Returns:
+        A numeric string representing the unit (e.g., "1", "3", "5")
+        if a match is found, otherwise None.
     """
     match = re.search(r"\bunit[\s\-]*([1-9]\d*)\b", query.lower())
     if match:
@@ -27,8 +36,14 @@ def detect_unit(query: str) -> str | None:
 
 def score_units(query_lower: str, subject_entry) -> tuple[str, float] | None:
     """
-    Score units within a subject using keyword matching.
-    Returns (best_unit_str, score) or None.
+    Score all units within a subject based on keyword frequency in the query.
+
+    Args:
+        query_lower: The pre-normalized (lowercase) user query.
+        subject_entry: The subject's entry from the master keyword map.
+
+    Returns:
+        A tuple of (best_unit_label, total_score) or None if no units match.
     """
     if isinstance(subject_entry, list):
         return None  # Legacy format lacks units
@@ -58,6 +73,9 @@ def score_units(query_lower: str, subject_entry) -> tuple[str, float] | None:
 
 def format_unit_filter(unit: str) -> str:
     """
-    Convert a unit number to the ChromaDB metadata format.
+    Convert a detected unit identifier into the format expected by ChromaDB.
+
+    Currently, this is a pass-through as both storage and routing
+    standardized on plain numeric strings ("1", "2", etc.).
     """
     return unit

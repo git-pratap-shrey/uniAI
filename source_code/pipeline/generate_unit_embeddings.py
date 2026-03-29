@@ -7,7 +7,7 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
+from source_code.config import CONFIG
 from pipeline.embeddings.local_embedding import embed
 
 def build_unit_texts():
@@ -54,7 +54,7 @@ def main():
     
     embeddings = {k: v for k, v in zip(keys, vectors)}
     
-    out_path = config.UNIT_EMBEDDINGS_PATH
+    out_path = CONFIG["paths"]["unit_embeddings"]
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     
     with open(out_path, "wb") as f:

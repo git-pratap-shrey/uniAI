@@ -1,3 +1,14 @@
+"""
+embedding_router.py
+───────────────────
+Routes queries to a specific (Subject, Unit) pair by calculating
+cosine similarity between the query embedding and pre-defined
+reference embeddings for each unit.
+
+Reference embeddings are generated during the 'Generation of unit embeddings'
+maintenance task and stored in a pickle file (unit_embeddings.pkl).
+"""
+
 import os
 import sys
 import pickle
@@ -20,7 +31,17 @@ if os.path.exists(config.UNIT_EMBEDDINGS_PATH):
     except Exception as e:
         print(f"[embedding_router] Could not load embeddings: {e}")
 
-def cosine_similarity(v1, v2):
+def cosine_similarity(v1: np.ndarray, v2: np.ndarray) -> float:
+    """
+    Compute the cosine similarity between two vectors.
+
+    Args:
+        v1: First vector.
+        v2: Second vector.
+
+    Returns:
+        Similarity score from 0.0 to 1.0 (higher = more similar).
+    """
     dot_product = np.dot(v1, v2)
     norm_v1 = np.linalg.norm(v1)
     norm_v2 = np.linalg.norm(v2)
@@ -30,7 +51,14 @@ def cosine_similarity(v1, v2):
 
 def route(query: str) -> tuple[str | None, str | None, float]:
     """
-    Returns (subject, unit, score) if confident, else (None, None, 0.0).
+    Attempt to route the query to a subject and unit using embedding similarity.
+
+    Args:
+        query: The raw user query.
+
+    Returns:
+        A tuple of (subject_name, unit_string, confidence_score).
+        Returns (None, None, 0.0) if no match exceeds the confidence threshold.
     """
     if not _unit_embeddings:
         return None, None, 0.0

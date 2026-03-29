@@ -1,3 +1,16 @@
+"""
+hybrid_router.py
+────────────────
+The master router for the RAG pipeline. It coordinates multiple
+routing strategies to determine the Subject and Unit of a query.
+
+Routing Hierarchy:
+1. Regex (Explicit mention like "Unit 3")
+2. Keywords (Fast, exact match)
+3. Embeddings (Semantic similarity)
+4. LLM (Slowest, but best for complex/ambiguous phrasing)
+"""
+
 import os
 import sys
 from dataclasses import dataclass
@@ -6,8 +19,8 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
-import ollama
+from source_code.config import CONFIG
+from source_code import models
 from prompts import subject_unit_router
 from rag.router import detect_subject, _keyword_map
 from rag.unit_router import detect_unit
@@ -20,7 +33,15 @@ class RouteResult:
     method: str  # "keyword" | "embedding" | "llm" | "none"
 
 def _llm_classify_subject_unit(query: str) -> RouteResult:
-    """Fallback router using LLM to classify both subject and unit."""
+    """
+    Fallback router using an LLM to classify both subject and unit via the models registry.
+
+    Args:
+        query: The raw user query.
+
+    Returns:
+        A RouteResult object containing the detected subject and unit.
+    """
     if not _keyword_map:
         return RouteResult(None, None, "none")
 
@@ -48,21 +69,16 @@ def _llm_classify_subject_unit(query: str) -> RouteResult:
     prompt = subject_unit_router(query=query, subjects_units_list=subjects_units_str)
 
     try:
-        client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
-        response = client.chat(
-            model=config.MODEL_ROUTER,
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant. You must respond directly without internal reasoning or <think> tags."},
-                {"role": "user",   "content": f"{prompt} /no_think"}
-            ],
-            think=False,
-            options={
-                "temperature": config.OLLAMA_ROUTER_TEMPERATURE,
-                "num_predict": config.OLLAMA_ROUTER_NUM_PREDICT,
-            },
+        response_text = models.chat(
+            prompt=f"{prompt} /no_think",
+            system_prompt="You are a helpful assistant. You must respond directly without internal reasoning or <think> tags.",
+            model=CONFIG["rag"].get("router_model", CONFIG["providers"].get("router")),
+            provider=CONFIG["providers"].get("router", "ollama"),
+            temperature=CONFIG["rag"].get("router_temperature", 0.0),
+            num_predict=CONFIG["rag"].get("router_num_predict", 10),
         )
         
-        llm_choice = response["message"]["content"].strip().upper().replace(" ", "_")
+        llm_choice = response_text.strip().upper().replace(" ", "_")
         
         for su in subject_units:
             if su.upper() == llm_choice:
@@ -80,6 +96,16 @@ def _llm_classify_subject_unit(query: str) -> RouteResult:
 
 
 def route(query: str, session_subject: str | None = None) -> RouteResult:
+    """
+    The main routing entry point. Executes the tiered routing strategy.
+
+    Args:
+        query:           The raw user query.
+        session_subject: Subject identifier to force (e.g., from a CLI lock).
+
+    Returns:
+        A RouteResult containing the detected subject, unit, and the method used.
+    """
     # 1. Explicit unit via regex
     explicit_unit = detect_unit(query)
     

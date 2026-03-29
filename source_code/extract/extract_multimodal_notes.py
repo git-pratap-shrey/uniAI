@@ -10,46 +10,21 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
-from utils import pil_to_base64, pil_to_jpeg_bytes, extract_first_json, build_vlm_client
+from source_code.config import CONFIG
+from source_code import models
+from utils import pil_to_base64, pil_to_jpeg_bytes, extract_first_json
 from prompts import NOTES_EXTRACTION
 
 # ------------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------------
 
-BASE_PATH = config.BASE_DATA_DIR
-CHUNK_SIZE = 1  # Pages per chunk — kept small for OCR accuracy
+BASE_PATH = CONFIG["paths"]["base_data"]
+CHUNK_SIZE = 1  # Pages per chunk
 
-# Backend options (set MODEL_VISION_BACKEND in config.py or .env)
-# "ollama"      -> local/cloud Ollama model (MODEL_VISION tag)
-# "huggingface" -> HuggingFace transformers (MODEL_VISION_HF repo id)
-BACKEND = config.MODEL_VISION_BACKEND.lower()
-
+# Backend/Provider settings now handled by models.py
+BACKEND = config.VISION_PROVIDER.lower()
 MODEL_NAME = config.MODEL_VISION
-
-# ---- HuggingFace backend setup ----
-if BACKEND == "huggingface":
-    HF_MODEL_ID = config.MODEL_VISION_HF
-    if not config.HF_TOKEN:
-        print("⚠️  HuggingFace backend selected but HF_TOKEN not set in config/env.")
-        print("   Get your token at: https://huggingface.co/settings/tokens")
-    else:
-        from huggingface_hub import InferenceClient as _HFClient
-        HF_CLIENT = _HFClient(
-            base_url="https://router.huggingface.co/v1",
-            api_key=config.HF_TOKEN,
-        )
-        print(f"✅ HuggingFace Inference API ready → {HF_MODEL_ID}")
-
-elif BACKEND == "ollama":
-    _ollama_client = build_vlm_client()
-
-else:
-    raise ValueError(
-        f"Unsupported MODEL_VISION_BACKEND: '{BACKEND}'. "
-        "Choose 'ollama' or 'huggingface'."
-    )
 
 
 # ------------------------------------------------------------------
@@ -108,7 +83,7 @@ def render_pages_to_images(doc, start_page: int, end_page: int, return_bytes=Fal
 
 def process_pdf(pdf_path: Path):
     print(f"\n📄 Processing: {pdf_path.name}")
-    print(f"   Backend: {BACKEND}  |  Model: {MODEL_NAME if BACKEND != 'huggingface' else config.MODEL_VISION_HF}")
+    print(f"   Provider: {CONFIG['providers']['vision']}  |  Model: {CONFIG['model']['model']}")
 
     metadata_base = infer_metadata_from_path(pdf_path)
     # Write all chunk JSONs and .txt into a per-PDF subfolder so that
@@ -154,42 +129,21 @@ def process_pdf(pdf_path: Path):
         raw_response = None
         for attempt in range(1, MAX_RETRIES + 1):
             try:
+                # Delegate vision call to central registry
                 if BACKEND == "ollama":
                     # Render as PIL then re-encode as JPEG (5-10x smaller than PNG)
                     images_pil = render_pages_to_images(doc, start_page, end_page, return_bytes=False, scale=1.0)
                     images = [pil_to_jpeg_bytes(img) for img in images_pil]
-                    response_stream = _ollama_client.chat(
-                        model=MODEL_NAME,
-                        messages=[{
-                            'role': 'user',
-                            'content': NOTES_EXTRACTION,
-                            'images': images,
-                        }],
-                        stream=True
-                    )
-                    raw_parts = []
-                    for chunk in response_stream:
-                        raw_parts.append(chunk.get("message", {}).get("content", ""))
-                    raw_response = "".join(raw_parts).strip()
+                else: 
+                     # For HuggingFace or others, use default scaling or bytes
+                     images = render_pages_to_images(doc, start_page, end_page, return_bytes=True)
 
-                elif BACKEND == "huggingface":
-                    images = render_pages_to_images(doc, start_page, end_page, return_bytes=False)
-                    hf_messages = [{
-                        "role": "user",
-                        "content": [
-                            *[{
-                                "type": "image_url",
-                                "image_url": {"url": pil_to_base64(img)},
-                            } for img in images],
-                            {"type": "text", "text": NOTES_EXTRACTION},
-                        ],
-                    }]
-                    hf_response = HF_CLIENT.chat_completion(
-                        model=HF_MODEL_ID,
-                        messages=hf_messages,
-                        max_tokens=8192,
-                    )
-                    raw_response = hf_response.choices[0].message.content.strip()
+                raw_response = models.vision(
+                    images=images,
+                    prompt=NOTES_EXTRACTION,
+                    provider=CONFIG["providers"]["vision"],
+                    model=CONFIG["model"]["model"]
+                )
 
                 break  # success — exit retry loop
 

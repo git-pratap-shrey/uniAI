@@ -1,18 +1,27 @@
 """
 context_builder.py
 ──────────────────
-Formats retrieved chunks into clean, LLM-ready context blocks.
+Transforms raw data (retrieved chunks, history) into structured text
+ready for LLM consumption.
 
-No retrieval logic. No scoring logic. Pure formatting.
+This module acts as the 'Prompt Engineering' layer, ensuring that
+metadata is preserved and presented in a way that helps the LLM
+cite sources accurately.
 """
 
 
 def build_context(chunks: list[dict]) -> str:
     """
-    Format ranked note/syllabus chunks into a context string for the LLM.
+    Convert a list of retrieved chunks into a single formatted context string.
 
-    Each chunk block shows source metadata as a header so the LLM can
-    reference where the information came from.
+    Each chunk is prefixed with a metadata header (Source #, Title, Unit, Relevance)
+    so the LLM can distinguish between different sources.
+
+    Args:
+        chunks: List of dictionaries containing "text" and "metadata".
+
+    Returns:
+        A formatted string with chunks separated by dividers.
     """
     if not chunks:
         return ""
@@ -43,9 +52,13 @@ def build_context(chunks: list[dict]) -> str:
 
 def build_history_block(history: list[dict]) -> str:
     """
-    Format conversation history into a compact context block.
+    Format the recent conversation history into a compact text block.
 
-    history is a list of {"role": "user"|"assistant", "content": "..."}
+    Args:
+        history: List of {"role": "user"|"assistant", "content": "..."} dictionaries.
+
+    Returns:
+        A string representing the previous conversation turns.
     """
     if not history:
         return ""
@@ -62,10 +75,13 @@ def build_history_block(history: list[dict]) -> str:
 
 def format_sources_for_display(chunks: list[dict]) -> list[str]:
     """
-    Format chunks into human-readable source lines for CLI display.
+    Format retrieved chunks into human-readable citation lines for CLI display.
 
-    Returns a list of strings like:
-      "python_unit1.pdf (p.1) | Unit unit1 | similarity=0.72"
+    Args:
+        chunks: List of ranked result dictionaries.
+
+    Returns:
+        A list of strings like: "filename.pdf (p.1) | Unit 3 | similarity=0.72"
     """
     lines = []
     for chunk in chunks:

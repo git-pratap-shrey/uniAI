@@ -6,7 +6,7 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
+from source_code.config import CONFIG
 from pipeline.embeddings.local_embedding import embed
 
 
@@ -27,7 +27,7 @@ def retrieve_with_threshold(collection, query: str, n_initial=10, similarity_thr
               {"documents": [...], "metadatas": [...], "distances": [...]}
     """
     if similarity_threshold is None:
-        similarity_threshold = config.SIMILARITY_THRESHOLD
+        similarity_threshold = CONFIG["rag"]["similarity_threshold"]
     
     # Generate embedding for the query
     query_emb = embed([query])[0]

@@ -1,31 +1,24 @@
 """
 router.py
-----------
-Detects which subject a query belongs to.
+─────────
+Specialized subject detector that uses a weighted keyword scoring
+system against a nested keyword map.
 
-Strategy:
-1. Weighted keyword scoring against the nested keyword map
-2. If ambiguous or no match → LLM fallback (slower, semantic)
-3. Returns subject name or None
+Scoring Strategy:
+1. Exact keyword match across multiple collections (notes, syllabus, pyq).
+2. Per-collection weights to prioritize unit-specific topics over generic ones.
+3. Fallback to LLM if no candidate subject reaches the minimum score threshold.
 
-Scoring weights (per keyword match):
-  notes.unit     → 4   (most specific: real content, per unit)
-  syllabus.unit  → 3   (structured, per unit)
-  notes.core     → 2   (subject-level anchor across notes)
-  syllabus.core  → 2   (subject-level anchor across syllabus)
-  pyq            → 5   (exam-proven topic signal)
-  unknown        → 0   (books/references noise — ignored)
-
-Optional debug mode:
-- Returns (subject, used_llm_bool)
+The scoring system ensures that high-signal sources like PYQs contribute
+more to the subject detection than generic reference lists.
 """
 
 import json
 import os
 import sys
 import re
-import config
-import ollama
+from source_code.config import CONFIG
+from source_code import models
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
@@ -80,11 +73,16 @@ else:
 
 def _flatten_keywords(entry) -> list[str]:
     """
-    Collapse a nested subject entry into a flat keyword list for scoring.
+    Consolidate a nested subject's keyword dictionary into a single flat list.
 
-    Handles the new nested format:
-        { "notes": { "core": [...], "1": [...] }, "syllabus": {...}, "pyq": [...] }
-    and the legacy flat format (plain list).
+    This ensures backwards compatibility with legacy flat list formats
+    and allows for simplified, fast keyword scanning.
+
+    Args:
+        entry: The subject's keyword dictionary (nested or flat).
+
+    Returns:
+        A flat list of all keywords associated with the subject.
     """
     if isinstance(entry, list):
         return entry  # legacy flat format
@@ -101,8 +99,17 @@ def _flatten_keywords(entry) -> list[str]:
 
 def _score_subject(query_lower: str, entry) -> float:
     """
-    Score a subject entry against a query using per-collection weights.
-    Returns a float score.
+    Calculate the total weighted score for a subject based on query keyword matches.
+
+    Aggregates scores from notes (core/unit), syllabus (core/unit), and pyq flat lists
+    using the weights defined in _WEIGHTS.
+
+    Args:
+        query_lower: Normalized user query.
+        entry: The subject's keyword entry.
+
+    Returns:
+        A numeric score.
     """
     # Legacy flat format: treat as notes.unit weight
     if isinstance(entry, list):
@@ -140,11 +147,18 @@ def _score_subject(query_lower: str, entry) -> float:
 
 def detect_subject(query: str, debug: bool = False):
     """
-    Detect subject of a query.
+    Analyze a query to identify which subject it belongs to.
+
+    This function coordinates the keyword scoring process and
+    decides whether to trigger the LLM fallback.
+
+    Args:
+        query: User input query.
+        debug: If True, returns additional info (unit, whether LLM was used).
 
     Returns:
-        subject (str | None)
-        If debug=True → returns (subject, used_llm_bool)
+        If debug is False: (subject_name, best_unit)
+        If debug is True:  (subject_name, best_unit, used_llm_flag)
     """
 
     if not _keyword_map:
@@ -184,31 +198,32 @@ def detect_subject(query: str, debug: bool = False):
 # -------------------------------------------------
 
 def _llm_classify(query: str) -> str | None:
-    """Ask local LLM to classify subject."""
+    """
+    Perform semantic subject classification using the centralized models registry.
 
+    Args:
+        query: User input query.
+
+    Returns:
+        The matched subject name or None.
+    """
     if not _keyword_map:
         return None
 
     subjects_list = ", ".join(_keyword_map.keys())
-    prompt        = subject_router(query=query, subjects_list=subjects_list)
+    prompt = subject_router(query=query, subjects_list=subjects_list)
 
     try:
-        client = ollama.Client(host=config.OLLAMA_LOCAL_URL)
-
-        response = client.chat(
-            model=config.MODEL_ROUTER,
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant. You must respond directly without internal reasoning or <think> tags."},
-                {"role": "user",   "content": f"{prompt} /no_think"}
-            ],
-            think=False,
-            options={
-                "temperature": config.OLLAMA_ROUTER_TEMPERATURE,
-                "num_predict": config.OLLAMA_ROUTER_NUM_PREDICT,
-            },
+        response_text = models.chat(
+            prompt=f"{prompt} /no_think",
+            system_prompt="You are a helpful assistant. You must respond directly without internal reasoning or <think> tags.",
+            model=CONFIG["rag"]["router_model"] if "router_model" in CONFIG["rag"] else CONFIG["providers"].get("router"),
+            provider=CONFIG["providers"].get("router", "ollama"),
+            temperature=CONFIG["rag"].get("router_temperature", 0.0),
+            num_predict=CONFIG["rag"].get("router_num_predict", 10),
         )
 
-        llm_choice            = response["message"]["content"].strip()
+        llm_choice = response_text.strip()
         print(f"[LLM RAW OUTPUT]: '{llm_choice}'")
         llm_choice_normalized = llm_choice.strip().upper().replace(" ", "_")
 
