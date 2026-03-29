@@ -1,22 +1,16 @@
 # uniAI — Syllabus-Aware, Exam-Focused Study Assistant
 
-uniAI is a **Retrieval-Augmented Generation (RAG)** system built for university students with one clear priority: **exam scoring over generic learning**.
-
-It is not a general-purpose AI tutor. It is built around syllabus boundaries, unit-level depth, and the kind of structured answers students are expected to write in exams. Every architectural decision reflects that constraint.
-
 > *Students don't need more explanations — they need the **right** explanations, aligned exactly with their syllabus, units, and exam patterns.*
+
+uniAI is a **Retrieval-Augmented Generation (RAG)** system built for university students with one clear priority: **exam scoring over generic learning**. It is not a general-purpose AI tutor. Every architectural decision — from how PDFs are ingested to how the LLM prompt is structured — reflects the constraint that answers must be grounded in the student's actual syllabus, unit by unit.
 
 ---
 
-## What Makes uniAI Different
+## Why uniAI is Different
 
 Most AI study tools try to *teach*. uniAI is designed to help students *score*.
 
-- Answers are grounded strictly in **your own notes and syllabus PDFs**
-- Explicitly flags questions that are **out of syllabus** instead of silently hallucinating
-- Retrieval is **unit-scoped** — asking about Unit 3 only pulls Unit 3 content
-- A **cross-encoder reranker** ensures the most relevant chunks reach the LLM, not just the most similar ones
-- Exam tone: definitions first, keywords bolded, structured points
+It is intentionally less creative, more constrained, and more exam-oriented than a general assistant. Concretely, this means it answers strictly from your own uploaded notes and syllabus PDFs, it explicitly flags out-of-syllabus questions instead of silently hallucinating, retrieval is unit-scoped so asking about Unit 3 only surfaces Unit 3 content, and a cross-encoder reranker ensures the most semantically relevant chunks reach the LLM rather than just the most cosine-similar ones.
 
 ---
 
@@ -26,58 +20,59 @@ Most AI study tools try to *teach*. uniAI is designed to help students *score*.
 PDF Notes / Syllabus / PYQs
         │
         ▼
-┌─────────────────────────────────┐
-│   VLM OCR Ingestion Pipeline    │  ← Qwen3-VL (Ollama / HuggingFace)
-│   Parallel page-by-page OCR     │    PyMuPDF, metadata tagging, garbage filtering
-└────────────┬────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────┐
-│   Three Isolated Collections    │
-│   multimodal_notes              │
-│   multimodal_syllabus           │  ← ChromaDB (cosine space)
-│   multimodal_pyq                │
-└────────────┬────────────────────┘
-             │
-        Query comes in
-             │
-             ▼
-┌─────────────────────────────────┐
-│   Query Expansion (3 layers)    │  ← Exam phrasing normalization
-│                                 │    Abbreviation expansion
-│                                 │    Syllabus keyword injection
-└────────────┬────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────┐
-│   Hybrid Router (3 stages)      │  1. Keyword scoring
-│                                 │  2. Unit embedding similarity
-│                                 │  3. LLM fallback (Mistral)
-└────────────┬────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────┐
-│   Metadata-Filtered Retrieval   │  ← Subject + Unit scoped ChromaDB query
-│   Notes + Syllabus chunks       │    Cosine similarity threshold gating
-└────────────┬────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────┐
-│   Cross-Encoder Reranker        │  ← Qwen3-Reranker-0.6B (HuggingFace)
-│                                 │    AutoModelForSequenceClassification
-│                                 │    GPU inference via PyTorch CUDA
-└────────────┬────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────┐
-│   Hallucination Gate            │  ← If top cross-score < threshold → Generic Mode
-└────────────┬────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────┐
-│   Generation                    │  ← Gemini API (cloud) or Ollama (local)
-│   + Session Memory Injection    │    Exam-focused prompt assembly
-└─────────────────────────────────┘
+┌────────────────────────────────────┐
+│   VLM OCR Ingestion Pipeline       │  ← Qwen3-VL (Ollama / HuggingFace)
+│   Per-page OCR + structured JSON   │    PyMuPDF, metadata tagging, garbage filtering
+└──────────────┬─────────────────────┘
+               │
+               ▼
+┌────────────────────────────────────┐
+│   Three Isolated ChromaDB          │
+│   Collections                      │  ← cosine similarity space
+│   multimodal_notes                 │
+│   multimodal_syllabus              │
+│   multimodal_pyq                   │
+└──────────────┬─────────────────────┘
+               │
+          Query arrives
+               │
+               ▼
+┌────────────────────────────────────┐
+│   Query Expansion (3 layers)       │  ← Exam phrasing normalization
+│                                    │    Abbreviation expansion
+│                                    │    Syllabus keyword injection
+└──────────────┬─────────────────────┘
+               │
+               ▼
+┌────────────────────────────────────┐
+│   Hybrid Router (3 stages)         │  1. Weighted keyword scoring
+│                                    │  2. Pre-computed unit embedding similarity
+│                                    │  3. LLM fallback (Qwen3.5 / Mistral)
+└──────────────┬─────────────────────┘
+               │
+               ▼
+┌────────────────────────────────────┐
+│   Metadata-Filtered Retrieval      │  ← Subject + Unit scoped ChromaDB query
+│   Notes + Syllabus chunks          │    Cosine similarity threshold gating
+└──────────────┬─────────────────────┘
+               │
+               ▼
+┌────────────────────────────────────┐
+│   Cross-Encoder Reranker           │  ← Qwen3-Reranker-0.6B (HuggingFace)
+│                                    │    GPU inference via PyTorch CUDA
+│                                    │    Sigmoid-normalized 0–1 relevance scores
+└──────────────┬─────────────────────┘
+               │
+               ▼
+┌────────────────────────────────────┐
+│   Hallucination Gate               │  ← top cross-score < 0.65 → Generic Mode
+└──────────────┬─────────────────────┘
+               │
+               ▼
+┌────────────────────────────────────┐
+│   Generation                       │  ← Gemini API / Ollama / Groq
+│   + Session Memory Injection       │    Exam-focused prompt assembly
+└────────────────────────────────────┘
 ```
 
 ---
@@ -87,54 +82,55 @@ PDF Notes / Syllabus / PYQs
 ```
 uniAI/
 ├── source_code/
-│   ├── config.py                        # All model, path, and threshold config
-│   ├── prompts.py                       # Single source of truth for all LLM prompts
-│   ├── utils.py                         # Shared helpers: embeddings, ChromaDB, image encoding
+│   ├── config/
+│   │   ├── env.py              # Secrets and machine-specific settings from .env
+│   │   ├── models.py           # AI provider profiles (Gemini, Ollama, Groq)
+│   │   ├── rag.py              # RAG hyperparameters (thresholds, K values, etc.)
+│   │   ├── paths.py            # Filesystem paths, ChromaDB collection names
+│   │   └── main.py             # Assembles CONFIG dict — single import for everything
+│   │
+│   ├── models.py               # Unified provider abstraction (chat, embed, rerank, vision)
+│   ├── utils.py                # Shared helpers: image encoding, ChromaDB, JSON parsing
+│   ├── prompts.py              # Single source of truth for all LLM prompts
 │   │
 │   ├── extract/
-│   │   ├── extract_multimodal_notes.py  # VLM OCR ingestion for lecture notes
-│   │   ├── extract_multimodal_pyq.py    # VLM OCR + LLM unit classification for PYQs
-│   │   └── extract_multimodal_syllabus.py # Structured syllabus extraction (7 chunks/PDF)
+│   │   ├── extract_multimodal_notes.py     # VLM OCR for lecture notes
+│   │   ├── extract_multimodal_pyq.py       # VLM OCR + LLM unit classification for PYQs
+│   │   └── extract_multimodal_syllabus.py  # Structured syllabus extraction (7 chunks/PDF)
 │   │
 │   ├── ingest/
-│   │   ├── ingest_multimodal.py         # Notes → multimodal_notes
-│   │   ├── ingest_multimodal_pyq.py     # PYQs → multimodal_pyq
-│   │   └── ingest_multimodal_syllabus.py # Syllabus → multimodal_syllabus
+│   │   ├── ingest_multimodal.py            # Notes → multimodal_notes
+│   │   ├── ingest_multimodal_pyq.py        # PYQs → multimodal_pyq
+│   │   └── ingest_multimodal_syllabus.py   # Syllabus → multimodal_syllabus
 │   │
 │   ├── pipeline/
-│   │   ├── embeddings/local_embedding.py  # Ollama embedding client (keep_alive)
-│   │   ├── generate_keyword_map.py        # Builds subject_keywords.json for routing
-│   │   ├── generate_unit_embeddings.py    # Builds unit_embeddings.pkl for embedding router
-│   │   └── retrieval_utils.py             # Threshold-filtered retrieval helper
+│   │   ├── embeddings/local_embedding.py   # Ollama embedding client (keep_alive)
+│   │   ├── generate_keyword_map.py         # Builds subject_keywords.json for routing
+│   │   ├── generate_unit_embeddings.py     # Builds unit_embeddings.pkl for Stage 2 router
+│   │   └── retrieval_utils.py              # Threshold-filtered retrieval helper
 │   │
-│   ├── rag/
-│   │   ├── rag_pipeline.py              # Main orchestrator: routes → retrieves → reranks → generates
-│   │   ├── hybrid_router.py             # 3-stage router: keyword → embedding → LLM
-│   │   ├── router.py                    # Keyword scoring router with weighted signals
-│   │   ├── embedding_router.py          # Pre-computed unit embedding similarity router
-│   │   ├── unit_router.py               # Regex + keyword unit detection
-│   │   ├── query_expander.py            # 3-layer query expansion
-│   │   ├── search.py                    # Collection-isolated retrieval functions
-│   │   ├── cross_encoder.py             # Qwen3-Reranker-0.6B reranker (GPU)
-│   │   ├── reranker.py                  # Heuristic reranker (fallback / legacy)
-│   │   ├── context_builder.py           # Formats chunks into LLM-ready context
-│   │   └── chat_cli.py                  # CLI chat loop
-│   │
-│   └── tests/
-│       ├── ci/                          # GitHub Actions test suite
-│       ├── router/                      # Hybrid router accuracy evaluation (30 questions)
-│       ├── retrieval/                   # Collection isolation + pipeline tests
-│       └── chat/                        # End-to-end RAG sweep tests
+│   └── rag/
+│       ├── rag_pipeline.py        # Main orchestrator: route → retrieve → rerank → generate
+│       ├── hybrid_router.py       # Coordinates 3-stage routing waterfall
+│       ├── router.py              # Stage 1: weighted keyword scoring
+│       ├── embedding_router.py    # Stage 2: pre-computed unit embedding similarity
+│       ├── unit_router.py         # Regex + keyword unit detection
+│       ├── query_expander.py      # 3-layer query expansion
+│       ├── search.py              # Collection-isolated retrieval functions
+│       ├── cross_encoder.py       # Qwen3-Reranker-0.6B reranker (GPU)
+│       ├── reranker.py            # Heuristic reranker (fallback / legacy)
+│       ├── context_builder.py     # Formats chunks into LLM-ready context
+│       └── chat_cli.py            # CLI chat loop
 │
-├── rag_project/                         # Django backend
+├── rag_project/                   # Django backend
 │   └── rag_api/
-│       ├── views.py                     # /api/query and /api/health endpoints
+│       ├── views.py               # /api/query and /api/health endpoints
 │       ├── urls.py
-│       └── templates/chat.html          # Minimal HTML/JS frontend
+│       └── templates/chat.html    # Minimal HTML/JS frontend
 │
-├── .github/workflows/ci.yml            # CI: syntax check, Django health, pytest
+├── .github/workflows/ci.yml       # CI: syntax check, Django health, pytest
 ├── requirements.txt
-├── requirements_linux.txt              # WSL/Ubuntu setup guide
+├── requirements_linux.txt         # WSL/Ubuntu setup guide
 └── .env.example
 ```
 
@@ -142,102 +138,69 @@ uniAI/
 
 ## Core Components
 
-### 1. Ingestion Pipeline
+### 1. Configuration System
 
-PDFs go through a three-stage ingestion process before they reach ChromaDB.
+The config was designed as a proper Python package with four files that each own one concern. `env.py` loads secrets from `.env`. `models.py` defines AI provider profiles and which one is active. `rag.py` holds every tunable hyperparameter. `paths.py` resolves filesystem locations using `pathlib`. The `main.py` assembles these into a single `CONFIG` dictionary that every other module imports, ensuring one consistent access pattern throughout the codebase.
 
-**Notes & Syllabus OCR** (`extract_multimodal_notes.py`, `extract_multimodal_syllabus.py`)
-- Renders each PDF page to an image (JPEG for Ollama cloud, PNG for HuggingFace)
-- Sends page images to a Vision-Language Model (VLM) for OCR and structured extraction
-- Supports two backends switchable via `MODEL_VISION_BACKEND`:
-  - `ollama` — local or cloud Ollama (default: `qwen3-vl:235b-cloud`)
-  - `huggingface` — HuggingFace Inference API (default: `Qwen/Qwen3-VL-235B-A22B-Instruct`)
-- Extracts structured JSON per chunk: `full_text`, `title`, `topics`, `key_concepts`, `unit`, `confidence`
-- Runs **parallel page extraction** for fast ingestion
-- Syllabus PDFs produce exactly 7 structured chunks: `unit_1` through `unit_5`, `course_outcomes`, `books_references`
+### 2. Models Registry (`models.py`)
 
-**PYQ Pipeline** (`extract_multimodal_pyq.py`)
-- VLM transcribes exam question paper images page by page
-- Each extracted question is classified into its syllabus unit using an LLM (`MODEL_CHAT`)
-- Questions are structured with: `question_text`, `unit`, `marks`, `year`, `section`
-- Stored in the dedicated `multimodal_pyq` collection for exam-pattern retrieval
+This is the architectural core. Instead of every script calling `ollama.chat()` or `genai.generate_content()` directly, they all go through `models.chat()`, `models.embed()`, `models.rerank()`, or `models.vision()`. Switching the generation backend from Gemini to Groq is a one-line change in `config/models.py`. Provider clients are lazily initialized — they are only created on first use, which avoids import-time failures if a provider library is not installed.
 
-**Ingestion Filtering** (`ingest_multimodal.py`)
-- Skips chunks below OCR confidence threshold (`MIN_INGEST_CONFIDENCE = 0.3`)
-- Filters promotional/garbage content (title blocklist + keyword density check)
-- Normalizes unit strings to plain numeric format (`"unit1"` → `"1"`)
+| Function | Purpose |
+|---|---|
+| `models.chat()` | Text generation via Gemini, Ollama, or Groq |
+| `models.embed()` | Vector embeddings via Ollama |
+| `models.rerank()` | Cross-encoder scoring via HuggingFace Transformers |
+| `models.vision()` | VLM OCR via Ollama or HuggingFace Inference API |
 
----
+### 3. Ingestion Pipelines
 
-### 2. Three Isolated ChromaDB Collections
+Three parallel pipelines handle the three data types, each depositing into its own isolated ChromaDB collection.
 
-| Collection | Content | Key Metadata Fields |
-|---|---|---|
-| `multimodal_notes` | Lecture notes, handwritten notes, printed slides | `subject`, `unit`, `title`, `document_type`, `confidence` |
-| `multimodal_syllabus` | Unit topics, course outcomes, reference books | `subject`, `unit`, `chunk_type`, `syllabus_version` |
-| `multimodal_pyq` | Past year exam questions | `subject`, `unit`, `year`, `marks` |
+**Notes pipeline** renders each PDF page to an image (JPEG at 1× scale for Ollama cloud to avoid Cloudflare timeouts, PNG at 2× for HuggingFace). The VLM returns a structured JSON with `full_text`, `title`, `unit`, `topics`, `key_concepts`, and `confidence`. An ingestion-time garbage filter rejects promotional slides, low-confidence OCR, and short empty chunks before they reach the vector store.
 
-Collection isolation is the foundation of specialized retrieval. Notes, syllabus, and PYQ data are never mixed at query time.
+**Syllabus pipeline** processes each syllabus PDF into exactly seven structured JSON files — one per unit plus course outcomes and a books/references chunk. This granularity is what makes unit-scoped retrieval precise later.
 
----
+**PYQ pipeline** is the most involved. It transcribes exam papers page-by-page via VLM, then for each extracted question calls the chat LLM a second time to classify which syllabus unit the question belongs to. Questions are cleaned of marks annotations, pipe separators, and trailing numbers via regex before ingestion.
 
-### 3. Hybrid Query Router
+### 4. Hybrid Query Router
 
-Before retrieval, every query goes through a three-stage routing pipeline to detect subject and unit.
+Every query goes through a three-stage waterfall before any retrieval happens.
 
-**Stage 1 — Keyword Scoring** (`router.py`)
-
-Scores the query against `subject_keywords.json` using weighted signals:
+**Stage 1 — Keyword Scoring** scores the query against `subject_keywords.json` using a weighted system. PYQ keywords carry the most signal (weight 5), followed by unit-specific notes keywords (4), syllabus unit keywords (3), and core subject keywords (2). If one subject wins with no tie and meets the minimum threshold, routing completes in milliseconds without any LLM call.
 
 | Signal | Weight |
 |---|---|
 | PYQ keywords | 5 |
 | Notes unit-level keywords | 4 |
 | Syllabus unit-level keywords | 3 |
-| Notes/Syllabus core keywords | 2 |
-| Unknown/noise | 0 |
+| Core subject keywords | 2 |
 
-Returns subject + unit if score ≥ `KEYWORD_MIN_SCORE` with no tie.
+**Stage 2 — Embedding Similarity** embeds the query and computes cosine similarity against pre-computed unit embeddings stored in `unit_embeddings.pkl`. These reference embeddings are generated offline from the keyword map and represent each subject/unit as a dense vector. If similarity exceeds `EMBEDDING_ROUTER_THRESHOLD` (0.55), routing is decided.
 
-**Stage 2 — Embedding Similarity** (`embedding_router.py`)
+**Stage 3 — LLM Fallback** invokes a fast local router model with a strict prompt that must reply with exactly one `SUBJECT_UNIT` string. Temperature is fixed at 0.0 for deterministic output. This stage only runs for genuinely ambiguous queries that escaped both previous stages.
 
-If keyword scoring fails or is ambiguous, the query is embedded and compared against pre-computed unit embeddings (`unit_embeddings.pkl`). Returns subject + unit if similarity ≥ `EMBEDDING_ROUTER_THRESHOLD`.
+### 5. Query Expansion
 
-**Stage 3 — LLM Fallback** (`hybrid_router.py`)
+Three layers are applied before embedding to bridge the vocabulary gap between how students phrase questions and how lecture notes are written.
 
-For complex or ambiguous queries, a fast local router model (Mistral) classifies the query against the full `subject_unit` list. Temperature is set to 0 for deterministic output.
+The first layer strips exam-style phrasing so "write a short note on buffer overflow" becomes "buffer overflow" and the embedding captures the concept, not the question format. The second layer expands known abbreviations using a hardcoded map and a loaded `subject_aliases.json`. The third layer appends syllabus keywords for the detected subject and unit, anchoring the query embedding in academic vocabulary.
 
----
+### 6. Cross-Encoder Reranker
 
-### 4. Query Expansion (`query_expander.py`)
+After cosine-similarity retrieval, the top candidates are reranked using `tomaarsen/Qwen3-Reranker-0.6B-seq-cls`. Unlike the bi-encoder used for initial retrieval, a cross-encoder processes the query and each document *together*, which allows it to detect semantic relationships that independent embeddings miss. Scores are sigmoid-normalized to a 0–1 range.
 
-Three layers applied before embedding, to bridge the gap between student phrasing and syllabus terminology:
+The **hallucination gate** sits immediately after reranking: if the top cross-encoder score falls below `MIN_CROSS_SCORE` (0.65), the pipeline discards all retrieved chunks and switches to Generic AI Tutor Mode. This is the mechanism that prevents the LLM from producing confident-sounding answers from irrelevant context.
 
-1. **Exam phrasing normalization** — strips question-format tokens (`define`, `explain`, `write a note on`) so embeddings focus on the actual concept
-2. **Abbreviation expansion** — maps known abbreviations (`k-map` → `karnaugh map`, `cia triad` → `confidentiality integrity availability`) plus subject aliases from `subject_aliases.json`
-3. **Syllabus keyword injection** — appends unit-specific and core keywords from `subject_keywords.json` to anchor the embedding in syllabus vocabulary
+### 7. Three Isolated ChromaDB Collections
 
----
+| Collection | Content | Key Metadata |
+|---|---|---|
+| `multimodal_notes` | Lecture notes, handwritten notes, slides | `subject`, `unit`, `title`, `document_type`, `confidence` |
+| `multimodal_syllabus` | Unit topics, course outcomes, book lists | `subject`, `unit`, `chunk_type`, `syllabus_version` |
+| `multimodal_pyq` | Past year exam questions | `subject`, `unit`, `year`, `marks` |
 
-### 5. Cross-Encoder Reranker (`cross_encoder.py`)
-
-After initial cosine-similarity retrieval, chunks are reranked using a sequence classification model.
-
-- **Model:** `tomaarsen/Qwen3-Reranker-0.6B-seq-cls`
-- **Loaded via:** HuggingFace `AutoModelForSequenceClassification`
-- **Inference:** GPU (CUDA) with `torch.float16`, eager-loaded at startup
-- **Process:** Top `CROSS_ENCODER_CANDIDATES` (default: 6) chunks are scored as `(query, chunk)` pairs; scores are sigmoid-normalized to 0–1
-- **Hallucination gate:** If the top cross-encoder score falls below `MIN_CROSS_SCORE` (default: 0.65), the pipeline switches to **Generic AI Tutor Mode** and returns no chunks
-
----
-
-### 6. Generation
-
-- **Primary:** Gemini API (`gemini-3-flash-preview` or configurable)
-- **Local fallback:** Ollama with `gemma3:4b` or any configured `MODEL_CHAT`
-- **Session memory:** Last `MAX_HISTORY_TURNS` (default: 4) conversation turns injected at generation time
-- **Prompt mode:** `syllabus` (strict, exam-focused) or `generic` (labeled general knowledge)
-- **Follow-up detection:** Queries like `repeat`, `summarize`, `again` skip retrieval and use history directly
+Collection isolation is foundational. The `retrieve_notes()` function applies an explicit `document_type != "syllabus"` filter to prevent syllabus chunks from appearing in notes results, even though both live under the same ChromaDB path.
 
 ---
 
@@ -254,7 +217,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-*For WSL/Ubuntu, follow the step-by-step guide in `requirements_linux.txt` (includes PyTorch CUDA setup).*
+For WSL/Ubuntu, follow the step-by-step guide in `requirements_linux.txt` (includes PyTorch CUDA setup).
 
 ### 2. Configure environment
 
@@ -263,16 +226,15 @@ cp .env.example .env
 # Edit .env with your keys and paths
 ```
 
-Key variables:
+Key variables to set:
 
 ```env
 MODEL_VISION_BACKEND=ollama          # ollama | huggingface
-MODEL_VISION=qwen3-vl:235b-cloud
-MODEL_EMBEDDING=qwen3-embedding:4B
-MODEL_CHAT=gemma3:4b                 # or gemini-3-flash-preview
-MODEL_ROUTER=mistral:7b-instruct
-GEMINI_API_KEY=...                   # if using Gemini
-HF_TOKEN=...                         # if using HuggingFace backend
+OLLAMA_BASE_URL=http://localhost:11434
+BASE_DATA_DIR=/path/to/your/data/year_2
+CHROMA_DB_PATH=/path/to/your/chroma
+GEMINI_API_KEY=...                   # if using Gemini for generation
+HF_TOKEN=...                         # if using HuggingFace for vision or reranking
 ```
 
 Make sure Ollama is running locally (`ollama serve`) and required models are pulled.
@@ -287,22 +249,20 @@ source_code/data/year_2/<SUBJECT>/
   syllabus/*.pdf
 ```
 
-### 4. Run ingestion pipeline
+### 4. Run the ingestion pipeline
 
 ```bash
-# Step 1: OCR extraction (notes and PYQs run in parallel)
+# OCR extraction
 python source_code/extract/extract_multimodal_notes.py
 python source_code/extract/extract_multimodal_pyq.py
-
-# Step 2: Syllabus extraction
 python source_code/extract/extract_multimodal_syllabus.py
 
-# Step 3: Ingest into ChromaDB
+# Ingest into ChromaDB
 python source_code/ingest/ingest_multimodal.py
 python source_code/ingest/ingest_multimodal_pyq.py
 python source_code/ingest/ingest_multimodal_syllabus.py
 
-# Step 4: Build keyword map and unit embeddings for router
+# Build router artifacts
 python source_code/pipeline/generate_keyword_map.py
 python source_code/pipeline/generate_unit_embeddings.py
 ```
@@ -314,17 +274,17 @@ cd rag_project
 python manage.py runserver
 ```
 
-**Endpoints:**
+**API Endpoints:**
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/health` | System health + active model |
+| `GET` | `/api/health` | System health and active model |
 | `POST` | `/api/query` | Main RAG query endpoint |
 
 **Query payload:**
 ```json
 {
-  "query": "Explain buffer overflow",
+  "query": "Explain buffer overflow attack",
   "history": [],
   "subject": "CYBER_SECURITY"
 }
@@ -340,72 +300,23 @@ Commands: `/switch <SUBJECT>`, `/subjects`, `/history`, `/clear`
 
 ---
 
-## Testing
-
-```bash
-# CI suite (syntax, Django health, router unit test)
-pytest source_code/tests/ci/ -v
-
-# Router accuracy (30 questions across 3 subjects)
-python source_code/tests/router/test_30_questions.py
-
-# Retrieval isolation tests
-pytest source_code/tests/retrieval/ -v
-
-# Full pipeline evaluation (80 questions, JSONL output)
-python source_code/tests/chat/testing.py
-
-# Cross-encoder threshold sweep
-python source_code/tests/chat/sweep.py
-```
-
-CI runs automatically on every push via GitHub Actions (`.github/workflows/ci.yml`).
-
----
-
 ## Configuration Reference
 
-All tuneable parameters live in `source_code/config.py`.
+All tuneable parameters live in `source_code/config/rag.py`.
 
 | Parameter | Default | Description |
 |---|---|---|
-| `SIMILARITY_THRESHOLD` | `0.35` | Min cosine similarity to keep a retrieval result |
-| `MIN_STRONG_SIM` | `0.6` | Min similarity the top chunk must have |
-| `CROSS_ENCODER_MODEL` | `tomaarsen/Qwen3-Reranker-0.6B-seq-cls` | Reranker model |
-| `MIN_CROSS_SCORE` | `0.65` | Below this → Generic AI Tutor Mode |
-| `CROSS_ENCODER_CANDIDATES` | `6` | Max pairs sent to cross-encoder |
-| `PIPELINE_CROSS_RERANK_TOP_N` | `4` | Chunks kept after reranking |
-| `MAX_HISTORY_TURNS` | `4` | Conversation turns injected into context |
-| `KEYWORD_MIN_SCORE` | `2` | Min keyword score for router Stage 1 |
-| `EMBEDDING_ROUTER_THRESHOLD` | `0.55` | Min similarity for router Stage 2 |
+| `similarity_threshold` | `0.35` | Min cosine similarity to keep a retrieval result |
+| `min_strong_sim` | `0.6` | Min similarity the top chunk must have |
+| `cross_encoder.model` | `tomaarsen/Qwen3-Reranker-0.6B-seq-cls` | Reranker model |
+| `cross_encoder.min_score` | `0.65` | Below this score → Generic AI Tutor Mode |
+| `cross_encoder.candidates` | `6` | Max chunks sent to cross-encoder |
+| `cross_encoder.pipeline_top_n` | `4` | Chunks kept after reranking |
+| `history_limit` | `4` | Conversation turns injected into context |
+| `keywords.min_score` | `2` | Min keyword score to trust Stage 1 routing |
+| `embedding_router_threshold` | `0.55` | Min similarity to trust Stage 2 routing |
 
----
-
-## Cleanup
-
-```bash
-# Delete ChromaDB + all non-PDF files in data directory
-python source_code/not_in_use_scripts/cleanup_data.py --force
-```
-
----
-
-## Current Limitations
-
-- Fixed-size chunking (semantic/structure-aware chunking planned)
-- CSRF disabled on `/api/query` — must be secured before any deployment
-- No production auth or rate limiting
-- Cloud LLM rate limits during heavy ingestion
-- Cross-encoder loads eagerly at startup — requires GPU for reasonable speed
-
-## Roadmap
-
-- Semantic chunking
-- Answer citations with source page references
-- Confidence indicators in responses
-- Local generation fallback to reduce cloud cost
-- Unit-level summaries and topic index
-- College-wide deployment (subject to feasibility)
+Chat model selection lives in `source_code/config/models.py` via `ACTIVE_CHAT_MODEL`.
 
 ---
 
@@ -413,14 +324,24 @@ python source_code/not_in_use_scripts/cleanup_data.py --force
 
 | Layer | Stack |
 |---|---|
-| Backend | Python, Django, FastAPI (testing) |
+| Backend | Python, Django |
 | AI / ML | RAG, VLM OCR, Cross-encoder reranking, Embeddings |
-| Models | Qwen3-VL, Qwen3-Reranker, Gemma3, Mistral, Gemini API |
-| Vector DB | ChromaDB (3 isolated collections) |
+| Models | Qwen3-VL, Qwen3-Reranker-0.6B, Qwen3-Embedding:4B, Gemma3, Gemini API |
+| Vector DB | ChromaDB (3 isolated collections, cosine space) |
 | Inference | Ollama (local/cloud), HuggingFace Transformers, PyTorch CUDA |
 | Data Processing | PyMuPDF, custom chunking and cleaning |
 | Testing | pytest, GitHub Actions CI |
 | Dev & Infra | Git/GitHub, `.env` config, Cloudflare Tunnel, local-first design |
+
+---
+
+## Current Limitations
+
+The cross-encoder loads on first call and blocks until it is warm, meaning the first request after a cold server start will be noticeably slow. CSRF is currently disabled on `/api/query` for development convenience and must be re-enabled before any public deployment. Only one academic year is fully ingested in the current prototype. There is no persistent long-term memory across sessions — conversation history is stateless and lives in the frontend.
+
+## Roadmap
+
+Semantic and structure-aware chunking to replace fixed-size page chunking. Answer citations with source page references so students can trace answers back to their notes. A background warm-up thread for the cross-encoder to eliminate cold-start latency. Automated ingestion triggers for new subject data. Unit-level summaries and topic index generation. College-wide deployment once the system is hardened.
 
 ---
 

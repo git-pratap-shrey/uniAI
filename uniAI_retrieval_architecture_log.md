@@ -1,3 +1,4 @@
+# !!!! REQUIRES UPDATE !!!
 # uniAI Retrieval Architecture -- Structured Design Log
 
 ## 1. Data Sources & Pipelines
