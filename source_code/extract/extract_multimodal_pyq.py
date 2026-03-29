@@ -25,11 +25,11 @@ from prompts import pyq_unit_classification
 
 BASE_PATH = CONFIG["paths"]["base_data"]
 BACKEND = CONFIG["providers"]["vision"].lower()
-OLLAMA_CLIENT = build_vlm_client()
 
+# Vision model configuration now handled by models.vision()
 if BACKEND == "huggingface":
     from huggingface_hub import InferenceClient as _HFClient
-    HF_MODEL_ID = config.MODEL_VISION_HF
+    # HF_MODEL_ID will be set by CONFIG["providers"]["vision_model"]
 
 def get_syllabus_topics(subject: str) -> str:
     """Finds the syllabus JSON for the subject and extracts units."""
@@ -63,27 +63,18 @@ def load_pdf(pdf_path: Path):
         raw_response = None
         for attempt in range(1, MAX_RETRIES + 1):
             try:
+                # Use centralized models.vision() for all providers
                 if BACKEND == "huggingface":
                     from PIL import Image
                     import io
                     img = Image.open(io.BytesIO(pix.tobytes("png")))
-                    hf_messages = [{
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "image_url",
-                                "image_url": {"url": pil_to_base64(img)},
-                            },
-                            {"type": "text", "text": PYQ_VLM_TRANSCRIPTION},
-                        ],
-                    }]
                     print(f"   -> Call HF Vision API (Page {page_num+1})...", end="", flush=True)
-                    hf_response = HF_CLIENT.chat_completion(
-                        model=HF_MODEL_ID,
-                        messages=hf_messages,
-                        max_tokens=8192,
+                    raw_response = models.vision(
+                        images=[img],
+                        prompt=PYQ_VLM_TRANSCRIPTION,
+                        provider=CONFIG["providers"]["vision"],
+                        model=CONFIG["providers"]["vision_model"]
                     )
-                    raw_response = hf_response.choices[0].message.content.strip()
                     print(" done.")
                 else:
                     # Convert to PIL then JPEG (5-10x smaller than raw PNG bytes)
@@ -91,19 +82,12 @@ def load_pdf(pdf_path: Path):
                     import io as _io
                     img = _PIL.open(_io.BytesIO(pix.tobytes("png")))
                     print(f"   -> Call Ollama Vision API (Page {page_num+1})...", end="", flush=True)
-                    response_stream = OLLAMA_CLIENT.chat(
-                        model=config.MODEL_VISION,
-                        messages=[{
-                            'role': 'user',
-                            'content': PYQ_VLM_TRANSCRIPTION,
-                            'images': [pil_to_jpeg_bytes(img)]
-                        }],
-                        stream=True
+                    raw_response = models.vision(
+                        images=[pil_to_jpeg_bytes(img)],
+                        prompt=PYQ_VLM_TRANSCRIPTION,
+                        provider=CONFIG["providers"]["vision"],
+                        model=CONFIG["providers"]["vision_model"]
                     )
-                    raw_parts = []
-                    for chunk in response_stream:
-                        raw_parts.append(chunk.get('message', {}).get('content', ''))
-                    raw_response = "".join(raw_parts).strip()
                     print(" done.")
                 break
             except Exception as e:
@@ -220,11 +204,12 @@ def get_unit_classification(question_text: str, syllabus_text: str) -> int:
     MAX_RETRIES = 3
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            response = OLLAMA_CLIENT.chat(
-                model=config.MODEL_CHAT,
-                messages=[{'role': 'user', 'content': prompt}]
+            response = models.chat(
+                prompt=prompt,
+                model=CONFIG["model"]["model"],
+                provider=CONFIG["providers"]["chat"]
             )
-            raw_output = response['message']['content'].strip()
+            raw_output = response.strip()
             match = re.search(r'(\d)', raw_output)
             if match:
                 unit = int(match.group(1))

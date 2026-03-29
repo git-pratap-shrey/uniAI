@@ -56,7 +56,7 @@ _WEIGHTS = {
 # Load keyword map once
 # -------------------------------------------------
 
-KEYWORDS_FILE = config.KEYWORDS_FILE_PATH
+KEYWORDS_FILE = CONFIG["paths"]["keywords"]
 
 _keyword_map: dict = {}
 
@@ -175,7 +175,7 @@ def detect_subject(query: str, debug: bool = False):
 
     max_score = max(scores.values()) if scores else 0
 
-    if max_score >= config.KEYWORD_MIN_SCORE:
+    if max_score >= CONFIG["rag"]["keywords"]["min_score"]:
         top_subjects = [s for s, v in scores.items() if v == max_score]
         if len(top_subjects) == 1:
             result = top_subjects[0]
@@ -217,10 +217,10 @@ def _llm_classify(query: str) -> str | None:
         response_text = models.chat(
             prompt=f"{prompt} /no_think",
             system_prompt="You are a helpful assistant. You must respond directly without internal reasoning or <think> tags.",
-            model=CONFIG["rag"]["router_model"] if "router_model" in CONFIG["rag"] else CONFIG["providers"].get("router"),
-            provider=CONFIG["providers"].get("router", "ollama"),
-            temperature=CONFIG["rag"].get("router_temperature", 0.0),
-            num_predict=CONFIG["rag"].get("router_num_predict", 10),
+            model=CONFIG["providers"]["router_model"] if "router_model" in CONFIG["providers"] else CONFIG["model"]["model"],
+            provider=CONFIG["providers"]["router"],
+            temperature=CONFIG["rag"]["router_temperature"],
+            num_predict=CONFIG["rag"]["router_num_predict"],
         )
 
         llm_choice = response_text.strip()

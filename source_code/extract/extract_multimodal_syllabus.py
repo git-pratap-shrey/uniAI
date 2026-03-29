@@ -59,7 +59,7 @@ from prompts import SYLLABUS_EXTRACTION
 BASE_PATH = CONFIG["paths"]["base_data"]
 # Backend configuration is now handled in models.py
 BACKEND = CONFIG["providers"]["vision"].lower()
-MODEL_NAME = CONFIG["model"]["model"]
+MODEL_NAME = CONFIG["providers"]["vision_model"]
 
 # ──────────────────────────────────────────────────────────────────────────────
 # HELPERS
@@ -136,45 +136,18 @@ Rules:
 
 def call_vlm(images: list, max_retries: int = 3) -> dict | None:
     """
-    Send syllabus images to the configured VLM backend.
+    Send syllabus images to the configured VLM backend using centralized models.vision().
     Returns parsed JSON dict or None on failure.
     """
     for attempt in range(1, max_retries + 1):
         try:
-            raw = None
-
-            if BACKEND == "ollama":
-                img_bytes = [pil_to_jpeg_bytes(img) for img in images]  # JPEG: ~5-10x smaller than PNG
-                response_stream = _ollama_client.chat(
-                    model=MODEL_NAME,
-                    messages=[{
-                        "role": "user",
-                        "content": SYLLABUS_EXTRACTION,
-                        "images": img_bytes,
-                    }],
-                    stream=True
-                )
-                raw_parts = []
-                for chunk in response_stream:
-                    raw_parts.append(chunk.get("message", {}).get("content", ""))
-                raw = "".join(raw_parts).strip()
-
-            elif BACKEND == "huggingface":
-                messages = [{
-                    "role": "user",
-                    "content": [
-                        *[{"type": "image_url", "image_url": {"url": pil_to_base64(img)}}
-                          for img in images],
-                        {"type": "text", "text": SYLLABUS_EXTRACTION},
-                    ],
-                }]
-                hf_resp = HF_CLIENT.chat_completion(
-                    model=HF_MODEL_ID,
-                    messages=messages,
-                    max_tokens=8192,
-                )
-                raw = hf_resp.choices[0].message.content.strip()
-
+            raw = models.vision(
+                images=images,
+                prompt=SYLLABUS_EXTRACTION,
+                provider=CONFIG["providers"]["vision"],
+                model=CONFIG["providers"]["vision_model"]
+            )
+            
             parsed = extract_first_json(raw)
             if parsed:
                 return parsed
@@ -364,7 +337,7 @@ def process_syllabus(pdf_path: Path, force: bool = False):
         print("\n   ❌ VLM extraction failed for all pages. Skipping this syllabus.")
         return
 
-    model_id = MODEL_NAME if BACKEND != "huggingface" else config.MODEL_VISION_HF
+    model_id = MODEL_NAME  # Use centralized model name
     base = _base_meta(subject, syllabus_version, pdf_path.name, model_id)
     base["subject_name"] = subject_name
 
@@ -441,8 +414,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--path",
-        default=config.BASE_DATA_DIR,
-        help="Root data directory (default: config.BASE_DATA_DIR)",
+        default=CONFIG["paths"]["base_data"],
+        help="Root data directory (default: CONFIG['paths']['base_data'])",
     )
     parser.add_argument(
         "--force",

@@ -101,7 +101,7 @@ def get_chroma_collection(collection_name: str = None) -> chromadb.Collection:
 
     Args:
         collection_name: Name of the collection to open. Defaults to
-                         config.CHROMA_COLLECTION_NAME when omitted.
+                         CONFIG["paths"]["collections"]["notes"] when omitted.
     """
     name = collection_name or CONFIG["paths"]["collections"]["notes"]
     if name not in _chroma_collections:
@@ -117,4 +117,4 @@ def get_chroma_collection(collection_name: str = None) -> chromadb.Collection:
 # VLM CLIENT
 # ──────────────────────────────────────────────────────────────────────────────
 
-# build_vlm_client is deprecated. Use models.vision() instead.
+# VLM client management is now handled by models.vision() - no deprecated functions

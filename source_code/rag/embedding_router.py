@@ -18,15 +18,15 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
+from source_code.config import CONFIG
 from pipeline.embeddings.local_embedding import embed
 
 # Load embeddings at import time
 _unit_embeddings = {}
 
-if os.path.exists(config.UNIT_EMBEDDINGS_PATH):
+if os.path.exists(CONFIG["paths"]["unit_embeddings"]):
     try:
-        with open(config.UNIT_EMBEDDINGS_PATH, "rb") as f:
+        with open(CONFIG["paths"]["unit_embeddings"], "rb") as f:
             _unit_embeddings = pickle.load(f)
     except Exception as e:
         print(f"[embedding_router] Could not load embeddings: {e}")
@@ -78,7 +78,7 @@ def route(query: str) -> tuple[str | None, str | None, float]:
             best_score = sim
             best_match = key
             
-    if best_score > config.EMBEDDING_ROUTER_THRESHOLD and best_match:
+    if best_score > CONFIG["rag"]["embedding_router_threshold"] and best_match:
         # key format: SUBJECT_UNIT, e.g., CYBER_SECURITY_3
         parts = best_match.rsplit("_", 1)
         if len(parts) == 2:

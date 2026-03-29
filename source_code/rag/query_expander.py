@@ -22,10 +22,10 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
+from source_code.config import CONFIG
 
-ALIASES_FILE  = config.ALIASES_FILE_PATH
-KEYWORDS_FILE = config.KEYWORDS_FILE_PATH
+ALIASES_FILE  = CONFIG["paths"]["aliases"]
+KEYWORDS_FILE = CONFIG["paths"]["keywords"]
 
 # ---------------------------------------------------------------------------
 # Layer 1 — Exam phrasing normalization
@@ -145,7 +145,7 @@ if os.path.exists(KEYWORDS_FILE):
         print(f"[query_expander] Could not load keyword map: {e}")
 
 
-def get_unit_keywords(subject: str, unit: str | None, top_n: int = config.QUERY_EXPANDER_MAX_KEYWORDS) -> list[str]:
+def get_unit_keywords(subject: str, unit: str | None, top_n: int = CONFIG["rag"]["keywords"]["max_expander"]) -> list[str]:
     """
     Retrieve the most descriptive keywords for a specific subject/unit.
 

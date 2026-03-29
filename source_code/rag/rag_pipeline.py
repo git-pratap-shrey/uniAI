@@ -37,7 +37,7 @@ import prompts
 # Constants
 # ---------------------------------------------------------------------------
 
-MAX_HISTORY_TURNS = config.MAX_HISTORY_TURNS  # user+assistant pairs kept in context
+MAX_HISTORY_TURNS = CONFIG["rag"]["history_limit"]  # user+assistant pairs kept in context
 
 FOLLOWUP_PATTERNS = [
     r"^repeat",
@@ -203,10 +203,10 @@ def answer_query(
         }
 
     # ── 5. Retrieve ───────────────────────────────────────────────────────
-    note_chunks = retrieve_notes(expanded_query, subject=subject, unit=unit, k=config.PIPELINE_NOTES_K)
+    note_chunks = retrieve_notes(expanded_query, subject=subject, unit=unit, k=CONFIG["rag"]["notes_k"])
 
     # Always retrieve syllabus chunks to give the cross-encoder more candidates
-    syllabus_chunks = retrieve_syllabus(expanded_query, subject=subject, unit=unit, k=config.PIPELINE_SYLLABUS_K)
+    syllabus_chunks = retrieve_syllabus(expanded_query, subject=subject, unit=unit, k=CONFIG["rag"]["syllabus_k"])
 
     all_chunks = note_chunks + syllabus_chunks
 
@@ -214,13 +214,13 @@ def answer_query(
     ranked = rerank_cross_encoder(
         expanded_query,
         all_chunks,
-        top_n=config.PIPELINE_CROSS_RERANK_TOP_N,
-        candidates=config.CROSS_ENCODER_CANDIDATES,
+        top_n=CONFIG["rag"]["cross_encoder"]["pipeline_top_n"],
+        candidates=CONFIG["rag"]["cross_encoder"]["candidates"],
     )
 
     if not ranked:
         mode = "generic"
-    elif ranked[0]["final_score"] < config.MIN_CROSS_SCORE:
+    elif ranked[0]["final_score"] < CONFIG["rag"]["cross_encoder"]["min_score"]:
         mode = "generic"
         ranked = []
 

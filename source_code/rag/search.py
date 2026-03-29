@@ -59,7 +59,7 @@ class Chunk(TypedDict):
 # ChromaDB — one persistent client, lazy-loaded collections
 # ---------------------------------------------------------------------------
 
-_client = chromadb.PersistentClient(path=config.CHROMA_DB_PATH)
+_client = chromadb.PersistentClient(path=CONFIG["paths"]["chroma"])
 
 # Collection handles, populated on first access
 _collections: dict[str, chromadb.Collection] = {}
@@ -69,9 +69,9 @@ _collections: dict[str, chromadb.Collection] = {}
 # - syllabus: Contains Unit descriptions and course outcomes.
 # - pyq:      Contains short, standalone exam questions.
 _COLLECTION_NAMES = {
-    "notes":    config.CHROMA_COLLECTION_NAME,          # multimodal_notes
-    "syllabus": config.CHROMA_SYLLABUS_COLLECTION_NAME,  # multimodal_syllabus
-    "pyq":      config.CHROMA_PYQ_COLLECTION_NAME,       # multimodal_pyq
+    "notes":    CONFIG["paths"]["collections"]["notes"],          # multimodal_notes
+    "syllabus": CONFIG["paths"]["collections"]["syllabus"],  # multimodal_syllabus
+    "pyq":      CONFIG["paths"]["collections"]["pyq"],       # multimodal_pyq
 }
 
 

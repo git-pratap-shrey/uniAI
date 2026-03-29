@@ -23,8 +23,8 @@ BASE_PATH = CONFIG["paths"]["base_data"]
 CHUNK_SIZE = 1  # Pages per chunk
 
 # Backend/Provider settings now handled by models.py
-BACKEND = config.VISION_PROVIDER.lower()
-MODEL_NAME = config.MODEL_VISION
+BACKEND = CONFIG["providers"]["vision"].lower()
+MODEL_NAME = CONFIG["providers"]["vision_model"]
 
 
 # ------------------------------------------------------------------
@@ -142,7 +142,7 @@ def process_pdf(pdf_path: Path):
                     images=images,
                     prompt=NOTES_EXTRACTION,
                     provider=CONFIG["providers"]["vision"],
-                    model=CONFIG["model"]["model"]
+                    model=CONFIG["providers"]["vision_model"]
                 )
 
                 break  # success — exit retry loop
@@ -175,7 +175,7 @@ def process_pdf(pdf_path: Path):
             "page_start": start_page + 1,
             "page_end": end_page,
             "extracted_metadata": structured_data,
-            "processed_by": MODEL_NAME if BACKEND != "huggingface" else HF_MODEL_ID,
+            "processed_by": MODEL_NAME,  # Use centralized model name
             "chunk_size": end_page - start_page,
         }
         with open(json_path, "w", encoding="utf-8") as f:

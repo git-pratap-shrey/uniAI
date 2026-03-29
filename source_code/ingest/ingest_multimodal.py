@@ -8,14 +8,14 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-import config
+from source_code.config import CONFIG
 from utils import get_embedding, get_chroma_collection
 
 # ------------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------------
 
-BASE_PATH = config.BASE_DATA_DIR
+BASE_PATH = CONFIG["paths"]["base_data"]
 
 # ------------------------------------------------------------------
 # HELPERS
@@ -159,7 +159,7 @@ def build_embedding_text(data: dict) -> str:
 
 def ingest_descriptions():
     print("--- Multimodal Ingestion Start ---")
-    print(f"Target Collection: {config.CHROMA_COLLECTION_NAME}")
+    print(f"Target Collection: {CONFIG['paths']['collections']['notes']}")
 
     collection = get_chroma_collection()
 
@@ -185,7 +185,7 @@ def ingest_descriptions():
 
             # Skip low confidence
             confidence = meta.get("confidence", 1.0)
-            if confidence < config.MIN_INGEST_CONFIDENCE:
+            if confidence < CONFIG["ingest"]["min_confidence"]:
                 skipped += 1
                 continue
 
