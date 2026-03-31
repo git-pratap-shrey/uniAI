@@ -13,7 +13,7 @@ from .env import GEMINI_API_KEY, GROQ_API_KEY
 
 MODEL_CONFIGS = {
     "gemini": {
-        "model": "gemini-3-flash-preview:latest",
+        "model": "gemini-3.1-flash-lite-preview",
         "temperature": 0.3,
         "top_p": 0.9,
         "max_tokens": 4096,
@@ -56,7 +56,7 @@ EMBEDDING_CONFIG = {
 
 ROUTER_CONFIG = {
     "provider": "ollama",
-    "model": "qwen3.5:4B",
+    "model": "qwen3.5:2B",
     "temperature": 0.0,
     "num_predict": 10,
 }

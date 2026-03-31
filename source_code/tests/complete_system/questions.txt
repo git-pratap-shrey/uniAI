@@ -1,0 +1,58 @@
+AKTU_UNI_AI_TEST_SET_V1.txt
+--------------------------------------------------
+SUBJECT: DIGITAL ELECTRONICS (BEC301/401)
+--------------------------------------------------
+
+Q1: Define Universal Gates. Why are NAND and NOR gates called Universal Gates?
+EXPECTED ANSWER: Universal gates are logic gates that can implement any Boolean function without the need for any other gate types. NAND and NOR are called universal because combinations of them can be used to create all three basic gates: AND, OR, and NOT.
+
+Q2: Differentiate between Combinational and Sequential circuits.
+EXPECTED ANSWER: Combinational circuits have outputs that depend only on the current inputs (e.g., Adders, Multiplexers). Sequential circuits have outputs that depend on both current inputs and previous states/memory, requiring a clock signal (e.g., Flip-flops, Counters).
+
+Q3: What is the Race-Around condition in JK Flip-Flops and how is it eliminated?
+EXPECTED ANSWER: It occurs when J=1, K=1 and the clock pulse width is greater than the propagation delay of the flip-flop, causing the output to toggle multiple times in one clock pulse. It is eliminated by using a Master-Slave JK Flip-flop or Edge-Triggering.
+
+Q4: Minimize the following Boolean function using K-Map: F(A, B, C, D) = Σ m(0, 1, 2, 5, 8, 9, 10).
+EXPECTED ANSWER: After grouping 1s (octets/quads/pairs) in the 4-variable K-map, the simplified Boolean expression is F = B'D' + B'C' + A'C'D.
+
+Q5: Explain the working of a 4:1 Multiplexer with its truth table and logic expression.
+EXPECTED ANSWER: A 4:1 Mux has 4 data inputs (D0-D3), 2 selection lines (S0, S1), and 1 output (Y). The output Y follows the specific input Di that corresponds to the binary value of the selection lines. Expression: Y = S1'S0'D0 + S1'S0D1 + S1S0'D2 + S1S0D3.
+
+--------------------------------------------------
+SUBJECT: UNIVERSAL HUMAN VALUES (BVE301/401)
+--------------------------------------------------
+
+Q1: Define "Self-Exploration" and its two main components.
+EXPECTED ANSWER: Self-exploration is the process of investigating within oneself to find what is valuable. Its two components are: 1) Natural Acceptance (the innate ability to distinguish right from wrong) and 2) Experiential Validation (verifying the proposal through living).
+
+Q2: Distinguish between the needs of the 'Self' (I) and the 'Body'.
+EXPECTED ANSWER: The needs of the 'Self' are qualitative, such as Happiness, Respect, and Trust, and are required continuously. The needs of the 'Body' are quantitative, like Food and Physical Facilities, and are required only periodically.
+
+Q3: Name and explain the four orders in Nature.
+EXPECTED ANSWER: 1) Material Order (soil, water, minerals), 2) Plant/Pranic Order (plants, trees), 3) Animal Order (animals, birds), and 4) Human Order. The first three exist in mutual fulfillment; the Human Order must understand this harmony to complete the cycle.
+
+Q4: Explain the difference between 'Intention' and 'Competence' in a relationship.
+EXPECTED ANSWER: Intention is what a person wants to do (usually positive), while Competence is the actual ability to perform that action. Trust is often broken because we judge ourselves by our intention and others by their competence.
+
+Q5: Define 'Prosperity'. How is it different from 'Wealth'?
+EXPECTED ANSWER: Wealth is a physical commodity or money (quantitative). Prosperity is the "feeling" of having more than required physical facilities. One can be wealthy but still feel deprived (lack of prosperity).
+
+--------------------------------------------------
+SUBJECT: CYBER SECURITY (BCC301/401)
+--------------------------------------------------
+
+Q1: Explain the CIA Triad in Information Security.
+EXPECTED ANSWER: CIA stands for: 1) Confidentiality (ensuring data is accessed only by authorized users), 2) Integrity (ensuring data is not altered or tampered with), and 3) Availability (ensuring systems/data are accessible when needed).
+
+Q2: What is Social Engineering? Provide two common examples.
+EXPECTED ANSWER: Social Engineering is the psychological manipulation of people into divulging confidential information. Examples include Phishing (fraudulent emails) and Pretexting (creating a fake scenario to steal data).
+
+Q3: Define "Digital Forensics" and the "Chain of Custody".
+EXPECTED ANSWER: Digital Forensics is the process of identifying, preserving, and analyzing digital evidence for legal proceedings. Chain of Custody is the chronological documentation showing the seizure, custody, control, and transfer of that evidence.
+
+Q4: What is a SQL Injection attack and how can it be prevented?
+EXPECTED ANSWER: It is a web security vulnerability that allows an attacker to interfere with database queries by inserting malicious SQL code into input fields. Prevention includes using prepared statements (parameterized queries) and input validation.
+
+Q5: List the primary objectives of the Indian Information Technology (IT) Act, 2000.
+EXPECTED ANSWER: The primary objectives are to provide legal recognition for electronic transactions, facilitate e-governance, prevent cybercrime, and provide a legal framework for digital signatures and electronic records.
+
