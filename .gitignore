@@ -4,6 +4,15 @@
 .venv/
 
 # ======================
+# AGENT AND IDE
+# ======================
+.claude
+.github
+.hypothesis
+.kiro
+.pytest_cache
+
+# ======================
 # Secrets
 # ======================
 .env
@@ -45,6 +54,16 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Test reports and results
+**/tests/**/report_*.txt
+**/tests/**/report_*.md
+**/tests/**/results_*.json
+**/tests/**/trace_*.json
+**/tests/**/logs/*.json
+**/tests/**/logs/*.txt
+source_code/tests/router/bug_exploration_results.md
+source_code/tests/router/preservation_test_summary.md
 
 # ======================
 # Vector DB (Chroma)

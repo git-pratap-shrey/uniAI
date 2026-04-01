@@ -267,7 +267,7 @@
     - Verify subject detection accuracy improves from 10/15 to expected 13-14/15
     - _Requirements: 2.4_
 
-- [-] 7. Fix Bug 5 - Missing UHV Keywords
+- [x] 7. Fix Bug 5 - Missing UHV Keywords
 
   - [x] 7.1 Add missing keywords to subject_keywords.json
     - File: source_code/data/subject_keywords.json
@@ -336,7 +336,7 @@
     - Embedding router still works (task 2.8)
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
 
-- [-] 10. Run full integration test suite
+- [x] 10. Run full integration test suite
   - Run complete system test with all 15 questions
   - Verify subject detection accuracy improves from 10/15 to 13-14/15
   - Verify all routing methods work correctly (keyword, embedding, LLM)
@@ -344,7 +344,7 @@
   - Document final accuracy metrics and any remaining issues
   - _Requirements: All requirements 1.1-3.8_
 
-- [~] 11. Checkpoint - Ensure all tests pass
+- [x] 11. Checkpoint - Ensure all tests pass
   - Confirm all bug condition exploration tests pass (Phase 1)
   - Confirm all preservation tests pass (Phase 2)
   - Confirm all implementation tasks complete (Phase 3)

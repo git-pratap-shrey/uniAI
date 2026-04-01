@@ -109,10 +109,43 @@ class TestResult:
             self.router_trace = RouterStageTrace()
 
 
+def _redact_sensitive_data(data: Any) -> Any:
+    """
+    Recursively redact sensitive information like API keys from data structures.
+    
+    Args:
+        data: Dictionary, list, or other data structure to redact
+        
+    Returns:
+        Copy of data with sensitive fields redacted
+    """
+    if isinstance(data, dict):
+        redacted = {}
+        for key, value in data.items():
+            # Redact API keys and tokens
+            if key.lower() in ('api_key', 'token', 'secret', 'password', 'auth_token', 'access_token'):
+                if value:
+                    # Show first 4 and last 4 characters, redact the middle
+                    if isinstance(value, str) and len(value) > 8:
+                        redacted[key] = f"{value[:4]}...{value[-4:]}"
+                    else:
+                        redacted[key] = "[REDACTED]"
+                else:
+                    redacted[key] = value
+            else:
+                redacted[key] = _redact_sensitive_data(value)
+        return redacted
+    elif isinstance(data, list):
+        return [_redact_sensitive_data(item) for item in data]
+    else:
+        return data
+
+
 def get_system_metadata() -> Dict[str, Any]:
     """
     Collect full system configuration metadata.
     Returns models, thresholds, and all hyperparameters.
+    API keys and sensitive data are automatically redacted.
     """
     import sys
     ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
@@ -125,7 +158,7 @@ def get_system_metadata() -> Dict[str, Any]:
         ROUTER_CONFIG, VISION_CONFIG
     )
 
-    return {
+    metadata = {
         "timestamp": datetime.now().isoformat(),
         "chat_model": {
             "active": ACTIVE_CHAT_MODEL,
@@ -152,6 +185,9 @@ def get_system_metadata() -> Dict[str, Any]:
             "embedding_router_threshold": CONFIG["rag"]["embedding_router_threshold"]
         }
     }
+    
+    # Redact sensitive data before returning
+    return _redact_sensitive_data(metadata)
 
 
 def generate_rich_table(results: List[TestResult]) -> None:
