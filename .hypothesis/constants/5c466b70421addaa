@@ -1,0 +1,4 @@
+# file: \\wsl.localhost\Ubuntu\home\anon\PROJECTS\uniAI\source_code\config\rag.py
+# hypothesis_version: 6.151.10
+
+[0.0, 0.3, 0.35, 0.55, 0.6, 0.65, 'all_notes_k', 'all_syllabus_k', 'candidates', 'min_score', 'min_strong_sim', 'model', 'notes_k', 'notes_k_default', 'pipeline_top_n', 'pyq_k', 'pyq_k_default', 'pyq_threshold', 'rerank_top_n', 'similarity_threshold', 'syllabus_k', 'syllabus_k_default']

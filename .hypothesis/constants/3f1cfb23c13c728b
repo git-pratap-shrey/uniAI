@@ -1,0 +1,4 @@
+# file: \\wsl.localhost\Ubuntu\home\anon\PROJECTS\uniAI\source_code\config\paths.py
+# hypothesis_version: 6.151.10
+
+['BASE_DATA_DIR', 'CHROMA_DB_PATH', 'chroma', 'data', 'embeddings', 'multimodal_notes', 'multimodal_pyq', 'multimodal_syllabus', 'pipeline', 'subject_aliases.json', 'unit_embeddings.pkl', 'year_2']

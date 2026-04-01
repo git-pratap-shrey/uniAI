@@ -58,7 +58,7 @@ ROUTER_CONFIG = {
     "provider": "ollama",
     "model": "qwen3.5:2B",
     "temperature": 0.0,
-    "num_predict": 10,
+    "num_predict": 50,
 }
 
 # ------------------------------------------------------------------

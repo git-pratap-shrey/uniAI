@@ -1,0 +1,4 @@
+# file: \\wsl.localhost\Ubuntu\home\anon\PROJECTS\uniAI\source_code\config\models.py
+# hypothesis_version: 6.151.10
+
+[0.0, 0.25, 0.3, 0.6, 0.9, 0.95, 4096, 8192, 'api_key', 'gemini', 'groq', 'hf_model_id', 'max_tokens', 'model', 'num_ctx', 'num_predict', 'ollama', 'provider', 'qwen/qwen3-32b', 'qwen3-embedding:4B', 'qwen3-vl:235b-cloud', 'qwen3.5:2B', 'qwen3:8b', 'temperature', 'top_p']

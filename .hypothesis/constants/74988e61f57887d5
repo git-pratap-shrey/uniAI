@@ -1,0 +1,4 @@
+# file: \\wsl.localhost\Ubuntu\home\anon\PROJECTS\uniAI\source_code\config\env.py
+# hypothesis_version: 6.151.10
+
+['APP_ENV', 'GEMINI_API_KEY', 'GROQ_API_KEY', 'HF_TOKEN', 'OLLAMA_API_KEY', 'OLLAMA_BASE_URL', 'OLLAMA_LOCAL_URL', 'True', 'USE_OLLAMA_CLOUD', 'dev', 'true']

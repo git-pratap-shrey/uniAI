@@ -14,6 +14,37 @@ from typing import List, Dict, Any
 from dataclasses import dataclass, asdict
 
 
+def load_subject_aliases() -> dict:
+    """Load subject aliases from JSON file and create reverse mapping."""
+    alias_path = os.path.join(os.path.dirname(__file__), "../../data/subject_aliases.json")
+    try:
+        with open(alias_path, 'r') as f:
+            aliases = json.load(f)
+        # Create reverse mapping: alias -> canonical name
+        reverse_map = {}
+        for canonical, alias_list in aliases.items():
+            canonical_normalized = canonical.upper().replace(" ", "_")
+            reverse_map[canonical_normalized] = canonical_normalized
+            for alias in alias_list:
+                alias_normalized = alias.upper().replace(" ", "_")
+                reverse_map[alias_normalized] = canonical_normalized
+        return reverse_map
+    except Exception as e:
+        print(f"[WARNING] Failed to load subject aliases: {e}")
+        return {}
+
+
+_SUBJECT_ALIASES = load_subject_aliases()
+
+
+def normalize_subject_name(name: str) -> str:
+    """Normalize subject name using alias mapping."""
+    if not name:
+        return ""
+    normalized = name.upper().replace(" ", "_")
+    return _SUBJECT_ALIASES.get(normalized, normalized)
+
+
 @dataclass
 class RouterStageTrace:
     """Captures the raw output of every stage in the hybrid router."""
@@ -180,7 +211,7 @@ def generate_rich_table(results: List[TestResult]) -> None:
         elif r.mode == "generic":
             status = "[yellow]GENERIC"
             score_str = f"{r.top_chunk_score:.2f}" if r.top_chunk_score else "N/A"
-        elif r.detected_subject and r.subject_expected.upper().replace(" ", "_") != r.detected_subject:
+        elif r.detected_subject and normalize_subject_name(r.subject_expected) != normalize_subject_name(r.detected_subject):
             status = "[yellow]MISMATCH"
             score_str = f"{r.top_chunk_score:.2f}"
         else:
@@ -398,7 +429,7 @@ def generate_text_report(results: List[TestResult], metadata: Dict[str, Any], ou
     success = sum(1 for r in results if not r.error)
     subject_matches = sum(1 for r in results
                           if r.detected_subject
-                          and r.subject_expected.upper().replace(" ", "_") == r.detected_subject)
+                          and normalize_subject_name(r.subject_expected) == normalize_subject_name(r.detected_subject))
     lines.append(f"Total Questions: {total}")
     lines.append(f"Successful: {success} ({100*success/total:.1f}%)")
     lines.append(f"Subject Detection Accuracy: {subject_matches}/{total} ({100*subject_matches/total:.1f}%)")

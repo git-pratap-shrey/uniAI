@@ -60,6 +60,9 @@ def _llm_classify_subject_unit(query: str) -> RouteResult:
                         units.add(u)
         
         if units:
+            # Add subject without unit first
+            subject_units.append(subject)
+            # Then add subject_unit combinations
             for u in sorted(units):
                 subject_units.append(f"{subject}_{u}")
         else:
@@ -70,15 +73,15 @@ def _llm_classify_subject_unit(query: str) -> RouteResult:
 
     try:
         response_text = models.chat(
-            prompt=f"{prompt} /no_think",
-            system_prompt="You are a helpful assistant. You must respond directly without internal reasoning or <think> tags.",
+            prompt=prompt,
+            system_prompt="You are a helpful assistant. You must respond directly without internal reasoning or <think> tags. /no_think",
             model=CONFIG["rag"].get("router_model", CONFIG["providers"].get("router")),
             provider=CONFIG["providers"].get("router", "ollama"),
             temperature=CONFIG["rag"].get("router_temperature", 0.0),
             num_predict=CONFIG["rag"].get("router_num_predict", 10),
         )
         
-        llm_choice = response_text.strip().upper().replace(" ", "_")
+        llm_choice = response_text.strip().rstrip('.!?\n').upper().replace(" ", "_")
         
         for su in subject_units:
             if su.upper() == llm_choice:

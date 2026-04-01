@@ -1,0 +1,4 @@
+# file: \\wsl.localhost\Ubuntu\home\anon\PROJECTS\uniAI\source_code\config\main.py
+# hypothesis_version: 6.151.10
+
+['GEMINI_API_KEY', 'GROQ_API_KEY', 'HF_TOKEN', 'OLLAMA_BASE_URL', 'OLLAMA_LOCAL_URL', 'USE_OLLAMA_CLOUD', 'aliases', 'base_data', 'chat', 'chroma', 'collections', 'cross_encoder', 'embedding', 'embedding_model', 'env', 'history_limit', 'ingest', 'keywords', 'max_expander', 'min_confidence', 'min_score', 'model', 'notes', 'num_predict', 'paths', 'provider', 'providers', 'pyq', 'rag', 'router', 'router_model', 'router_num_predict', 'router_temperature', 'syllabus', 'temperature', 'unit_embeddings', 'vision', 'vision_model']

@@ -1,0 +1,4 @@
+# file: \\wsl.localhost\Ubuntu\home\anon\PROJECTS\uniAI\source_code\models.py
+# hypothesis_version: 6.151.10
+
+[0.25, 0.3, 0.6, 4096, 8192, '10m', 'GEMINI_API_KEY', 'GROQ_API_KEY', 'HF_TOKEN', 'OLLAMA_LOCAL_URL', 'chat', 'content', 'cpu', 'cross_encoder', 'cuda', 'embedding', 'embedding_model', 'gemini', 'groq', 'huggingface', 'image_url', 'left', 'max_output_tokens', 'max_tokens', 'message', 'model', 'num_ctx', 'ollama', 'providers', 'pt', 'rag', 'rb', 'response', 'role', 'system', 'system_instruction', 'temperature', 'text', 'top_p', 'type', 'url', 'user', 'vision', 'vision_model']
