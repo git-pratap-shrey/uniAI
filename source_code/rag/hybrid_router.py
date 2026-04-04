@@ -113,7 +113,7 @@ def route(query: str, session_subject: str | None = None) -> RouteResult:
     explicit_unit = detect_unit(query)
     
     # 2. Keyword Router (subject level, and optionally unit)
-    subj, unit, used_llm = detect_subject(query, debug=True)
+    subj, unit, used_llm = detect_subject(query, debug=True, allow_llm_fallback=False)
     if subj and not used_llm:
         # If user explicitly specified a unit in the query, it overrides the keyword unit
         final_unit = explicit_unit or unit

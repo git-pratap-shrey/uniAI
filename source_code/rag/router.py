@@ -145,7 +145,7 @@ def _score_subject(query_lower: str, entry) -> float:
 # Public API
 # -------------------------------------------------
 
-def detect_subject(query: str, debug: bool = False):
+def detect_subject(query: str, debug: bool = False, allow_llm_fallback: bool = True):
     """
     Analyze a query to identify which subject it belongs to.
 
@@ -155,6 +155,7 @@ def detect_subject(query: str, debug: bool = False):
     Args:
         query: User input query.
         debug: If True, returns additional info (unit, whether LLM was used).
+        allow_llm_fallback: If False, do not call the internal LLM fallback.
 
     Returns:
         If debug is False: (subject_name, best_unit)
@@ -189,8 +190,11 @@ def detect_subject(query: str, debug: bool = False):
     # -------------------------
     # Fallback to LLM
     # -------------------------
-    llm_result = _llm_classify(query)
-    return (llm_result, None, True) if debug else (llm_result, None)
+    if allow_llm_fallback:
+        llm_result = _llm_classify(query)
+        return (llm_result, None, True) if debug else (llm_result, None)
+
+    return (None, None, False) if debug else (None, None)
 
 
 # -------------------------------------------------

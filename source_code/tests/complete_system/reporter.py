@@ -67,6 +67,7 @@ class RouterStageTrace:
     # Stage 4 – LLM router
     llm_subject: str = ""                 # subject returned (or "")
     llm_unit: str = ""                    # unit returned (or "")
+    llm_ran: bool = False                 # True when Stage 4 LLM router was executed
     llm_passed: bool = False              # True when LLM returned a subject
 
     # Winner
@@ -299,7 +300,7 @@ def generate_rich_table(results: List[TestResult]) -> None:
         t = r.router_trace
         kw_pass  = "[green]YES" if t.keyword_passed  else "[red]NO"
         emb_pass = "[green]YES" if t.embedding_passed else "[red]NO"
-        llm_pass = "[green]YES" if t.llm_passed       else "[red]NO"
+        llm_pass = "[green]YES" if t.llm_passed else ("[red]NO" if t.llm_ran else "[dim]SKIP")
 
         router_table.add_row(
             r.question_id,
@@ -381,6 +382,7 @@ def generate_json_output(results: List[TestResult], metadata: Dict[str, Any], ou
                 "embedding_passed":     r.router_trace.embedding_passed,
                 "llm_subject":          r.router_trace.llm_subject,
                 "llm_unit":             r.router_trace.llm_unit,
+                "llm_ran":              r.router_trace.llm_ran,
                 "llm_passed":           r.router_trace.llm_passed,
                 "winning_stage":        r.router_trace.winning_stage,
             }

@@ -88,6 +88,7 @@ def run_single_question(question: Question) -> TestResult:
 
         # ── Stage 4: LLM router (only run if both keyword and embedding failed) ──
         if not trace.keyword_passed and not trace.embedding_passed:
+            trace.llm_ran = True
             llm_res = _llm_classify_subject_unit(question.query)
             trace.llm_subject = llm_res.subject or ""
             trace.llm_unit    = llm_res.unit or ""
@@ -224,11 +225,12 @@ def main():
             print(f"    [FAIL] Error: {result.error}")
         else:
             t = result.router_trace
+            llm_status = "PASS" if t.llm_passed else ("fail" if t.llm_ran else "SKIP")
             print(
                 f"    [OK] Winner: {t.winning_stage} | "
                 f"kw={'PASS' if t.keyword_passed else 'fail'} | "
                 f"emb={'PASS' if t.embedding_passed else 'fail'}({t.embedding_score:.3f}) | "
-                f"llm={'PASS' if t.llm_passed else 'fail'} | "
+                f"llm={llm_status} | "
                 f"Subject: {result.detected_subject or 'NONE'} | "
                 f"Unit: {result.detected_unit or 'NONE'} | "
                 f"Time: {result.execution_time_ms:.0f}ms"
@@ -255,9 +257,12 @@ def main():
     # Summary
     total = len(results)
     success = sum(1 for r in results if not r.error)
-    subject_matches = sum(1 for r in results
-                          if r.detected_subject
-                          and r.subject_expected.upper().replace(" ", "_") == r.detected_subject)
+    from source_code.tests.complete_system.reporter import normalize_subject_name
+    subject_matches = sum(
+        1 for r in results
+        if r.detected_subject
+        and normalize_subject_name(r.subject_expected) == normalize_subject_name(r.detected_subject)
+    )
 
     print(f"Summary: {success}/{total} passed, {subject_matches}/{total} correct subject detection")
 

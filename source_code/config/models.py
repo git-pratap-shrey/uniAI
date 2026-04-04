@@ -56,7 +56,7 @@ EMBEDDING_CONFIG = {
 
 ROUTER_CONFIG = {
     "provider": "ollama",
-    "model": "qwen3.5:2B",
+    "model": "gemini-3-flash-preview:latest",
     "temperature": 0.0,
     "num_predict": 50,
 }

@@ -19,6 +19,8 @@ except ImportError:
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+import threading
+
 # ---------------------------------------------------------------------------
 # Client Management (Lazy Loading)
 # ---------------------------------------------------------------------------
@@ -194,23 +196,33 @@ def embed(texts: List[str], model: Optional[str] = None, provider: Optional[str]
 
 _rerank_model = None
 _rerank_tokenizer = None
+_rerank_device = None
+_rerank_model_id = None
+_rerank_lock = threading.Lock()
 
-def _load_reranker():
-    global _rerank_model, _rerank_tokenizer
-    if _rerank_model is None:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        model_id = CONFIG["rag"]["cross_encoder"]["model"]
-        print(f"[models.rerank] Loading {model_id} on {device}...")
-        _rerank_tokenizer = AutoTokenizer.from_pretrained(model_id, padding_side="left")
+def _load_reranker(model_id: Optional[str] = None):
+    global _rerank_model, _rerank_tokenizer, _rerank_device, _rerank_model_id
+    resolved_model_id = model_id or CONFIG["rag"]["cross_encoder"]["model"]
+
+    if _rerank_model is not None and _rerank_tokenizer is not None and _rerank_device is not None and _rerank_model_id == resolved_model_id:
+        return
+
+    with _rerank_lock:
+        if _rerank_model is not None and _rerank_tokenizer is not None and _rerank_device is not None and _rerank_model_id == resolved_model_id:
+            return
+
+        _rerank_device = "cuda" if torch.cuda.is_available() else "cpu"
+        _rerank_model_id = resolved_model_id
+        print(f"[models.rerank] Loading {_rerank_model_id} on {_rerank_device}...")
+        _rerank_tokenizer = AutoTokenizer.from_pretrained(_rerank_model_id, padding_side="left")
         _rerank_model = AutoModelForSequenceClassification.from_pretrained(
-            model_id,
-            torch_dtype=torch.float16 if device == "cuda" else torch.float32,
-        ).to(device).eval()
+            _rerank_model_id,
+            torch_dtype=torch.float16 if _rerank_device == "cuda" else torch.float32,
+        ).to(_rerank_device).eval()
 
 def rerank(query: str, documents: List[str], model: Optional[str] = None) -> List[float]:
     """Score document relevance to a query using a Cross-Encoder."""
-    _load_reranker()
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    _load_reranker(model_id=model)
     
     # Qwen3-Reranker format
     instruction = "Given a student's academic query, retrieve relevant lecture notes or syllabus passages that answer the query"
@@ -235,7 +247,7 @@ def rerank(query: str, documents: List[str], model: Optional[str] = None) -> Lis
             truncation=True,
             max_length=8192,
             return_tensors="pt",
-        ).to(device)
+        ).to(_rerank_device)
         
         logits = _rerank_model(**inputs).logits.squeeze(-1)
         if logits.dim() == 0:
