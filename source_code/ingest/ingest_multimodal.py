@@ -1,7 +1,7 @@
 import json
 import os
-import sys
 import re
+import sys
 from pathlib import Path
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -22,35 +22,13 @@ BASE_PATH = CONFIG["paths"]["base_data"]
 # ------------------------------------------------------------------
 
 def normalize_unit(unit):
-    """
-    Normalize unit to a clean numeric string.
-
-    Accepts:
-        1
-        "1"
-        "unit1"
-        "Unit 1"
-        "UNIT-1"
-        "unit 03"
-
-    Returns:
-        "1", "2", etc.
-        or "unknown" if invalid
-    """
-
+    """Normalize unit to a clean numeric string."""
     if unit is None:
         return "unknown"
+    s = str(unit).strip().lower()
+    m = re.search(r"\d+", s)
+    return str(int(m.group())) if m else "unknown"
 
-    unit_str = str(unit).strip().lower()
-
-    if not unit_str:
-        return "unknown"
-
-    match = re.search(r"\d+", unit_str)
-    if match:
-        return str(int(match.group()))  # remove leading zeros
-
-    return "unknown"
 
 # Exact title blocklist (normalised to lower-case, stripped)
 _GARBAGE_TITLES = {
@@ -72,56 +50,51 @@ _PROMO_KEYWORDS = [
 ]
 
 
-def is_garbage_chunk(meta: dict, data: dict) -> bool:
+def is_garbage_chunk(section_meta: dict) -> bool:
     """
-    Return True if this chunk should be skipped because it is
+    Return True if this section should be skipped because it is
     promotional, non-educational, or near-empty.
-
-    Criteria (any one is sufficient):
-    1. Title is in the known-bad blocklist.
-    2. document_type is explicitly 'other' AND full_text is short.
-    3. full_text contains multiple promotional keywords.
-    4. full_text is very short (< 80 chars) and has no topics or concepts.
     """
-    title      = meta.get("title", "").strip().lower()
-    doc_type   = meta.get("document_type", "")
-    full_text  = meta.get("full_text", "").strip()
-    topics     = meta.get("topics", [])
-    concepts   = meta.get("key_concepts", [])
+    title = section_meta.get("section_title", "").strip().lower()
+    full_text = section_meta.get("full_text", "").strip()
+    topics = section_meta.get("topics", [])
+    concepts = section_meta.get("key_concepts", [])
 
-    # 1. Exact title blocklist
+    # Exact title blocklist
     if title in _GARBAGE_TITLES:
         return True
 
-    # 2. document_type == 'other' with minimal real content
-    if doc_type == "other" and len(full_text) < 200:
-        return True
-
-    # 3. Promotional keyword density (≥ 2 hits)
+    # Promotional keywords (>= 2 hits)
     text_lower = full_text.lower()
     hits = sum(1 for kw in _PROMO_KEYWORDS if kw in text_lower)
     if hits >= 2:
         return True
 
-    # 4. Very short text and no structured content at all
+    # Very short text and no structured content
     if len(full_text) < 80 and not topics and not concepts:
         return True
 
     return False
 
+
 def build_embedding_text(data: dict) -> str:
     """
-    Build rich embedding text.
-    """
+    Build rich embedding text for a section chunk.
 
+    New format:
+    Subject: COA | Unit: 4 | Type: notes | Topics: t1, t2 | Concepts: c1, c2 | Title: RISC Architecture
+
+    full_text (truncated to 4000 chars)
+
+    Topics moved before title for more embedding weight on keywords.
+    Type field added for document_type context.
+    """
     meta = data.get("extracted_metadata", {})
 
     full_text = meta.get("full_text", "").strip()
-    title = meta.get("title", "")
+    section_title = meta.get("section_title", "")
     subject = data.get("subject", "").upper()
-
-    raw_unit = data.get("unit")
-    normalized_unit = normalize_unit(raw_unit)
+    normalized_unit = normalize_unit(data.get("unit"))
 
     topics = ", ".join(meta.get("topics", []))
     concepts = ", ".join(meta.get("key_concepts", []))
@@ -134,14 +107,16 @@ def build_embedding_text(data: dict) -> str:
     if normalized_unit != "unknown":
         prefix_parts.append(f"Unit: {normalized_unit}")
 
-    if title:
-        prefix_parts.append(f"Title: {title}")
+    prefix_parts.append("Type: notes")
 
     if topics:
         prefix_parts.append(f"Topics: {topics}")
 
     if concepts:
-        prefix_parts.append(f"Key Concepts: {concepts}")
+        prefix_parts.append(f"Concepts: {concepts}")
+
+    if section_title:
+        prefix_parts.append(f"Title: {section_title}")
 
     prefix = " | ".join(prefix_parts)
 
@@ -150,7 +125,7 @@ def build_embedding_text(data: dict) -> str:
         truncated = full_text[:max_text_len]
         return f"{prefix}\n\n{truncated}" if prefix else truncated
 
-    return prefix or data.get("description", "")
+    return prefix or ""
 
 
 # ------------------------------------------------------------------
@@ -164,9 +139,13 @@ def ingest_descriptions():
     collection = get_chroma_collection()
 
     root_path = Path(BASE_PATH)
-    json_files = sorted(root_path.rglob("chunk_*.json"))
+    # New naming: <pdf_stem>_p{start}-{end}_{chunk_idx}.json
+    # Match files inside PDF stem subfolders that follow the convention
+    json_files = sorted(root_path.rglob("*_p*_*_*.json"))
+    # Keep only files that look like section chunks (contain page range marker)
+    json_files = [f for f in json_files if "_p" in f.stem]
 
-    print(f"Found {len(json_files)} chunk JSONs to ingest.")
+    print(f"Found {len(json_files)} section JSONs to ingest.")
 
     ingested = 0
     skipped = 0
@@ -178,8 +157,10 @@ def ingest_descriptions():
 
             meta = data.get("extracted_metadata", {})
 
-            # Skip question papers (handled elsewhere)
-            if meta.get("document_type") == "question_paper":
+            # Skip section-level data: if "sections" key exists this is a
+            # per-page file from the new sectioning pipeline — skip it,
+            # we only ingest individual section JSONs
+            if isinstance(meta, dict) and "sections" in meta:
                 skipped += 1
                 continue
 
@@ -189,8 +170,8 @@ def ingest_descriptions():
                 skipped += 1
                 continue
 
-            # Skip garbage / promotional chunks
-            if is_garbage_chunk(meta, data):
+            # Skip garbage / promotional sections
+            if is_garbage_chunk(meta):
                 skipped += 1
                 continue
 
@@ -199,12 +180,19 @@ def ingest_descriptions():
                 skipped += 1
                 continue
 
-            file_name = data.get("source_pdf", "unknown")
+            subject = data.get("subject", "unknown").upper()
+            raw_unit = data.get("unit")
+            normalized_unit = normalize_unit(raw_unit)
+
             page_start = data.get("page_start", 0)
             page_end = data.get("page_end", 0)
-            subject = data.get("subject", "unknown").upper()
+            chunk_idx = data.get("chunk_idx", 0)
+            section_index = data.get("section_index", 0)
 
-            doc_id = f"{subject}_{file_name}_p{page_start}-{page_end}"
+            # Information-heavy doc ID
+            # Format: {SUBJECT}_unit{unit}_notes_{pdf_stem}_p{start}-{end}_{chunk_idx}
+            pdf_stem = json_file.parent.name  # parent folder is the PDF stem
+            doc_id = f"{subject}_unit{normalized_unit}_notes_{pdf_stem}_p{page_start}-{page_end}_{chunk_idx}"
 
             # Skip if already exists
             existing = collection.get(ids=[doc_id])
@@ -214,21 +202,23 @@ def ingest_descriptions():
 
             vector = get_embedding(embedding_text[:4000])
 
-            raw_unit = data.get("unit")
-            normalized_unit = normalize_unit(raw_unit)
+            page_count = max(1, page_end - page_start + 1) if page_end and page_start else 1
 
             collection.upsert(
                 ids=[doc_id],
                 embeddings=[vector],
                 documents=[embedding_text],
                 metadatas=[{
-                    "source": file_name,
+                    "source": f"{pdf_stem}.pdf",
                     "page_start": page_start,
                     "page_end": page_end,
+                    "page_count": page_count,
                     "unit": normalized_unit,
                     "subject": subject,
-                    "title": meta.get("title", "unknown"),
-                    "document_type": meta.get("document_type", "unknown"),
+                    "title": meta.get("section_title", "unknown"),
+                    "document_type": "notes",
+                    "chunk_idx": chunk_idx,
+                    "section_index": section_index,
                     "confidence": confidence,
                 }]
             )
@@ -237,7 +227,7 @@ def ingest_descriptions():
                 print(f"⚠ Unknown unit for {doc_id}")
 
             ingested += 1
-            print(f"   ✅ {doc_id} — {meta.get('title', 'untitled')}")
+            print(f"   ✅ {doc_id} — {meta.get('section_title', 'untitled')}")
 
         except Exception as e:
             print(f"   ❌ Failed: {json_file.name}: {e}")

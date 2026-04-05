@@ -43,7 +43,7 @@ The architectural core. Every module calls `models.chat()`, `models.embed()`, `m
 Organized into five groups.
 
 **EXTRACTION:**
-- `NOTES_EXTRACTION` -- VLM prompt: OCR PDF page images, output structured JSON with full_text, title, unit, document_type, topics, key_concepts, diagrams_present, content_quality, confidence.
+- `NOTES_EXTRACTION(existing_topics: list[str] | None) -> str` -- VLM prompt builder for semantic sectioning. Accepts a list of already-known topics for the unit. On first page (empty list), freely discovers new topics with full-term vocabulary preference. On subsequent pages, VLM reuses existing topic names when content matches, only creating new ones when genuinely necessary. Output includes `sections[]` array, each with `section_title`, `is_new_topic`, `full_text`, `topics`, `key_concepts`, `has_diagram`.
 - `SYLLABUS_EXTRACTION` -- VLM prompt: parse syllabus tables, output JSON with syllabus_version, subject_name, units[], course_outcomes[], textbooks[], reference_books[].
 
 **RAG CHAT (builder functions):**

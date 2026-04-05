@@ -6,7 +6,7 @@ The `ingest/` package contains three scripts that load structured JSON (produced
 
 | Script | Input JSONs | Target Collection | Document IDs |
 |---|---|---|---|
-| `ingest_multimodal.py` | `chunk_*.json` (notes) | `multimodal_notes` | `{SUBJECT}_{filename}_p{start}-{end}` |
+| `ingest_multimodal.py` | `<pdf_stem>_p*-*.json` (notes sections) | `multimodal_notes` | `{SUBJECT}_unit{unit}_notes_{pdf_stem}_p{start}-{end}_{chunk_idx}` |
 | `ingest_multimodal_pyq.py` | `*_processed.json` (PYQs) | `multimodal_pyq` | `{question_id}` from extraction |
 | `ingest_multimodal_syllabus.py` | `syllabus_*.json` | `multimodal_syllabus` | `syllabus_{SUBJECT}_{source_pdf}_{chunk_type}` |
 
@@ -25,7 +25,7 @@ The collection isolation is foundational to the RAG system: the three data types
 
 ### `ingest_multimodal.py`
 
-Ingests lecture notes chunk JSONs (produced by `extract_multimodal_notes.py`) into the `multimodal_notes` ChromaDB collection.
+Ingests lecture notes section JSONs (produced by `extract_multimodal_notes.py`) into the `multimodal_notes` ChromaDB collection.
 
 **Constants:**
 - `BASE_PATH` -- from `CONFIG["paths"]["base_data"]`
@@ -37,32 +37,34 @@ Ingests lecture notes chunk JSONs (produced by `extract_multimodal_notes.py`) in
 - Output: Clean numeric string like "1", "2", or "unknown"
 - Logic: Converts to string, lowercases, extracts first digit sequence via regex, strips leading zeros.
 
-`is_garbage_chunk(meta: dict, data: dict) -> bool`
-- Input: Extracted metadata dict and full data dict
-- Output: True if the chunk should be skipped
-- Logic: Checks four criteria (any one is sufficient to reject):
-  1. Title is in `_GARBAGE_TITLES` blocklist ("thank you", "subscribe", "aktu full courses", etc.)
-  2. `document_type == "other"` AND `full_text < 200` chars
-  3. `full_text` contains 2+ promotional keywords from `_PROMO_KEYWORDS` ("download", "google play", "subscribe", "paid course", etc.)
-  4. `full_text < 80` chars with no topics and no key concepts
+`is_garbage_chunk(section_meta: dict) -> bool`
+- Input: Section-level extracted metadata dict
+- Output: True if the section should be skipped
+- Logic: Checks three criteria (any one is sufficient to reject):
+  1. `section_title` is in `_GARBAGE_TITLES` blocklist
+  2. `full_text` contains 2+ promotional keywords from `_PROMO_KEYWORDS`
+  3. `full_text < 80` chars with no topics and no key concepts
 
 `build_embedding_text(data: dict) -> str`
-- Input: Full JSON data dict (with `extracted_metadata` wrapper)
-- Output: Rich embedding string: "Subject: COA | Unit: 3 | Title: X | Topics: a, b | Key Concepts: c, d\n\n<full_text (truncated to 4000)>"
-- Logic: Prefixes structured metadata (subject, unit, title, topics, key concepts) separated by ` | `, then appends the full text. Falls back to the `description` field if no full text exists.
+- Input: Full JSON data dict (with `extracted_metadata` wrapper containing section-level fields)
+- Output: Rich embedding string: "Subject: COA | Unit: 4 | Type: notes | Topics: a, b | Concepts: c, d | Title: RISC Architecture\n\n<full_text (truncated to 4000)>"
+- Logic: Topics moved before title for more embedding weight. `Type: notes` added for document context. Title demoted to last position (display hint only). Falls back to empty string if no content.
 
 `ingest_descriptions() -> None`
 - Input: None (reads from `BASE_PATH` using config)
 - Output: Side effects -- upserts documents into `multimodal_notes` ChromaDB collection
 - Logic:
   1. Opens the `multimodal_notes` collection via `utils.get_chroma_collection()`
-  2. Finds all `chunk_*.json` files under `BASE_PATH`
-  3. For each JSON: skips if document_type is "question_paper", if confidence < 0.3, if garbage, if empty text, or if ID already exists
-  4. Builds embedding text, generates vector, upserts with metadata
-  5. Reports final counts
+  2. Finds all `<pdf_stem>_p*_*_*.json` files under `BASE_PATH` (section-level output from the new extractor)
+  3. For each JSON: skips if file contains a `"sections"` key (per-page file), if confidence < 0.3, if garbage, if empty text, or if ID already exists
+  4. Builds info-rich document ID: `{SUBJECT}_unit{unit}_notes_{pdf_stem}_p{start}-{end}_{chunk_idx}`
+  5. Builds embedding text, generates vector, upserts with updated metadata schema
+  6. Reports final counts
 
 **Metadata stored per document:**
-`source`, `page_start`, `page_end`, `unit`, `subject`, `title`, `document_type`, `confidence`
+`source`, `page_start`, `page_end`, `page_count` (NEW), `unit`, `subject`, `title` (section_title), `document_type`, `chunk_idx` (NEW), `section_index` (NEW), `confidence`
+
+**NOT stored (removed):** `topics` and `topics_str` -- ChromaDB metadata fields must be scalar. Topics are captured in the embedding text and retrievable semantically.
 
 **Entry point:** `python ingest_multimodal.py`
 
@@ -133,8 +135,10 @@ All three scripts share the same dependency pattern:
 - `config.py` provides CONFIG (paths, collection names, thresholds)
 
 **Data flow from extraction to ingestion:**
-- extract_multimodal_notes.py -> chunk_*.json -> ingest_multimodal.py -> multimodal_notes
+- extract_multimodal_notes.py -> <pdf_stem>_p*_*_*.json -> ingest_multimodal.py -> multimodal_notes
 - extract_multimodal_pyq.py -> *_processed.json -> ingest_multimodal_pyq.py -> multimodal_pyq
 - extract_multimodal_syllabus.py -> syllabus_*.json -> ingest_multimodal_syllabus.py -> multimodal_syllabus
 
 The garbage filter (`is_garbage_chunk`) is unique to notes ingestion -- only notes PDFs are prone to promotional watermarking. The `normalize_unit()` function only appears in the notes ingestion script; the PYQ and syllabus scripts receive already-normalized units from their extraction pipelines.
+
+The ingest pipeline now handles section-level JSON files (one per semantic topic section per page) instead of page-level chunks. Document IDs include unit, pdf_stem, page range, and chunk index for debugging. Metadata uses only scalar fields -- topic arrays are stored in the embedding text, not in metadata.

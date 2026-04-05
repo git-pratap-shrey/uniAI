@@ -18,47 +18,76 @@ Prompts that include runtime variables are builder functions returning a str.
 # 1. EXTRACTION PROMPTS
 # ══════════════════════════════════════════════════════════════════════════════
 
-NOTES_EXTRACTION = """\
+def notes_extraction(existing_topics: list[str] | None = None) -> str:
+    topic_list_block = ""
+    if existing_topics:
+        topic_list_block = (
+            "## Existing Topics for This Unit\n"
+            "The following topics have already been identified in this unit.\n"
+            "When a section's content matches one of these, REUSE its exact name.\n"
+            f"  {', '.join(existing_topics)}\n"
+            "Only create a NEW topic if the content genuinely does not fit any above.\n"
+        )
+    else:
+        topic_list_block = (
+            "## Existing Topics for This Unit\n"
+            "This is the first page of this unit, so the existing topics list is empty.\n"
+            "You may freely name the sections you discover. These names will be\n"
+            "reused for matching content on later pages.\n"
+            "Use full terms, not abbreviations (e.g. 'Karnaugh Map' not 'K-Map').\n"
+        )
+
+    return f"""\
 You are an OCR + metadata extraction system for university course materials.
 
-You will receive images of PDF pages. These may be handwritten notes, printed \
+You will receive images of PDF page(s). These may be handwritten notes, printed \
 slides, question papers, or diagrams. Text CANNOT be copy-pasted from these — \
 you must read them visually.
 
 ## Your Tasks
 
-### Task 1 — Full OCR
-Read ALL visible text from the images. Transcribe it faithfully:
+### Task 1 — Section-Level OCR
+Identify distinct topical sections on these pages. Each section covers a \
+coherent concept. Transcribe the text for each section:
 - Preserve headings, bullet points, numbering, and structure
 - For handwritten text, do your best to read it accurately
 - For code snippets, preserve indentation and syntax
 - Skip watermarks, page numbers, and headers/footers
-- If a diagram is present, describe it briefly in [DIAGRAM: ...]
+- If a diagram is present in a section, set has_diagram to true for that section
+- Minimum section text: 80 characters. Merge tiny fragments into the nearest section.
 
-### Task 2 — Structured Metadata
-Classify and tag the content you extracted.
+{topic_list_block}
+
+### Task 2 — Structured Metadata Per Section
 
 ## Output Format
 Return ONLY a valid JSON object (no markdown fences, no extra text):
 
-{
-  "full_text": "The complete transcribed text from all pages, preserving structure with newlines",
-  "title": "The topic title visible on the pages (e.g. 'Functions in Python', '2023 End Sem Paper')",
-  "unit": "Unit number if identifiable (e.g. '1', '3'), else null",
-  "document_type": "One of: question_paper, handwritten_notes, printed_notes, syllabus, lab_manual, other",
-  "topics": ["List of specific subtopics covered in these pages"],
-  "key_concepts": ["Important definitions, formulas, theorems, or algorithms mentioned"],
-  "diagrams_present": false,
+{{
+  "page_has_diagram": false,
   "content_quality": "One of: clear, partially_legible, illegible",
-  "confidence": 0.85
-}
+  "confidence": 0.85,
+  "sections": [
+    {{
+      "section_title": "Name of this section — reuse from existing topics list if it matches, otherwise create a new descriptive name",
+      "is_new_topic": true,
+      "full_text": "The complete transcribed text for this section",
+      "topics": ["Specific subtopics within this section"],
+      "key_concepts": ["Definitions, formulas, theorems, or algorithms mentioned"],
+      "has_diagram": false
+    }}
+  ]
+}}
 
 ## Rules
-- full_text must contain the ACTUAL text from the pages. This is the most important field.
+- Each section must have a distinct, descriptive section_title.
+- full_text for each section must contain the ACTUAL text from the pages.
+- is_new_topic must be true ONLY if you created a topic name not in the existing list.
 - Be thorough — every readable sentence matters for search.
 - Do NOT invent content that isn't visible.
-- If pages are completely illegible, set confidence to 0.1 and full_text to empty string.
+- If page is completely illegible, set confidence to 0.1 and sections to empty array.
 - confidence is a float between 0.0 and 1.0 reflecting OCR accuracy.
+- Prefer full terms over abbreviations in new topic names.
 """
 
 

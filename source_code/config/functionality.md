@@ -53,7 +53,7 @@ Filesystem paths and collection names.
 
 **Exposed symbols:**
 - `BASE_DIR` -- `source_code/` root
-- `BASE_DATA_DIR` -- env or `BASE_DIR/data/year_2`
+- `BASE_DATA_DIR` -- env or `BASE_DIR/data` (flattened layout, no `year_2` nesting)
 - `CHROMA_DB_PATH` -- env or `BASE_DIR/chroma`
 - `UNIT_EMBEDDINGS_PATH` -- `BASE_DIR/pipeline/embeddings/unit_embeddings.pkl`
 - `KEYWORDS_FILE_PATH` -- `BASE_DIR/data/subject_keywords.json`

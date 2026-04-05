@@ -180,9 +180,10 @@ def clean_question_text(q_text: str) -> tuple:
 def detect_metadata(text: str, pdf_path: Path):
     parts = pdf_path.parts
     try:
-        year_idx = parts.index("year_2")
-        subject = parts[year_idx + 1]
-    except:
+        # Flattened layout: <SUBJECT>/pyqs/<name>.pdf
+        pyqs_idx = parts.index("pyqs")
+        subject = parts[pyqs_idx - 1]
+    except (ValueError, IndexError):
         subject = "UNKNOWN"
 
     year = 2023

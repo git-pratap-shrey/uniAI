@@ -69,6 +69,7 @@ source_code/tests/router/preservation_test_summary.md
 # Vector DB (Chroma)
 # ======================
 source_code/chroma/
+source_code/chroma_old/
 
 # ======================
 # Frontend / Vercel

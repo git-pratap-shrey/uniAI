@@ -13,7 +13,7 @@ from .env import OLLAMA_BASE_URL, OLLAMA_LOCAL_URL
 BASE_DIR = Path(__file__).parent.parent
 
 # Data directory
-BASE_DATA_DIR = os.getenv("BASE_DATA_DIR", str(BASE_DIR / "data" / "year_2"))
+BASE_DATA_DIR = os.getenv("BASE_DATA_DIR", str(BASE_DIR / "data"))
 
 # Database paths
 CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", str(BASE_DIR / "chroma"))

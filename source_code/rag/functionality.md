@@ -166,7 +166,7 @@ The `rag/` module is the core query runtime of uniAI. It orchestrates every stag
 
 - `_get(alias: str) -> chromadb.Collection` — lazy-loads a collection by alias ("notes", "syllabus", "pyq")
 - `normalize_unit(raw: str | int | None) -> str | None` — standardizes unit identifiers to plain numeric strings
-- `_unit_filter(unit: str) -> dict` — builds ChromaDB `$or` clause for backward compatibility (matches both `"3"` and `"unit3"`)
+- `_unit_filter(unit: str) -> dict` — builds simple ChromaDB filter matching plain numeric unit string (e.g. `{"unit": "3"}`). Legacy `"unit3"` format support dropped; all newly ingested data uses numeric format.
 - `_build_where(subject, unit, extra) -> dict | None` — composes nested `$and` filter from subject/unit/extra constraints
 - `_query_collection(alias, query, where, k, threshold) -> list[Chunk]` — executes the actual query: embeds text, calls ChromaDB, filters by distance threshold, returns Chunk list
 

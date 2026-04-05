@@ -1,4 +1,5 @@
 import os
+import re
 import fitz  # PyMuPDF
 import json
 import time
@@ -13,14 +14,13 @@ if ROOT_DIR not in sys.path:
 from source_code.config import CONFIG
 from source_code import models
 from utils import pil_to_base64, pil_to_jpeg_bytes, extract_first_json
-from prompts import NOTES_EXTRACTION
+from prompts import notes_extraction
 
 # ------------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------------
 
 BASE_PATH = CONFIG["paths"]["base_data"]
-CHUNK_SIZE = 1  # Pages per chunk
 
 # Backend/Provider settings now handled by models.py
 BACKEND = CONFIG["providers"]["vision"].lower()
@@ -32,22 +32,41 @@ MODEL_NAME = CONFIG["providers"]["vision_model"]
 # ------------------------------------------------------------------
 
 def infer_metadata_from_path(pdf_path: Path) -> dict:
+    """
+    Infer metadata from flattened path.
+    Expected structure: <SUBJECT>/notes/unit<N>/*.pdf
+    """
     parts = pdf_path.parts
     try:
-        year_idx = parts.index("year_2")
-        subject  = parts[year_idx + 1]   # e.g. 'COA'
-        doc_type = parts[year_idx + 2]   # e.g. 'notes'
-        unit     = parts[year_idx + 3]   # e.g. 'unit1'
+        notes_idx = parts.index("notes")
+        subject = parts[notes_idx - 1]          # e.g. 'COA'
+        unit_str = parts[notes_idx + 1]         # e.g. 'unit4'
+        # Normalize unit to numeric string
+        m = re.search(r"\d+", unit_str.lower())
+        unit = str(int(m.group())) if m else "unknown"
     except (ValueError, IndexError):
-        subject, doc_type, unit = "unknown", "unknown", "unknown"
+        subject, unit = "unknown", "unknown"
 
     return {
         "subject": subject,
-        "type": doc_type,
+        "type": "notes",
         "unit": unit,
         "source_pdf": pdf_path.name,
     }
 
+
+def normalize_unit(unit):
+    """Normalize unit to a clean numeric string."""
+    if unit is None:
+        return "unknown"
+    s = str(unit).strip().lower()
+    m = re.search(r"\d+", s)
+    return str(int(m.group())) if m else "unknown"
+
+
+# ------------------------------------------------------------------
+# RENDERING
+# ------------------------------------------------------------------
 
 def render_pages_to_images(doc, start_page: int, end_page: int, return_bytes=False, scale=2.0) -> list:
     """
@@ -73,12 +92,7 @@ def render_pages_to_images(doc, start_page: int, end_page: int, return_bytes=Fal
 
 
 # ------------------------------------------------------------------
-# PROMPT
-# ------------------------------------------------------------------
-# Moved to prompts.NOTES_EXTRACTION
-
-# ------------------------------------------------------------------
-# CORE LOGIC
+# CORE LOGIC: Semantic Sectioning with Topic Feedback Loop
 # ------------------------------------------------------------------
 
 def process_pdf(pdf_path: Path):
@@ -86,8 +100,6 @@ def process_pdf(pdf_path: Path):
     print(f"   Provider: {CONFIG['providers']['vision']}  |  Model: {CONFIG['model']['model']}")
 
     metadata_base = infer_metadata_from_path(pdf_path)
-    # Write all chunk JSONs and .txt into a per-PDF subfolder so that
-    # multiple PDFs in the same unit folder never collide on chunk names.
     output_dir = pdf_path.parent / pdf_path.stem
     output_dir.mkdir(exist_ok=True)
     txt_path = output_dir / (pdf_path.stem + ".txt")
@@ -105,52 +117,66 @@ def process_pdf(pdf_path: Path):
     total_pages = len(doc)
     all_text_parts = []
 
-    for start_page in range(0, total_pages, CHUNK_SIZE):
-        end_page = min(start_page + CHUNK_SIZE, total_pages)
+    # Running topic list for this PDF — starts empty on page 1
+    existing_topics: list[str] = []
 
-        json_filename = f"chunk_{start_page + 1}_{end_page}.json"
+    # Global chunk counter for this PDF
+    global_chunk_idx = 0
+
+    for start_page in range(0, total_pages):
+        end_page = start_page + 1
+        page_num_1based = start_page + 1
+
+        # New JSON naming: <pdf_stem>_p{start}-{end}_{chunk_idx}.json
+        pdf_stem = pdf_path.stem
+        json_filename = f"{pdf_stem}_p{page_num_1based}-{page_num_1based}_{global_chunk_idx}.json"
         json_path = output_dir / json_filename
 
         if json_path.exists():
+            # Rehydrate existing metadata into the running topic list
             try:
                 with open(json_path, "r", encoding="utf-8") as f:
-                    existing = json.load(f)
-                ft = existing.get("extracted_metadata", {}).get("full_text", "")
-                if ft:
-                    all_text_parts.append(f"\n--- PAGES {start_page+1}-{end_page} ---\n{ft}")
+                    existing_data = json.load(f)
+                sections = existing_data.get("extracted_metadata", {}).get("sections", [])
+                for sec in sections:
+                    title = sec.get("section_title", "")
+                    if title and title not in existing_topics:
+                        existing_topics.append(title)
+                    ft = sec.get("full_text", "")
+                    if ft:
+                        all_text_parts.append(f"\n--- PAGE {page_num_1based} [{title}] ---\n{ft}")
+                # Count chunks to advance global_chunk_idx
+                all_existing = sorted(output_dir.glob(f"{pdf_stem}_p*_{global_chunk_idx}.json"))
             except Exception:
                 pass
-            print(f"   -> Chunk {start_page + 1}-{end_page} already processed. Skipping.")
+            print(f"   -> Page {page_num_1based} already processed. Skipping.")
+            global_chunk_idx += 1
             continue
 
-        print(f"   -> Processing Chunk {start_page + 1}-{end_page}...", end="", flush=True)
+        print(f"   -> Processing Page {page_num_1based} (topics so far: {len(existing_topics)})...", end="", flush=True)
 
         MAX_RETRIES = 3
         raw_response = None
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                # Delegate vision call to central registry
                 if BACKEND == "ollama":
-                    # Render as PIL then re-encode as JPEG (5-10x smaller than PNG)
                     images_pil = render_pages_to_images(doc, start_page, end_page, return_bytes=False, scale=1.0)
                     images = [pil_to_jpeg_bytes(img) for img in images_pil]
-                else: 
-                     # For HuggingFace or others, use default scaling or bytes
-                     images = render_pages_to_images(doc, start_page, end_page, return_bytes=True)
+                else:
+                    images = render_pages_to_images(doc, start_page, end_page, return_bytes=True)
 
+                prompt = notes_extraction(existing_topics if existing_topics else None)
                 raw_response = models.vision(
                     images=images,
-                    prompt=NOTES_EXTRACTION,
+                    prompt=prompt,
                     provider=CONFIG["providers"]["vision"],
                     model=CONFIG["providers"]["vision_model"]
                 )
-
-                break  # success — exit retry loop
-
+                break
             except Exception as e:
                 err_str = str(e)
                 if attempt < MAX_RETRIES:
-                    wait = 5 * attempt  # 15s, 30s, 45s
+                    wait = 5 * attempt
                     print(f" ⚠ Attempt {attempt} failed: {err_str[:120]}")
                     print(f"   Retrying in {wait}s...", end="", flush=True)
                     time.sleep(wait)
@@ -159,29 +185,72 @@ def process_pdf(pdf_path: Path):
 
         if raw_response is None:
             time.sleep(5)
+            global_chunk_idx += 1
             continue
 
         structured_data = extract_first_json(raw_response)
         if structured_data is None:
             print(" ⚠ No valid JSON. Saving raw.")
-            structured_data = {"raw_description": raw_response, "full_text": raw_response}
+            structured_data = {
+                "extracted_metadata": {
+                    "raw_description": raw_response,
+                    "full_text": raw_response,
+                    "sections": [{
+                        "section_title": "Untitled",
+                        "is_new_topic": True,
+                        "full_text": raw_response,
+                        "topics": [],
+                        "key_concepts": [],
+                        "has_diagram": False,
+                    }],
+                    "page_has_diagram": False,
+                    "content_quality": "partially_legible",
+                    "confidence": 0.5,
+                }
+            }
 
-        full_text = structured_data.get("full_text", "")
-        if full_text:
-            all_text_parts.append(f"\n--- PAGES {start_page+1}-{end_page} ---\n{full_text}")
+        sections = structured_data.get("sections", [])
+        if not sections:
+            print(" ⚠ No sections extracted. Skipping page.")
+            global_chunk_idx += 1
+            time.sleep(1)
+            continue
 
-        chunk_data = {
-            **metadata_base,
-            "page_start": start_page + 1,
-            "page_end": end_page,
-            "extracted_metadata": structured_data,
-            "processed_by": MODEL_NAME,  # Use centralized model name
-            "chunk_size": end_page - start_page,
-        }
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(chunk_data, f, indent=2, ensure_ascii=False)
+        # Update running topic list with newly discovered topics
+        for sec in sections:
+            title = sec.get("section_title", "")
+            if title and sec.get("is_new_topic", False) and title not in existing_topics:
+                existing_topics.append(title)
+                print(f"\n   + New topic: {title}")
 
-        print(" ✅ Done.")
+        # Write one JSON per section
+        for sec_idx, sec in enumerate(sections):
+            sec_start = page_num_1based
+            sec_end = page_num_1based
+            chunk_id = global_chunk_idx + sec_idx
+
+            sec_json_filename = f"{pdf_stem}_p{sec_start}-{sec_end}_{chunk_id}.json"
+            sec_json_path = output_dir / sec_json_filename
+
+            chunk_data = {
+                **metadata_base,
+                "page_start": sec_start,
+                "page_end": sec_end,
+                "extracted_metadata": sec,
+                "processed_by": MODEL_NAME,
+                "chunk_size": 1,
+                "section_index": sec_idx,
+                "chunk_idx": chunk_id,
+            }
+            with open(sec_json_path, "w", encoding="utf-8") as f:
+                json.dump(chunk_data, f, indent=2, ensure_ascii=False)
+
+            ft = sec.get("full_text", "")
+            if ft:
+                all_text_parts.append(f"\n--- PAGE {page_num_1based} [{sec.get('section_title', 'Untitled')}] ---\n{ft}")
+
+        print(f" ✅ Done ({len(sections)} section(s)).")
+        global_chunk_idx += len(sections)
         time.sleep(1)
 
     doc.close()

@@ -254,12 +254,13 @@ def build_books_chunk(textbooks: list, reference_books: list, base: dict) -> dic
 def infer_subject_from_path(pdf_path: Path) -> str:
     """
     Infer study subject from the path.
-    Expected structure: .../year_2/<SUBJECT>/syllabus/<name>.pdf
+    Expected structure: <SUBJECT>/syllabus/<name>.pdf
     """
     parts = pdf_path.parts
     try:
-        year_idx = parts.index("year_2")
-        return parts[year_idx + 1].lower()         # e.g. 'COA' or 'PYTHON'
+        # Flatten: the folder before 'syllabus' is the subject
+        syllabus_idx = parts.index("syllabus")
+        return parts[syllabus_idx - 1]
     except (ValueError, IndexError):
         return "unknown"
 

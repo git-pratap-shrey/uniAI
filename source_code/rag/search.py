@@ -24,10 +24,8 @@ Each function returns a list of Chunk dicts:
 
 Unit normalisation
 ------------------
-Both ingestion pipelines now write plain numeric strings ("1", "2" …).
-Older ingest runs may have written "unit1". The _unit_filter() helper
-builds a ChromaDB $or clause that matches both forms so old data works
-transparently.
+Ingestion pipelines write plain numeric unit strings ("1", "2" …).
+The _unit_filter() helper matches this format.
 """
 
 import os
@@ -148,20 +146,12 @@ def normalize_unit(raw: str | int | None) -> str | None:
 
 def _unit_filter(unit: str) -> dict:
     """
-    Build a flexible ChromaDB filter for unit numbers.
-
-    This creates an $or clause to support both the current ("1")
-    and legacy ("unit1") storage formats.
+    Build a ChromaDB filter for a unit number.
 
     Args:
-        unit: The normalized numeric unit string.
+        unit: The normalized numeric unit string (e.g. "1", "2").
     """
-    return {
-        "$or": [
-            {"unit": unit},
-            {"unit": f"unit{unit}"},
-        ]
-    }
+    return {"unit": unit}
 
 
 # ---------------------------------------------------------------------------
