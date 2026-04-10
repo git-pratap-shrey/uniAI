@@ -26,9 +26,11 @@ CONFIG = {
     # Machine-specific / Env vars (Flattened for easy migration)
     "OLLAMA_BASE_URL": OLLAMA_BASE_URL,
     "OLLAMA_LOCAL_URL": OLLAMA_LOCAL_URL,
+    "OLLAMA_API_KEY": OLLAMA_API_KEY,
     "GEMINI_API_KEY": GEMINI_API_KEY,
     "GROQ_API_KEY": GROQ_API_KEY,
     "HF_TOKEN": HF_TOKEN,
+    "OPENROUTER_API_KEY": OPENROUTER_API_KEY,
     "USE_OLLAMA_CLOUD": USE_OLLAMA_CLOUD,
 
     "model": get_active_model_config(),

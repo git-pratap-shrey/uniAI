@@ -20,7 +20,7 @@ MODEL_CONFIGS = {
         "api_key": GEMINI_API_KEY,
     },
     "ollama": {
-        "model": "qwen3:8b",
+        "model": "qwen3.5:2b",
         "temperature": 0.25,
         "top_p": 0.95,
         "num_ctx": 8192,
@@ -66,7 +66,8 @@ ROUTER_CONFIG = {
 # ------------------------------------------------------------------
 
 VISION_CONFIG = {
-    "provider": "ollama", # ollama | huggingface
+    "provider": "ollama", # ollama | huggingface | openrouter
     "model": "qwen3-vl:235b-cloud",
+    "or_model": "qwen/qwen3-vl-235b-a22b-instruct",
     "hf_model_id": "Qwen/Qwen3-VL-235B-A22B-Instruct",
 }

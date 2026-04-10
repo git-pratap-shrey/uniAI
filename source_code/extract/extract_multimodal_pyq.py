@@ -37,15 +37,21 @@ def get_syllabus_topics(subject: str) -> str:
     if not syllabus_dir.exists():
         return "Unit 1: Basic Concepts\nUnit 2: Intermediate\nUnit 3: Advanced\nUnit 4: Applications\nUnit 5: Case Studies"
 
-    for json_file in syllabus_dir.rglob("chunk_*.json"):
+    topic_strs = []
+    for json_file in syllabus_dir.rglob("syllabus_unit_*.json"):
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            topics = data.get("extracted_metadata", {}).get("topics", [])
-            if topics:
-                return "\n".join([f"Unit {i+1}: {topic}" for i, topic in enumerate(topics)])
+            unit = data.get("unit")
+            title = data.get("unit_title", "")
+            topics = data.get("topics", [])
+            if unit and topics:
+                topic_strs.append(f"Unit {unit}: {title} — {', '.join(topics)}")
         except:
             pass
+
+    if topic_strs:
+        return "\n".join(sorted(topic_strs, key=lambda s: s.split(": ")[0]))
     return "Unit 1: Basics\nUnit 2: Core\nUnit 3: Advanced\nUnit 4: Tools\nUnit 5: Applications"
 
 
@@ -145,6 +151,9 @@ def clean_question_text(q_text: str) -> tuple:
       "Explain X [10]"                                (bracket marks)
     """
     marks = None
+
+    # 0. Strip leading sub-question parenthetical: (a), (b), (i), etc.
+    q_text = re.sub(r'^\([a-zA-Z]+\)\s*', '', q_text).strip()
 
     # 1. Inline marks: (10 marks), [10]
     inline = re.search(r'\((\d+)\s*marks?\)|\[(\d+)\]', q_text, re.IGNORECASE)
@@ -267,6 +276,7 @@ def process_pyq(pdf_path: Path):
         chunks = [("General", clean_text)]
 
     questions_data = []
+    q_index = 0
 
     for current_section, section_text in chunks:
         lines = section_text.split("\n")
@@ -303,7 +313,8 @@ def process_pyq(pdf_path: Path):
 
                 # Include section slug in ID to prevent cross-section collisions
                 slug = section_slug(current_section)
-                q_id = f"{subject.lower()}_{year}_{pdf_path.stem}_{slug}_u{unit}_{q_num.lower()}"
+                q_index += 1
+                q_id = f"{subject.lower()}_{year}_{pdf_path.stem}_{slug}_u{unit}_{q_num.lower()}_q{q_index}"
 
                 questions_data.append({
                     "question_id": q_id,

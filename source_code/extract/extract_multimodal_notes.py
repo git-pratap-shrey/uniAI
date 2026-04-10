@@ -1,3 +1,5 @@
+# python -m source_code.extract.extract_multimodal_notes
+
 import os
 import re
 import fitz  # PyMuPDF
@@ -97,7 +99,7 @@ def render_pages_to_images(doc, start_page: int, end_page: int, return_bytes=Fal
 
 def process_pdf(pdf_path: Path):
     print(f"\n📄 Processing: {pdf_path.name}")
-    print(f"   Provider: {CONFIG['providers']['vision']}  |  Model: {CONFIG['model']['model']}")
+    print(f"   Provider: {CONFIG['providers']['vision']}  |  Model: {CONFIG['providers']['vision_model']}")
 
     metadata_base = infer_metadata_from_path(pdf_path)
     output_dir = pdf_path.parent / pdf_path.stem
@@ -129,28 +131,30 @@ def process_pdf(pdf_path: Path):
 
         # New JSON naming: <pdf_stem>_p{start}-{end}_{chunk_idx}.json
         pdf_stem = pdf_path.stem
-        json_filename = f"{pdf_stem}_p{page_num_1based}-{page_num_1based}_{global_chunk_idx}.json"
-        json_path = output_dir / json_filename
+        
+        all_existing_for_page = sorted(output_dir.glob(f"{pdf_stem}_p{page_num_1based}-{page_num_1based}_*.json"))
 
-        if json_path.exists():
+        if len(all_existing_for_page) > 0:
             # Rehydrate existing metadata into the running topic list
             try:
-                with open(json_path, "r", encoding="utf-8") as f:
-                    existing_data = json.load(f)
-                sections = existing_data.get("extracted_metadata", {}).get("sections", [])
-                for sec in sections:
+                for existing_file in all_existing_for_page:
+                    with open(existing_file, "r", encoding="utf-8") as f:
+                        existing_data = json.load(f)
+                    
+                    sec = existing_data.get("extracted_metadata", {})
                     title = sec.get("section_title", "")
                     if title and title not in existing_topics:
                         existing_topics.append(title)
                     ft = sec.get("full_text", "")
                     if ft:
                         all_text_parts.append(f"\n--- PAGE {page_num_1based} [{title}] ---\n{ft}")
-                # Count chunks to advance global_chunk_idx
-                all_existing = sorted(output_dir.glob(f"{pdf_stem}_p*_{global_chunk_idx}.json"))
+                
+                chunks_this_page = len(all_existing_for_page)
             except Exception:
-                pass
-            print(f"   -> Page {page_num_1based} already processed. Skipping.")
-            global_chunk_idx += 1
+                chunks_this_page = 1
+
+            print(f"   -> Page {page_num_1based} already processed. Skipping ({chunks_this_page} chunks).")
+            global_chunk_idx += chunks_this_page
             continue
 
         print(f"   -> Processing Page {page_num_1based} (topics so far: {len(existing_topics)})...", end="", flush=True)
@@ -172,6 +176,8 @@ def process_pdf(pdf_path: Path):
                     provider=CONFIG["providers"]["vision"],
                     model=CONFIG["providers"]["vision_model"]
                 )
+                if isinstance(raw_response, str) and raw_response.startswith("⚠ Vision Error"):
+                    raise Exception(raw_response)
                 break
             except Exception as e:
                 err_str = str(e)
@@ -195,18 +201,18 @@ def process_pdf(pdf_path: Path):
                 "extracted_metadata": {
                     "raw_description": raw_response,
                     "full_text": raw_response,
-                    "sections": [{
-                        "section_title": "Untitled",
-                        "is_new_topic": True,
-                        "full_text": raw_response,
-                        "topics": [],
-                        "key_concepts": [],
-                        "has_diagram": False,
-                    }],
                     "page_has_diagram": False,
                     "content_quality": "partially_legible",
                     "confidence": 0.5,
-                }
+                },
+                "sections": [{
+                    "section_title": "Untitled",
+                    "is_new_topic": True,
+                    "full_text": raw_response,
+                    "topics": [],
+                    "key_concepts": [],
+                    "has_diagram": False,
+                }]
             }
 
         sections = structured_data.get("sections", [])

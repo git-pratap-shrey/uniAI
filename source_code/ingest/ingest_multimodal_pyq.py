@@ -53,7 +53,7 @@ def ingest_pyqs():
     print("--- PYQ Ingestion Start ---")
     print(f"Target Collection : {CONFIG['paths']['collections']['pyq']}")
     print(f"Scanning           : {CONFIG['paths']['base_data']}")
-    
+
     collection = get_chroma_collection(CONFIG['paths']['collections']['pyq'])
     root_path  = Path(CONFIG['paths']['base_data'])
     # the processed jsons are put in pyqs_processed subfolders
@@ -63,18 +63,25 @@ def ingest_pyqs():
 
     ingested = 0
     skipped = 0
+    seen_ids = set()
 
     for json_file in json_files:
         try:
             with open(json_file, "r", encoding="utf-8") as f:
                 questions_list = json.load(f)
-                
+
             for q_data in questions_list:
                 doc_id = q_data.get("question_id")
                 if not doc_id:
                     skipped += 1
                     continue
-                
+
+                # In-run dedup guard
+                if doc_id in seen_ids:
+                    print(f"   ⚠️  Skipping duplicate ID: {doc_id}")
+                    skipped += 1
+                    continue
+
                 # Check existance
                 existing = collection.get(ids=[doc_id])
                 if existing and existing["ids"]:
@@ -103,6 +110,7 @@ def ingest_pyqs():
                     }]
                 )
                 ingested += 1
+                seen_ids.add(doc_id)
             print(f"   ✅ Processed file: {json_file.name}")
         except Exception as e:
             print(f"   ❌ Failed: {json_file.name}: {e}")

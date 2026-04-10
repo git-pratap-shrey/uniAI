@@ -34,7 +34,13 @@ _clients = {
 def get_ollama_client() -> ollama.Client:
     """Return a persistent Ollama client."""
     if _clients["ollama"] is None:
-        _clients["ollama"] = ollama.Client(host=CONFIG["OLLAMA_LOCAL_URL"])
+        kwargs = {}
+        api_key = CONFIG.get("OLLAMA_API_KEY", "")
+        if api_key:
+            kwargs["headers"] = {"Authorization": f"Bearer {api_key}"}
+        
+        host = CONFIG["OLLAMA_BASE_URL"] if CONFIG.get("USE_OLLAMA_CLOUD") else CONFIG["OLLAMA_LOCAL_URL"]
+        _clients["ollama"] = ollama.Client(host=host, **kwargs)
     return _clients["ollama"]
 
 def get_gemini_client():
@@ -278,14 +284,24 @@ def vision(images: Any, prompt: str, model: Optional[str] = None, provider: Opti
             image_payload = []
             if isinstance(images, (str, bytes)):
                 images = [images]
-            
+
             for img in images:
                 if isinstance(img, str) and os.path.exists(img):
                     with open(img, "rb") as f:
                         image_payload.append(f.read())
+                elif isinstance(img, bytes):
+                    image_payload.append(img)
                 else:
-                    image_payload.append(img) # assume bytes
-            
+                    # PIL Image -> PNG bytes
+                    import io
+                    from PIL import Image
+                    if hasattr(img, "save"):
+                        buf = io.BytesIO()
+                        img.save(buf, format="PNG")
+                        image_payload.append(buf.getvalue())
+                    else:
+                        image_payload.append(img)
+
             response = client.generate(
                 model=model,
                 prompt=prompt,
@@ -294,7 +310,50 @@ def vision(images: Any, prompt: str, model: Optional[str] = None, provider: Opti
             return response["response"]
         except Exception as e:
             return f"⚠ Vision Error: {e}"
-            
+
+    elif provider == "openrouter":
+        try:
+            import io
+            import base64
+            from PIL import Image
+            import requests as _requests
+
+            content = [{"type": "text", "text": prompt}]
+            for img in images:
+                if isinstance(img, (str, bytes)):
+                    raw = img if isinstance(img, bytes) else open(img, "rb").read()
+                elif hasattr(img, "save"):
+                    buf = io.BytesIO()
+                    img.save(buf, format="PNG")
+                    raw = buf.getvalue()
+                else:
+                    raw = None
+                if raw:
+                    b64 = base64.b64encode(raw).decode()
+                    content.append({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64}"}})
+
+            api_key = CONFIG.get("OPENROUTER_API_KEY", "")
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://github.com/uniAI",
+                "X-Title": "uniAI RAG",
+            }
+            payload = {
+                "model": model or CONFIG["providers"].get("vision_or_model", "qwen/qwen3-vl-235b-a22b-instruct"),
+                "messages": [{"role": "user", "content": content}],
+            }
+            resp = _requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=120,
+            )
+            resp.raise_for_status()
+            return resp.json()["choices"][0]["message"]["content"]
+        except Exception as e:
+            return f"⚠ Vision Error (OpenRouter): {e}"
+
     elif provider == "huggingface":
         if genai is None: # We'll use InferenceClient directly if we can
              pass
