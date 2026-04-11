@@ -78,10 +78,19 @@ node_modules/
 .next/
 out/
 
-# Data (local only)
+# Data (local only, but keep wiki)
 source_code/data_old/
 source_code/data_new/
-source_code/data/
+
+# Allow wiki contents inside the data folder
+!source_code/data/
+!source_code/data/**/wiki/
+!source_code/data/**/wiki/**
+
+# But ignore everything else in data (must come after the unignores to work)
+source_code/data/*
+!source_code/data/**/wiki/
+
 source_code/data - Copy/
 
 # ======================
