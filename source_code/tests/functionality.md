@@ -6,7 +6,7 @@ The test suite validates every layer of the uniAI system — from individual com
 
 **Test subdirectories:**
 
-| Directory | Purpose |
+| Directory/File | Purpose |
 |---|---|
 | `chat/` | Manual chat session scripts, question sets, and sweep runners |
 | `retrieval/` | Retrieval accuracy, subject/unit routing, and isolation tests |
@@ -16,6 +16,7 @@ The test suite validates every layer of the uniAI system — from individual com
 | `db/` | ChromaDB audit and dump utilities |
 | `others/` | Miscellaneous unit tests (parsing, query expander, chunking, config verification) |
 | `api/` | Individual API provider smoke tests (Gemini, Groq) |
+| `test_glm.py` | Standalone GLM-OCR connectivity and capability smoke test |
 
 ---
 
@@ -210,6 +211,26 @@ Standalone tests for individual LLM providers to verify API key validity and con
 
 - **`groq_api_test.py`** — Simple smoke test for Groq API.
   - Same pattern as Gemini test, validates Groq connectivity
+
+---
+
+### `test_glm.py` — GLM-OCR Capability Test
+
+Standalone, hardcoded script to isolate and test the `glm-ocr:bf16` model via Ollama subprocess calls. Created to debug connectivity issues during batch extraction.
+
+#### Functions
+
+- **`render_page_to_image(pdf_path, page_num, output_path, scale)`** — Renders a single PDF page to a PNG file using PyMuPDF. Hardcoded to use the third page of a Digital Electronics notes PDF.
+
+- **`run_ollama_glm_ocr(image_path)`** — Runs three `ollama run glm-ocr:bf16` subprocess commands against the rendered image:
+  - `Text Recognition: <image>` — tests plain text OCR
+  - `Table Recognition: <image>` — tests structured table extraction
+  - `Figure Recognition: <image>` — tests figure/diagram detection
+  - Prints stdout and stderr for each command.
+
+**Usage:** `python source_code/tests/test_glm.py`
+
+**Note:** PDF path is hardcoded to `source_code/data/year_2/DIGITAL_ELECTRONICS/notes/unit2/unit2.pdf`. Update before running on a different machine or data layout.
 
 ---
 

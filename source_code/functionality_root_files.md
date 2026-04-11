@@ -19,6 +19,8 @@ The architectural core. Every module calls `models.chat()`, `models.embed()`, `m
 
 **Lazy-loaded clients:** `_clients` dict initialized to None. `get_ollama_client()`, `get_gemini_client()`, `get_groq_client()` -- each creates client on first use with appropriate API key from CONFIG.
 
+- `get_ollama_client()` -- reads `OLLAMA_API_KEY` from CONFIG; if set, adds `Authorization: Bearer` header. Uses `OLLAMA_BASE_URL` (cloud) or `OLLAMA_LOCAL_URL` depending on `USE_OLLAMA_CLOUD`.
+
 **`chat(prompt, system_prompt, messages, model, provider, **kwargs) -> str`**
 - Resolves provider/model from CONFIG if not overridden. Supports simple prompt, system+prompt, or full messages array.
 - **Gemini:** `client.models.generate_contents()` with config_args (temperature, max_output_tokens, top_p). Returns `response.text`.
@@ -30,20 +32,23 @@ The architectural core. Every module calls `models.chat()`, `models.embed()`, `m
 - Provider defaults to ollama, model to `qwen3-embedding:4B`. Calls `client.embeddings()` per text with `keep_alive="10m"`. Returns list of vectors.
 
 **`rerank(query, documents, model) -> List[float]`**
-- Loads `tomaarsen/Qwen3-Reranker-0.6B-seq-cls` lazily (thread-safe, auto-detects CUDA, float16 on GPU).
+- Loads `tomaarsen/Qwen3-Reranker-0.6B-seq-cls` lazily (thread-safe via `_rerank_lock`, auto-detects CUDA, float16 on GPU / float32 on CPU).
 - Qwen3-Reranker format: formats each pair as chat-style system+instruct+query+document tags.
 - Tokenizes, passes through model, applies `sigmoid()` normalization to 0-1 range. Max length 8192, left padding.
+- Re-uses loaded model if same `model_id` is requested again (avoids re-loading).
 
 **`vision(images, prompt, model, provider) -> str`**
-- **Ollama:** Accepts file paths or bytes, reads/casts to bytes, calls `client.generate()`.
+- **Ollama:** Accepts file paths, bytes, or PIL Images. Reads/casts to bytes, calls `client.generate()`. Returns `response["response"]`.
+- **OpenRouter:** Converts images to base64 PNG data URIs, POSTs to `https://openrouter.ai/api/v1/chat/completions` with `OPENROUTER_API_KEY`, includes `HTTP-Referer` and `X-Title` headers. Timeout 120s.
 - **HuggingFace:** Converts images to base64 data URIs (`pil_to_base64`), uses `InferenceClient` chat completions with image_url content type.
+- Returns error string prefixed with `"⚠ Vision Error"` on failure (callers check for this prefix).
 
 ### `prompts.py`
 
 Organized into five groups.
 
 **EXTRACTION:**
-- `NOTES_EXTRACTION(existing_topics: list[str] | None) -> str` -- VLM prompt builder for semantic sectioning. Accepts a list of already-known topics for the unit. On first page (empty list), freely discovers new topics with full-term vocabulary preference. On subsequent pages, VLM reuses existing topic names when content matches, only creating new ones when genuinely necessary. Output includes `sections[]` array, each with `section_title`, `is_new_topic`, `full_text`, `topics`, `key_concepts`, `has_diagram`.
+- `notes_extraction(existing_topics: list[str] | None) -> str` -- VLM prompt builder for semantic sectioning. Accepts a list of already-known topics for the unit. On first page (empty list), freely discovers new topics with full-term vocabulary preference. On subsequent pages, VLM reuses existing topic names when content matches, only creating new ones when genuinely necessary. Output includes `sections[]` array, each with `section_title`, `is_new_topic`, `full_text`, `topics`, `key_concepts`, `has_diagram`.
 - `SYLLABUS_EXTRACTION` -- VLM prompt: parse syllabus tables, output JSON with syllabus_version, subject_name, units[], course_outcomes[], textbooks[], reference_books[].
 
 **RAG CHAT (builder functions):**
@@ -97,3 +102,12 @@ models.py --> config (provider selection, API keys)
 ```
 
 All AI calls flow through `models.py`, which reads provider/model from CONFIG, lazy-initializes the client, normalizes provider differences, and returns consistent output.
+
+**Provider support matrix:**
+
+| Function | ollama | gemini | groq | openrouter | huggingface |
+|---|---|---|---|---|---|
+| `chat()` | ✅ | ✅ | ✅ | ❌ | ❌ |
+| `embed()` | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `rerank()` | N/A (local HF) | ❌ | ❌ | ❌ | ❌ |
+| `vision()` | ✅ | ❌ | ❌ | ✅ | ✅ |

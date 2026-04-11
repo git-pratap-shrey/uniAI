@@ -22,6 +22,7 @@ Loads environment variables from `.env` using `python-dotenv`. Only secrets and 
 
 **Exposed symbols:**
 - `GROQ_API_KEY`, `GEMINI_API_KEY`, `HF_TOKEN`, `OLLAMA_API_KEY` -- API keys (default `""`)
+- `OPENROUTER_API_KEY` -- API key for OpenRouter vision fallback (default `""`)
 - `OLLAMA_BASE_URL`, `OLLAMA_LOCAL_URL` -- default `"http://localhost:11434"`
 - `USE_OLLAMA_CLOUD` -- bool, default `True`
 - `APP_ENV` -- string, default `"dev"`
@@ -32,13 +33,14 @@ Defines AI model profiles and active selection.
 **Exposed symbols:**
 - `MODEL_CONFIGS` (dict) -- Three chat profiles:
   - `"gemini"`: `gemini-3.1-flash-lite-preview`, temp 0.3, top_p 0.9, max_tokens 4096
-  - `"ollama"`: `qwen3:8b`, temp 0.25, top_p 0.95, num_ctx 8192
+  - `"ollama"`: `qwen3.5:2b`, temp 0.25, top_p 0.95, num_ctx 8192
   - `"groq"`: `qwen/qwen3-32b`, temp 0.6, top_p 0.95, max_tokens 4096
 - `ACTIVE_CHAT_MODEL` -- currently `"gemini"`
 - `get_active_model_config()` -- returns `MODEL_CONFIGS[ACTIVE_CHAT_MODEL]`
 - `EMBEDDING_CONFIG` -- `{"provider": "ollama", "model": "qwen3-embedding:4B"}`
 - `ROUTER_CONFIG` -- `{"provider": "ollama", "model": "gemini-3-flash-preview:latest", "temperature": 0.0, "num_predict": 50}`
-- `VISION_CONFIG` -- `{"provider": "ollama", "model": "qwen3-vl:235b-cloud", "hf_model_id": "Qwen/Qwen3-VL-235B-A22B-Instruct"}`
+- `VISION_CONFIG` -- `{"provider": "ollama", "model": "qwen3-vl:235b-cloud", "or_model": "qwen/qwen3-vl-235b-a22b-instruct", "hf_model_id": "Qwen/Qwen3-VL-235B-A22B-Instruct"}`
+  - `or_model` is the model string used when `provider == "openrouter"`
 
 ### `rag.py`
 Centralizes all RAG pipeline tuning parameters.
@@ -57,12 +59,20 @@ Filesystem paths and collection names.
 - `CHROMA_DB_PATH` -- env or `BASE_DIR/chroma`
 - `UNIT_EMBEDDINGS_PATH` -- `BASE_DIR/pipeline/embeddings/unit_embeddings.pkl`
 - `KEYWORDS_FILE_PATH` -- `BASE_DIR/data/subject_keywords.json`
+- `ALIASES_FILE_PATH` -- `BASE_DIR/data/subject_aliases.json`
 - `CHROMA_COLLECTION_NAME` -- `"multimodal_notes"`
 - `CHROMA_SYLLABUS_COLLECTION_NAME` -- `"multimodal_syllabus"`
 - `CHROMA_PYQ_COLLECTION_NAME` -- `"multimodal_pyq"`
 
 ### `main.py`
-Assembles all sub-modules into structured `CONFIG` dict with keys: `env`, `OLLAMA_BASE_URL`, `model`, `providers` (chat/embedding/router/vision), `rag` (thresholds, cross_encoder, keywords, embedding_router), `paths` (base_data, chroma, unit_embeddings, collections), `ingest` (min_confidence).
+Assembles all sub-modules into a structured `CONFIG` dict. Top-level keys:
+- `env` -- APP_ENV string
+- `OLLAMA_BASE_URL`, `OLLAMA_LOCAL_URL`, `OLLAMA_API_KEY`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `HF_TOKEN`, `OPENROUTER_API_KEY`, `USE_OLLAMA_CLOUD` -- flattened env vars
+- `model` -- active chat model profile dict (from `get_active_model_config()`)
+- `providers` -- `{chat, embedding, embedding_model, router, router_model, vision, vision_model}`
+- `rag` -- merged RAG hyperparams + `history_limit`, `cross_encoder`, `router_model/temperature/num_predict`, `keywords`, `embedding_router_threshold`
+- `paths` -- `{base_data, chroma, unit_embeddings, aliases, keywords, collections: {notes, syllabus, pyq}}`
+- `ingest` -- `{min_confidence}`
 
 ### `__init__.py`
 Re-exports `CONFIG`: `from .main import CONFIG`

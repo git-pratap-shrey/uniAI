@@ -6,8 +6,8 @@ The `ingest/` package contains three scripts that load structured JSON (produced
 
 | Script | Input JSONs | Target Collection | Document IDs |
 |---|---|---|---|
-| `ingest_multimodal.py` | `<pdf_stem>_p*-*.json` (notes sections) | `multimodal_notes` | `{SUBJECT}_unit{unit}_notes_{pdf_stem}_p{start}-{end}_{chunk_idx}` |
-| `ingest_multimodal_pyq.py` | `*_processed.json` (PYQs) | `multimodal_pyq` | `{question_id}` from extraction |
+| `ingest_multimodal.py` | `<pdf_stem>/<pdf_stem>_p*-*_*.json` (section-level) | `multimodal_notes` | `{SUBJECT}_unit{unit}_notes_{pdf_stem}_p{start}-{end}_{chunk_idx}` |
+| `ingest_multimodal_pyq.py` | `pyqs_processed/*_processed.json` | `multimodal_pyq` | `{question_id}` from extraction |
 | `ingest_multimodal_syllabus.py` | `syllabus_*.json` | `multimodal_syllabus` | `syllabus_{SUBJECT}_{source_pdf}_{chunk_type}` |
 
 All three scripts follow the same pattern:
@@ -89,13 +89,17 @@ Ingests processed PYQ JSONs (produced by `extract_multimodal_pyq.py`) into the `
 - Output: Side effects -- upserts each question into `multimodal_pyq` collection
 - Logic:
   1. Opens `multimodal_pyq` collection
-  2. Finds all `pyqs_processed/*_processed.json` files
-  3. For each JSON, iterates question list: skips if no question_id, if ID exists, if text too short
+  2. Finds all `pyqs_processed/*_processed.json` files via `rglob`
+  3. For each JSON, iterates question list:
+     - Skips if no `question_id`
+     - **In-run dedup guard**: tracks `seen_ids` set to prevent duplicate upserts within the same run (protects against duplicate IDs across files)
+     - Checks ChromaDB for existing ID, skips if already ingested
+     - Skips if embedding text is empty or `question_text` < 5 chars
   4. Generates embedding, upserts with metadata
-  5. Reports counts
+  5. Reports counts (ingested, skipped)
 
 **Metadata stored per document:**
-`source`, `unit`, `subject`, `document_type: "pyq"`, `year`, `marks`
+`source`, `unit`, `subject`, `document_type: "pyq"`, `year`, `marks` (0 if null)
 
 **Entry point:** `python ingest_multimodal_pyq.py`
 
@@ -132,13 +136,15 @@ Syllabus-specific: `syllabus_version`, `chunk_type`
 
 All three scripts share the same dependency pattern:
 - `utils.py` provides `get_embedding()` -> `models.embed()` -> Ollama and `get_chroma_collection()` -> chromadb.PersistentClient
-- `config.py` provides CONFIG (paths, collection names, thresholds)
+- `config` provides CONFIG (paths, collection names, thresholds)
 
 **Data flow from extraction to ingestion:**
-- extract_multimodal_notes.py -> <pdf_stem>_p*_*_*.json -> ingest_multimodal.py -> multimodal_notes
-- extract_multimodal_pyq.py -> *_processed.json -> ingest_multimodal_pyq.py -> multimodal_pyq
-- extract_multimodal_syllabus.py -> syllabus_*.json -> ingest_multimodal_syllabus.py -> multimodal_syllabus
+- extract_multimodal_notes.py -> `<stem>/<stem>_p*_*_*.json` -> ingest_multimodal.py -> multimodal_notes
+- extract_multimodal_pyq.py -> `pyqs_processed/*_processed.json` -> ingest_multimodal_pyq.py -> multimodal_pyq
+- extract_multimodal_syllabus.py -> `syllabus_*.json` -> ingest_multimodal_syllabus.py -> multimodal_syllabus
 
 The garbage filter (`is_garbage_chunk`) is unique to notes ingestion -- only notes PDFs are prone to promotional watermarking. The `normalize_unit()` function only appears in the notes ingestion script; the PYQ and syllabus scripts receive already-normalized units from their extraction pipelines.
 
-The ingest pipeline now handles section-level JSON files (one per semantic topic section per page) instead of page-level chunks. Document IDs include unit, pdf_stem, page range, and chunk index for debugging. Metadata uses only scalar fields -- topic arrays are stored in the embedding text, not in metadata.
+The PYQ ingestion script now maintains an in-run `seen_ids` set to guard against duplicate question IDs appearing across multiple processed JSON files, in addition to the ChromaDB existence check.
+
+The ingest pipeline handles section-level JSON files (one per semantic topic section per page) instead of page-level chunks. Document IDs include unit, pdf_stem, page range, and chunk index for debugging. Metadata uses only scalar fields -- topic arrays are stored in the embedding text, not in metadata.

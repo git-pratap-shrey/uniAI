@@ -21,8 +21,9 @@ PDF Notes / Syllabus / PYQs
         │
         ▼
 ┌────────────────────────────────────┐
-│   VLM OCR Ingestion Pipeline       │  ← Qwen3-VL (Ollama / HuggingFace)
-│   Per-page OCR + structured JSON   │    PyMuPDF, metadata tagging, garbage filtering
+│   VLM OCR Ingestion Pipeline       │  ← Qwen3-VL (Ollama / OpenRouter / HuggingFace)
+│   Semantic sectioning per page     │    PyMuPDF, running topic list, garbage filtering
+│   One JSON per topic section       │    Rate-limit safe (exponential backoff)
 └──────────────┬─────────────────────┘
                │
                ▼
@@ -45,9 +46,10 @@ PDF Notes / Syllabus / PYQs
                │
                ▼
 ┌────────────────────────────────────┐
-│   Hybrid Router (3 stages)         │  1. Weighted keyword scoring
-│                                    │  2. Pre-computed unit embedding similarity
-│                                    │  3. LLM fallback (Qwen3.5 / Mistral)
+│   Hybrid Router (4 tiers)          │  1. Regex for explicit unit mention
+│                                    │  2. Weighted keyword scoring
+│                                    │  3. Pre-computed unit embedding similarity
+│                                    │  4. LLM fallback (Qwen3.5 / Gemini)
 └──────────────┬─────────────────────┘
                │
                ▼
@@ -94,7 +96,7 @@ uniAI/
 │   ├── prompts.py              # Single source of truth for all LLM prompts
 │   │
 │   ├── extract/
-│   │   ├── extract_multimodal_notes.py     # VLM OCR for lecture notes
+│   │   ├── extract_multimodal_notes.py     # VLM OCR: semantic sectioning with topic loop
 │   │   ├── extract_multimodal_pyq.py       # VLM OCR + LLM unit classification for PYQs
 │   │   └── extract_multimodal_syllabus.py  # Structured syllabus extraction (7 chunks/PDF)
 │   │
@@ -106,21 +108,32 @@ uniAI/
 │   ├── pipeline/
 │   │   ├── embeddings/local_embedding.py   # Ollama embedding client (keep_alive)
 │   │   ├── generate_keyword_map.py         # Builds subject_keywords.json for routing
-│   │   ├── generate_unit_embeddings.py     # Builds unit_embeddings.pkl for Stage 2 router
+│   │   ├── generate_unit_embeddings.py     # Builds unit_embeddings.pkl for Stage 3 router
 │   │   └── retrieval_utils.py              # Threshold-filtered retrieval helper
 │   │
-│   └── rag/
-│       ├── rag_pipeline.py        # Main orchestrator: route → retrieve → rerank → generate
-│       ├── hybrid_router.py       # Coordinates 3-stage routing waterfall
-│       ├── router.py              # Stage 1: weighted keyword scoring
-│       ├── embedding_router.py    # Stage 2: pre-computed unit embedding similarity
-│       ├── unit_router.py         # Regex + keyword unit detection
-│       ├── query_expander.py      # 3-layer query expansion
-│       ├── search.py              # Collection-isolated retrieval functions
-│       ├── cross_encoder.py       # Qwen3-Reranker-0.6B reranker (GPU)
-│       ├── reranker.py            # Heuristic reranker (fallback / legacy)
-│       ├── context_builder.py     # Formats chunks into LLM-ready context
-│       └── chat_cli.py            # CLI chat loop
+│   ├── rag/
+│   │   ├── rag_pipeline.py        # Main orchestrator: route → retrieve → rerank → generate
+│   │   ├── hybrid_router.py       # Coordinates 4-tier routing waterfall
+│   │   ├── router.py              # Tier 2: weighted keyword scoring
+│   │   ├── embedding_router.py    # Tier 3: pre-computed unit embedding similarity
+│   │   ├── unit_router.py         # Regex + keyword unit detection
+│   │   ├── query_expander.py      # 3-layer query expansion
+│   │   ├── search.py              # Collection-isolated retrieval functions
+│   │   ├── cross_encoder.py       # Qwen3-Reranker-0.6B reranker (GPU)
+│   │   ├── reranker.py            # Heuristic reranker (fallback / legacy)
+│   │   ├── context_builder.py     # Formats chunks into LLM-ready context
+│   │   └── chat_cli.py            # CLI chat loop
+│   │
+│   └── tests/
+│       ├── test_glm.py            # Standalone GLM-OCR capability smoke test
+│       ├── chat/                  # Manual chat session scripts and question sets
+│       ├── retrieval/             # Retrieval accuracy and routing tests
+│       ├── router/                # Router evaluation with trace logs
+│       ├── complete_system/       # Full pipeline integration tests
+│       ├── ci/                    # CI/CD tests (syntax, Django, pytest)
+│       ├── db/                    # ChromaDB audit and dump utilities
+│       ├── others/                # Miscellaneous unit tests
+│       └── api/                   # API provider smoke tests
 │
 ├── rag_project/                   # Django backend
 │   └── rag_api/
@@ -128,6 +141,7 @@ uniAI/
 │       ├── urls.py
 │       └── templates/chat.html    # Minimal HTML/JS frontend
 │
+├── PROGRESS.md                    # Pipeline status tracker
 ├── .github/workflows/ci.yml       # CI: syntax check, Django health, pytest
 ├── requirements.txt
 ├── requirements_linux.txt         # WSL/Ubuntu setup guide
@@ -146,28 +160,30 @@ The config was designed as a proper Python package with four files that each own
 
 This is the architectural core. Instead of every script calling `ollama.chat()` or `genai.generate_content()` directly, they all go through `models.chat()`, `models.embed()`, `models.rerank()`, or `models.vision()`. Switching the generation backend from Gemini to Groq is a one-line change in `config/models.py`. Provider clients are lazily initialized — they are only created on first use, which avoids import-time failures if a provider library is not installed.
 
-| Function | Purpose |
-|---|---|
-| `models.chat()` | Text generation via Gemini, Ollama, or Groq |
-| `models.embed()` | Vector embeddings via Ollama |
-| `models.rerank()` | Cross-encoder scoring via HuggingFace Transformers |
-| `models.vision()` | VLM OCR via Ollama or HuggingFace Inference API |
+| Function | Purpose | Providers |
+|---|---|---|
+| `models.chat()` | Text generation | Gemini, Ollama, Groq |
+| `models.embed()` | Vector embeddings | Ollama |
+| `models.rerank()` | Cross-encoder scoring | HuggingFace Transformers (local) |
+| `models.vision()` | VLM OCR | Ollama, OpenRouter, HuggingFace |
 
 ### 3. Ingestion Pipelines
 
 Three parallel pipelines handle the three data types, each depositing into its own isolated ChromaDB collection.
 
-**Notes pipeline** renders each PDF page to an image (JPEG at 1× scale for Ollama cloud to avoid Cloudflare timeouts, PNG at 2× for HuggingFace). The VLM returns a structured JSON with `full_text`, `title`, `unit`, `topics`, `key_concepts`, and `confidence`. An ingestion-time garbage filter rejects promotional slides, low-confidence OCR, and short empty chunks before they reach the vector store.
+**Notes pipeline** uses a **semantic sectioning** approach: per page, the VLM identifies distinct topic sections and returns a `sections[]` array. Each section is written as its own JSON file. A **running topic list** is maintained across pages so the VLM can reuse consistent section names rather than creating duplicates. Already-processed pages are detected by file glob and skipped, with existing topic names rehydrated from disk to preserve continuity. Images are rendered as JPEG at 1× scale for Ollama cloud (to avoid Cloudflare 524 timeouts) or PNG at 2× for HuggingFace.
 
 **Syllabus pipeline** processes each syllabus PDF into exactly seven structured JSON files — one per unit plus course outcomes and a books/references chunk. This granularity is what makes unit-scoped retrieval precise later.
 
-**PYQ pipeline** is the most involved. It transcribes exam papers page-by-page via VLM, then for each extracted question calls the chat LLM a second time to classify which syllabus unit the question belongs to. Questions are cleaned of marks annotations, pipe separators, and trailing numbers via regex before ingestion.
+**PYQ pipeline** is the most involved. It transcribes exam papers page-by-page via VLM, then for each extracted question calls the chat LLM a second time to classify which syllabus unit the question belongs to. Questions are cleaned of marks annotations, pipe separators, and trailing numbers via regex before ingestion. Both the OCR step and the classification step use 15s × attempt exponential backoff to handle cloud rate limits.
 
 ### 4. Hybrid Query Router
 
-Every query goes through a three-stage waterfall before any retrieval happens.
+Every query goes through a **four-tier** waterfall before any retrieval happens.
 
-**Stage 1 — Keyword Scoring** scores the query against `subject_keywords.json` using a weighted system. PYQ keywords carry the most signal (weight 5), followed by unit-specific notes keywords (4), syllabus unit keywords (3), and core subject keywords (2). If one subject wins with no tie and meets the minimum threshold, routing completes in milliseconds without any LLM call.
+**Tier 1 — Regex Unit Detection** checks for an explicit unit mention (`unit 3`, `unit-4`) and extracts it immediately.
+
+**Tier 2 — Keyword Scoring** scores the query against `subject_keywords.json` using a weighted system. PYQ keywords carry the most signal (weight 5), followed by unit-specific notes keywords (4), syllabus unit keywords (3), and core subject keywords (2). If one subject wins with no tie and meets the minimum threshold, routing completes in milliseconds without any LLM call.
 
 | Signal | Weight |
 |---|---|
@@ -176,9 +192,9 @@ Every query goes through a three-stage waterfall before any retrieval happens.
 | Syllabus unit-level keywords | 3 |
 | Core subject keywords | 2 |
 
-**Stage 2 — Embedding Similarity** embeds the query and computes cosine similarity against pre-computed unit embeddings stored in `unit_embeddings.pkl`. These reference embeddings are generated offline from the keyword map and represent each subject/unit as a dense vector. If similarity exceeds `EMBEDDING_ROUTER_THRESHOLD` (0.55), routing is decided.
+**Tier 3 — Embedding Similarity** embeds the query and computes cosine similarity against pre-computed unit embeddings stored in `unit_embeddings.pkl`. These reference embeddings are generated offline from the keyword map and represent each subject/unit as a dense vector. If similarity exceeds `EMBEDDING_ROUTER_THRESHOLD` (0.55), routing is decided.
 
-**Stage 3 — LLM Fallback** invokes a fast local router model with a strict prompt that must reply with exactly one `SUBJECT_UNIT` string. Temperature is fixed at 0.0 for deterministic output. This stage only runs for genuinely ambiguous queries that escaped both previous stages.
+**Tier 4 — LLM Fallback** invokes a fast router model with a strict prompt that must reply with exactly one `SUBJECT_UNIT` string. Temperature is fixed at 0.0 for deterministic output. This tier only runs for genuinely ambiguous queries that escaped all previous stages.
 
 ### 5. Query Expansion
 
@@ -196,7 +212,7 @@ The **hallucination gate** sits immediately after reranking: if the top cross-en
 
 | Collection | Content | Key Metadata |
 |---|---|---|
-| `multimodal_notes` | Lecture notes, handwritten notes, slides | `subject`, `unit`, `title`, `document_type`, `confidence` |
+| `multimodal_notes` | Lecture notes, handwritten notes, slides | `subject`, `unit`, `title`, `chunk_idx`, `section_index`, `confidence` |
 | `multimodal_syllabus` | Unit topics, course outcomes, book lists | `subject`, `unit`, `chunk_type`, `syllabus_version` |
 | `multimodal_pyq` | Past year exam questions | `subject`, `unit`, `year`, `marks` |
 
@@ -229,20 +245,24 @@ cp .env.example .env
 Key variables to set:
 
 ```env
-MODEL_VISION_BACKEND=ollama          # ollama | huggingface
-OLLAMA_BASE_URL=http://localhost:11434
-BASE_DATA_DIR=/path/to/your/data/year_2
+OLLAMA_BASE_URL=http://localhost:11434   # or cloud Ollama URL
+OLLAMA_API_KEY=...                       # if using authenticated cloud Ollama
+BASE_DATA_DIR=/path/to/your/data        # flattened: SUBJECT/notes/unitN/*.pdf
 CHROMA_DB_PATH=/path/to/your/chroma
-GEMINI_API_KEY=...                   # if using Gemini for generation
-HF_TOKEN=...                         # if using HuggingFace for vision or reranking
+GEMINI_API_KEY=...                       # if using Gemini for generation
+OPENROUTER_API_KEY=...                   # if using OpenRouter for vision fallback
+HF_TOKEN=...                             # if using HuggingFace for vision or reranking
+USE_OLLAMA_CLOUD=true                    # true = use OLLAMA_BASE_URL, false = OLLAMA_LOCAL_URL
 ```
 
 Make sure Ollama is running locally (`ollama serve`) and required models are pulled.
 
 ### 3. Place your data
 
+Data layout is **flat** — no year nesting:
+
 ```
-source_code/data/year_2/<SUBJECT>/
+<BASE_DATA_DIR>/<SUBJECT>/
   notes/unit1/*.pdf
   notes/unit2/*.pdf
   pyqs/*.pdf
@@ -252,10 +272,10 @@ source_code/data/year_2/<SUBJECT>/
 ### 4. Run the ingestion pipeline
 
 ```bash
-# OCR extraction
-python source_code/extract/extract_multimodal_notes.py
-python source_code/extract/extract_multimodal_pyq.py
-python source_code/extract/extract_multimodal_syllabus.py
+# OCR extraction (run as modules from project root)
+python -m source_code.extract.extract_multimodal_notes
+python -m source_code.extract.extract_multimodal_pyq
+python -m source_code.extract.extract_multimodal_syllabus
 
 # Ingest into ChromaDB
 python source_code/ingest/ingest_multimodal.py
@@ -266,6 +286,8 @@ python source_code/ingest/ingest_multimodal_syllabus.py
 python source_code/pipeline/generate_keyword_map.py
 python source_code/pipeline/generate_unit_embeddings.py
 ```
+
+All extraction scripts are resumable — already-processed files are detected and skipped automatically.
 
 ### 5. Start the server
 
@@ -313,8 +335,8 @@ All tuneable parameters live in `source_code/config/rag.py`.
 | `cross_encoder.candidates` | `6` | Max chunks sent to cross-encoder |
 | `cross_encoder.pipeline_top_n` | `4` | Chunks kept after reranking |
 | `history_limit` | `4` | Conversation turns injected into context |
-| `keywords.min_score` | `2` | Min keyword score to trust Stage 1 routing |
-| `embedding_router_threshold` | `0.55` | Min similarity to trust Stage 2 routing |
+| `keywords.min_score` | `2` | Min keyword score to trust Tier 2 routing |
+| `embedding_router_threshold` | `0.55` | Min similarity to trust Tier 3 routing |
 
 Chat model selection lives in `source_code/config/models.py` via `ACTIVE_CHAT_MODEL`.
 
@@ -326,10 +348,10 @@ Chat model selection lives in `source_code/config/models.py` via `ACTIVE_CHAT_MO
 |---|---|
 | Backend | Python, Django |
 | AI / ML | RAG, VLM OCR, Cross-encoder reranking, Embeddings |
-| Models | Qwen3-VL, Qwen3-Reranker-0.6B, Qwen3-Embedding:4B, Gemma3, Gemini API |
+| Models | Qwen3-VL, Qwen3-Reranker-0.6B, Qwen3-Embedding:4B, Qwen3.5:2b, Gemini API |
 | Vector DB | ChromaDB (3 isolated collections, cosine space) |
-| Inference | Ollama (local/cloud), HuggingFace Transformers, PyTorch CUDA |
-| Data Processing | PyMuPDF, custom chunking and cleaning |
+| Inference | Ollama (local/cloud), OpenRouter, HuggingFace Transformers, PyTorch CUDA |
+| Data Processing | PyMuPDF, semantic sectioning, custom cleaning |
 | Testing | pytest, GitHub Actions CI |
 | Dev & Infra | Git/GitHub, `.env` config, Cloudflare Tunnel, local-first design |
 
@@ -341,13 +363,13 @@ The cross-encoder loads on first call and blocks until it is warm, meaning the f
 
 ## Roadmap
 
-Semantic and structure-aware chunking to replace fixed-size page chunking. Answer citations with source page references so students can trace answers back to their notes. A background warm-up thread for the cross-encoder to eliminate cold-start latency. Automated ingestion triggers for new subject data. Unit-level summaries and topic index generation. College-wide deployment once the system is hardened.
+Answer citations with source page references so students can trace answers back to their notes. A background warm-up thread for the cross-encoder to eliminate cold-start latency. Automated ingestion triggers for new subject data. Unit-level summaries and topic index generation. Fix zero-yield PYQ PDFs (fill-in-the-blank regex). College-wide deployment once the system is hardened.
 
 ---
 
 ## Status
 
-**Stage:** Active development / prototype  
+**Stage:** Active development / prototype — notes extraction running  
 **Target users:** Self + small group of classmates  
 **Future goal:** College-wide deployment
 
