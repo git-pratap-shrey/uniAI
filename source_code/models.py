@@ -40,6 +40,7 @@ def get_ollama_client() -> ollama.Client:
             kwargs["headers"] = {"Authorization": f"Bearer {api_key}"}
         
         host = CONFIG["OLLAMA_BASE_URL"] if CONFIG.get("USE_OLLAMA_CLOUD") else CONFIG["OLLAMA_LOCAL_URL"]
+        print(f"[models] Initializing Ollama client with host: {host}")
         _clients["ollama"] = ollama.Client(host=host, **kwargs)
     return _clients["ollama"]
 

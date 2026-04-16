@@ -3,25 +3,24 @@
 **Subject**: CYBER_SECURITY | **Unit**: unit1
 
 ## Definition
-A botnet is a network of computers infected with malicious software, controlled remotely by a "botmaster" without the owners' knowledge.
+A botnet (robot network) is a network of infected computers (bots/zombies) controlled remotely by a 'botmaster' without the owners' knowledge.
 
 ## Key points
-- Infected computers are called "bots" or "zombies."
-- Botnets are considered the "fuel for cybercrime" due to their ability to scale attacks.
+- Acts as the 'fuel' for cybercrime by providing distributed power and anonymity.
 - Used for DDoS attacks, spam campaigns, data theft, click fraud, and crypto-jacking.
-- They provide anonymity to the attacker and are resilient to shutdown efforts.
+- Resilient due to decentralized architectures and multiple command-and-control (C&C) servers.
 
 ## Important terms
 | Term | Meaning |
 |------|---------|
-| Botmaster | The individual or group that controls the botnet. |
-| DDoS | Distributed Denial of Service; overwhelming a target with traffic from multiple bots. |
-| Zombie | An individual computer infected and controlled as part of a botnet. |
+| Zombie | An infected computer controlled by a botmaster. |
+| Botmaster | The individual or group controlling the botnet. |
+| C&C Server | Command and Control server used to send instructions to bots. |
 
-## Exam questions likely on this topic
-- What is a botnet and why is it called the 'fuel for cybercrime'?
-- How do botnets function in a cyber attack?
+## Actual & Predicted Exam Questions
+- [Predicted] Why are botnets considered the 'fuel' for cybercrime?
+- [Predicted] Explain how a botnet is created and used for DDoS attacks.
 
 ## See also
-- [[Cyber Attack Lifecycle]]
-- [[Classification of Cybercrime]]
+- [[Cybercriminals and Attack Vectors]]
+- [[Introduction to Cybercrime]]

@@ -21,7 +21,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 # Machine-specific settings
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_LOCAL_URL = os.getenv("OLLAMA_LOCAL_URL", "http://localhost:11434")
-USE_OLLAMA_CLOUD = os.getenv("USE_OLLAMA_CLOUD", "True").lower() == "true"
+USE_OLLAMA_CLOUD = os.getenv("USE_OLLAMA_CLOUD", "False").lower() == "true"
 
 # App Environment (dev | prod)
 APP_ENV = os.getenv("APP_ENV", "dev")

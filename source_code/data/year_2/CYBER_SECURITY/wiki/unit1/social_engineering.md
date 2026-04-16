@@ -3,25 +3,24 @@
 **Subject**: CYBER_SECURITY | **Unit**: unit1
 
 ## Definition
-Social engineering is the technique of manipulating, influencing, or deceiving people to obtain sensitive information or perform actions that compromise security.
+Social engineering is the art of manipulating, influencing, or deceiving people to obtain sensitive information or perform actions that compromise security.
 
 ## Key points
-- **Human-Based**: Relies on direct interaction (e.g., Impersonation, Tailgating, Shoulder Surfing, Quid Pro Quo).
-- **Computer-Based**: Exploits digital channels (e.g., Phishing, Spear Phishing, Smishing, Vishing, Baiting).
-- It exploits human trust rather than technical vulnerabilities.
-- Attackers often create a sense of urgency or fear to trick victims.
+- **Human-Based**: Impersonation, tailgating, shoulder surfing, quid pro quo.
+- **Computer-Based**: Phishing, spear phishing, smishing, vishing, baiting, malware.
+- Goal: Exploit human trust to bypass technical security controls.
 
 ## Important terms
 | Term | Meaning |
 |------|---------|
-| Phishing | Fraudulent emails/messages designed to trick users into revealing sensitive data. |
 | Tailgating | Following an authorized person into a restricted area. |
-| Vishing | Voice phishing conducted via phone calls. |
+| Vishing | Voice phishing; using phone calls to deceive victims. |
+| Phishing | Fraudulent emails/messages to trick users into revealing credentials. |
 
-## Exam questions likely on this topic
-- Define social engineering and distinguish between human-based and computer-based techniques.
-- Describe three common social engineering tactics.
+## Actual & Predicted Exam Questions
+- [Predicted] Explain the difference between human-based and computer-based social engineering.
+- [Predicted] Describe three techniques used in social engineering attacks.
 
 ## See also
-- [[Classification of Cybercrime]]
-- [[Cyber Attack Lifecycle]]
+- [[Cyber Offenses]]
+- [[Cybercriminals and Attack Vectors]]

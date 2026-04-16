@@ -47,10 +47,12 @@ RETRY_DELAY        = 15       # seconds between retries
 # ──────────────────────────────────────────────────────────────────────────────
 
 WIKI_PROMPT = """\
-You are a university study assistant. I will give you all the raw OCR text
-extracted from a student's course notes for ONE unit of ONE subject.
+You are a university study assistant. I will give you:
+1. All the raw OCR text extracted from a student's course notes for ONE unit.
+2. The official SYLLABUS topics for this unit.
+3. Actual PAST YEAR QUESTIONS (PYQs) for this unit.
 
-Your job is to compile this raw text into a set of structured wiki pages
+Your job is to compile the notes into a set of structured wiki pages
 that are optimized for exam preparation — NOT for general learning.
 
 ## Output format
@@ -87,8 +89,10 @@ One clear exam-ready definition. Use the exact wording from the notes.
 |------|---------|
 | term | one-line definition |
 
-## Exam questions likely on this topic
-- List 2-3 probable exam questions based on the content.
+## Actual & Predicted Exam Questions
+- List 2-3 ACTUAL past year questions from the provided list if they relate to this topic.
+- If no actual questions apply, list 1-2 highly probable predicted questions based on the notes.
+- Format: "[Actual 2021] Question text..." or "[Predicted] Question text..."
 
 ## See also
 - [[Related topic 1]]
@@ -98,6 +102,7 @@ One clear exam-ready definition. Use the exact wording from the notes.
 
 - Extract 4-8 pages per unit, one per distinct topic found in the notes.
 - Every page must have all sections above, even if brief.
+- Use the official syllabus topics to guide the organization and naming.
 - "Key points" must use the language of the notes — not generic textbook language.
 - Do NOT invent content not present in the notes.
 - Do NOT merge unrelated topics into one page.
@@ -161,6 +166,55 @@ def load_chunks_for_subject(subject: str) -> dict[str, list[dict]]:
         })
 
     return dict(by_unit)
+
+
+def load_syllabus_for_unit(subject: str, unit: str) -> dict | None:
+    """Loads topics and unit title from syllabus_unit_<N>.json."""
+    unit_num = "".join(filter(str.isdigit, unit))
+    if not unit_num:
+        return None
+    
+    syllabus_path = Path(BASE_PATH) / subject / "syllabus" / f"syllabus_unit_{unit_num}.json"
+    if not syllabus_path.exists():
+        return None
+        
+    try:
+        with open(syllabus_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"  ⚠ Error loading syllabus for {unit}: {e}")
+        return None
+
+
+def load_pyqs_for_unit(subject: str, unit: str) -> list[dict]:
+    """Loads all processed PYQs for a subject and filters by unit."""
+    pyqs_dir = Path(BASE_PATH) / subject / "pyqs" / "pyqs_processed"
+    if not pyqs_dir.exists():
+        return []
+        
+    unit_num = "".join(filter(str.isdigit, unit))
+    if not unit_num:
+        return []
+    
+    try:
+        target_unit = int(unit_num)
+    except ValueError:
+        return []
+    
+    matched_pyqs = []
+    for jf in pyqs_dir.glob("*.json"):
+        try:
+            with open(jf, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    for q in data:
+                        if q.get("unit") == target_unit:
+                            matched_pyqs.append(q)
+        except Exception as e:
+            print(f"  ⚠ Error loading PYQ {jf.name}: {e}")
+            continue
+            
+    return matched_pyqs
 
 
 def build_unit_context(chunks: list[dict]) -> str:
@@ -337,9 +391,27 @@ def compile_wiki(subject: str, force: bool = False, unit_filter: str | None = No
         context = build_unit_context(chunks)
         print(f"   Context size: {len(context):,} chars")
 
+        # --- Load Extra Context ---
+        syllabus_data = load_syllabus_for_unit(subject, unit)
+        pyqs = load_pyqs_for_unit(subject, unit)
+
+        extra_context = ""
+        if syllabus_data:
+            topics_str = ", ".join(syllabus_data.get("topics", []))
+            extra_context += f"\n\n## Official Syllabus Topics for {unit}\n{topics_str}\n"
+        
+        if pyqs:
+            extra_context += f"\n\n## Actual Past Year Questions for {unit}\n"
+            for q in pyqs:
+                year = q.get("year", "N/A")
+                marks = q.get("marks", "N/A")
+                text = q.get("question_text", "")
+                extra_context += f"- [Actual {year}, {marks} marks] {text}\n"
+
         # Build the full prompt
         prompt = WIKI_PROMPT.format(subject=subject, unit=unit)
-        prompt += f"\n\n## Raw notes for {subject} — {unit}\n\n{context}"
+        prompt += f"\n\n{extra_context}"
+        prompt += f"\n\n## Raw course notes for {subject} — {unit}\n\n{context}"
 
         print(f"   Calling Gemini...", end="", flush=True)
         pages = call_gemini(prompt)
