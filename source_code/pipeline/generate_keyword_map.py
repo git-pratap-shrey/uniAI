@@ -6,10 +6,14 @@ from collections import Counter
 import chromadb
 import ollama
 
-# --- Ensure imports work regardless of working directory ---
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# --- Ensure project root and source_code/ are on the path ──────────────────────
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
+# Also add source_code/ for direct imports
+SOURCE_DIR = os.path.join(ROOT_DIR, "source_code")
+if SOURCE_DIR not in sys.path:
+    sys.path.append(SOURCE_DIR)
 
 from source_code.config import CONFIG
 import prompts
@@ -20,7 +24,7 @@ import prompts
 
 CHROMA_PATH = CONFIG["paths"]["chroma"]
 MODEL       = CONFIG["providers"]["router"]
-OUTPUT_FILE = os.path.join(ROOT_DIR, "data", "subject_keywords.json")
+OUTPUT_FILE = os.path.join(ROOT_DIR, "source_code", "data", "subject_keywords.json")
 
 COLLECTIONS = {
     "notes":    CONFIG["paths"]["collections"]["notes"],

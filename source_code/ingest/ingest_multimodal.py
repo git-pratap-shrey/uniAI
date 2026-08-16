@@ -4,9 +4,14 @@ import re
 import sys
 from pathlib import Path
 
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# Ensure project root is on sys.path for source_code imports
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
+# Also add source_code/ for direct imports like 'utils'
+SOURCE_DIR = os.path.join(ROOT_DIR, "source_code")
+if SOURCE_DIR not in sys.path:
+    sys.path.append(SOURCE_DIR)
 
 from source_code.config import CONFIG
 from utils import get_embedding, get_chroma_collection
@@ -140,11 +145,9 @@ def ingest_descriptions():
 
     root_path = Path(BASE_PATH)
     # New naming: <pdf_stem>_p{start}-{end}_{chunk_idx}.json
-    # Match files inside PDF stem subfolders that follow the convention
-    json_files = sorted(root_path.rglob("*_p*_*_*.json"))
-    # Keep only files that look like section chunks (contain page range marker)
-    json_files = [f for f in json_files if "_p" in f.stem]
-
+    # Specifically targets files like hand_unit1_p1-1_0.json within notes subfolders
+    json_files = sorted(root_path.rglob("notes/**/*_p*-*_*.json"))
+    
     print(f"Found {len(json_files)} section JSONs to ingest.")
 
     ingested = 0

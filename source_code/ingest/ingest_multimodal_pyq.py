@@ -3,9 +3,14 @@ import os
 import sys
 from pathlib import Path
 
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# Ensure project root is on sys.path for source_code imports
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
+# Also add source_code/ for direct imports like 'utils'
+SOURCE_DIR = os.path.join(ROOT_DIR, "source_code")
+if SOURCE_DIR not in sys.path:
+    sys.path.append(SOURCE_DIR)
 
 from source_code.config import CONFIG
 from utils import get_embedding, get_chroma_collection

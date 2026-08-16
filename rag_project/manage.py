@@ -7,6 +7,12 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rag_project.settings')
+
+    # Add project root to sys.path to allow importing source_code
+    import sys
+    from pathlib import Path
+    sys.path.append(str(Path(__file__).resolve().parent.parent))
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

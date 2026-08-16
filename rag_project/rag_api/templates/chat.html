@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> UNI AI</title>
+    <title>uniAI — Syllabus-Aware Exam Assistant</title>
     <style>
         * {
             margin: 0;
@@ -14,180 +14,411 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            height: 90vh;
+            background: #1a1a2e;
+            height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
+        /* ── Header ── */
         .header {
-            padding: 20px;
-            background: #4a5568;
-            color: white;
-            border-radius: 10px 10px 0 0;
+            padding: 14px 20px;
+            background: #16213e;
+            border-bottom: 1px solid #0f3460;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
         }
 
+        .header h1 {
+            font-size: 1.1rem;
+            color: #e2e8f0;
+            letter-spacing: 0.03em;
+        }
+
+        .header h1 span {
+            color: #63b3ed;
+        }
+
+        /* Session badge shown once subject is locked */
+        #session-badge {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: #0f3460;
+            border: 1px solid #2b6cb0;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            color: #90cdf4;
+        }
+
+        #session-badge .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #48bb78;
+        }
+
+        #session-badge button {
+            background: none;
+            border: none;
+            color: #718096;
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.85rem;
+            line-height: 1;
+        }
+
+        #session-badge button:hover { color: #e53e3e; }
+
+        /* ── Messages ── */
         .messages {
             flex: 1;
-            padding: 20px;
             overflow-y: auto;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            padding: 12px 16px;
-            border-radius: 8px;
-            max-width: 80%;
-        }
-
-        .user {
-            background: #4a5568;
-            color: white;
-            margin-left: auto;
-        }
-
-        .assistant {
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-        }
-
-        .input-box {
             padding: 20px;
-            border-top: 1px solid #e2e8f0;
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #cbd5e0;
-            border-radius: 6px;
-            font-size: 15px;
+        /* Each turn */
+        .turn { display: flex; flex-direction: column; gap: 4px; }
+
+        /* Meta line (mirrors CLI: [MODE]  Subject: X  Unit: Y  Expanded: '...') */
+        .meta {
+            font-size: 0.72rem;
+            color: #718096;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
         }
 
-        button {
-            padding: 12px 30px;
-            background: #4a5568;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 15px;
+        .meta .badge {
+            background: #0f3460;
+            color: #63b3ed;
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
         }
 
-        button:hover {
-            background: #2d3748;
+        .meta .expanded {
+            font-style: italic;
+            color: #4a5568;
         }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* =========================
-       MARKDOWN / AI RESPONSE
-       ========================= */
-
-        /* Code blocks */
-        .assistant pre {
-            background: #1a202c;
-            color: #f7fafc;
-            padding: 12px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin-top: 8px;
-        }
-
-        .assistant pre code {
-            background: none;
-            color: inherit;
-            padding: 0;
-            font-family: Consolas, Monaco, monospace;
+        /* Message bubbles */
+        .message {
+            padding: 12px 16px;
+            border-radius: 10px;
+            max-width: 82%;
+            line-height: 1.6;
             font-size: 0.95rem;
         }
 
-        /* Inline code */
+        .user {
+            background: #2b6cb0;
+            color: #ebf8ff;
+            align-self: flex-end;
+        }
+
+        .assistant {
+            background: #1e293b;
+            border: 1px solid #2d3748;
+            color: #e2e8f0;
+            align-self: flex-start;
+        }
+
+        /* Sources (mirrors CLI 📚 Sources: block) */
+        .sources {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #0d1b2a;
+            border-left: 3px solid #0f3460;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.75rem;
+            color: #4a5568;
+            align-self: flex-start;
+            max-width: 82%;
+        }
+
+        .sources .src-title {
+            color: #718096;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .sources ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sources li::before { content: "• "; color: #2b6cb0; }
+
+        /* Thinking indicator */
+        .thinking {
+            background: #1e293b;
+            border: 1px solid #2d3748;
+            color: #4a5568;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-style: italic;
+            font-size: 0.9rem;
+            align-self: flex-start;
+        }
+
+        /* ── Markdown inside assistant bubbles ── */
+        .assistant pre {
+            background: #0d1117;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+
+        .assistant pre code { font-family: Consolas, Monaco, monospace; font-size: 0.88rem; }
+
         .assistant p code,
         .assistant li code {
-            background: #edf2f7;
-            color: #1a202c;
-            padding: 2px 4px;
+            background: #0f3460;
+            color: #90cdf4;
+            padding: 1px 5px;
             border-radius: 4px;
             font-family: monospace;
         }
 
-        .assistant ul {
-            padding-left: 20px;
+        .assistant ul, .assistant ol { padding-left: 20px; margin: 6px 0; }
+        .assistant li { margin-bottom: 4px; }
+        .assistant h3, .assistant h4 { color: #90cdf4; margin: 10px 0 4px; }
+        .assistant table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+        .assistant th, .assistant td {
+            border: 1px solid #2d3748;
+            padding: 6px 10px;
+            text-align: left;
+            font-size: 0.88rem;
+        }
+        .assistant th { background: #0f3460; color: #90cdf4; }
+
+        /* ── Input bar ── */
+        .input-area {
+            padding: 14px 20px;
+            background: #16213e;
+            border-top: 1px solid #0f3460;
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
-        .assistant li {
-            margin-bottom: 6px;
+        #input {
+            flex: 1;
+            padding: 11px 14px;
+            background: #1e293b;
+            border: 1px solid #2d3748;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.15s;
         }
+
+        #input:focus { border-color: #2b6cb0; }
+        #input::placeholder { color: #4a5568; }
+
+        #btn {
+            padding: 11px 22px;
+            background: #2b6cb0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+
+        #btn:hover { background: #2c5282; }
+        #btn:disabled { opacity: 0.45; cursor: not-allowed; }
     </style>
-
 </head>
 
 <body>
-    <div class="container">
-        <div class="header">
-            <h1 style="text-align: center;"> Sophomore Notes AI </h1>
+    <div class="header">
+        <h1>🎓 <span>uniAI</span> — Syllabus-Aware Exam Assistant</h1>
+        <div id="session-badge">
+            <div class="dot"></div>
+            <span id="badge-label">Subject: —</span>
+            <button id="clear-lock" title="Clear subject lock">✕</button>
         </div>
+    </div>
 
-        <div class="messages" id="messages"></div>
+    <div class="messages" id="messages"></div>
 
-        <div class="input-box">
-            <input type="text" id="input" placeholder="Ask about UHV, DE, CS..."
-                onkeypress="if(event.key==='Enter') send()">
-            <button onclick="send()" id="btn">Send</button>
-        </div>
+    <div class="input-area">
+        <input type="text" id="input" placeholder="Ask about your syllabus…"
+            onkeypress="if(event.key==='Enter') send()">
+        <button onclick="send()" id="btn">Send</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script>
-        const chatHistory = [];
+        // ---------------------------------------------------------------------------
+        // State  (mirrors chat_cli.py session variables)
+        // ---------------------------------------------------------------------------
+        const chatHistory = [];       // [{role, content}, ...]
+        let sessionSubject = null;    // locked after first successful detection
+        let isFirstQuery = true;
 
-        function addMessage(text, type) {
-            const msg = document.createElement('div');
-            msg.className = 'message ' + type;
-
-            if (type === 'assistant') {
-                msg.innerHTML = marked.parse(text);
-            } else {
-                msg.textContent = text;
-            }
-
-            document.getElementById('messages').appendChild(msg);
-            document.getElementById('messages').scrollTop = 999999;
+        // ---------------------------------------------------------------------------
+        // Session badge
+        // ---------------------------------------------------------------------------
+        function setSessionSubject(subject) {
+            sessionSubject = subject;
+            const badge = document.getElementById('session-badge');
+            badge.style.display = subject ? 'flex' : 'none';
+            document.getElementById('badge-label').textContent = `Subject: ${subject}`;
         }
 
+        document.getElementById('clear-lock').addEventListener('click', () => {
+            setSessionSubject(null);
+            isFirstQuery = true;
+            appendInfo('Subject lock cleared. Will auto-detect on next query.');
+        });
+
+        // ---------------------------------------------------------------------------
+        // DOM helpers
+        // ---------------------------------------------------------------------------
+        const $msgs = document.getElementById('messages');
+
+        function scrollBottom() {
+            $msgs.scrollTop = $msgs.scrollHeight;
+        }
+
+        /** Plain info line (light grey) */
+        function appendInfo(text) {
+            const el = document.createElement('div');
+            el.style.cssText = 'font-size:0.78rem;color:#4a5568;text-align:center;';
+            el.textContent = text;
+            $msgs.appendChild(el);
+            scrollBottom();
+        }
+
+        /** User bubble */
+        function appendUser(text) {
+            const turn = document.createElement('div');
+            turn.className = 'turn';
+            const msg = document.createElement('div');
+            msg.className = 'message user';
+            msg.textContent = text;
+            turn.appendChild(msg);
+            $msgs.appendChild(turn);
+            scrollBottom();
+            return turn;
+        }
+
+        /** Thinking placeholder */
+        function appendThinking() {
+            const el = document.createElement('div');
+            el.className = 'thinking';
+            el.id = 'thinking';
+            el.textContent = '🤖 Thinking…';
+            $msgs.appendChild(el);
+            scrollBottom();
+            return el;
+        }
+
+        /**
+         * Assistant turn — mirrors _print_answer() in chat_cli.py
+         *   [MODE]  Subject: X  Unit: Y  Expanded: '...'
+         *   ────────────────
+         *   <answer>
+         *   📚 Sources: ...
+         */
+        function appendAssistant(data) {
+            // Remove thinking placeholder
+            const thinking = document.getElementById('thinking');
+            if (thinking) thinking.remove();
+
+            const turn = document.createElement('div');
+            turn.className = 'turn';
+
+            // ── Meta line ──
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+
+            const modeBadge = document.createElement('span');
+            modeBadge.className = 'badge';
+            modeBadge.textContent = (data.mode || 'syllabus').toUpperCase();
+            meta.appendChild(modeBadge);
+
+            if (data.subject) {
+                const s = document.createElement('span');
+                s.textContent = `Subject: ${data.subject}`;
+                meta.appendChild(s);
+            }
+            if (data.unit) {
+                const u = document.createElement('span');
+                u.textContent = `Unit: ${data.unit}`;
+                meta.appendChild(u);
+            }
+            if (data.expanded_query && data.expanded_query.toLowerCase() !== data.query?.toLowerCase()) {
+                const e = document.createElement('span');
+                e.className = 'expanded';
+                e.textContent = `Expanded: '${data.expanded_query}'`;
+                meta.appendChild(e);
+            }
+            turn.appendChild(meta);
+
+            // ── Answer bubble ──
+            const msg = document.createElement('div');
+            msg.className = 'message assistant';
+            msg.innerHTML = marked.parse(data.answer || '⚠ No response received.');
+            turn.appendChild(msg);
+
+            // ── Sources (mirrors 📚 Sources: block) ──
+            const srcs = data.sources || [];
+            if (srcs.length > 0) {
+                const srcBox = document.createElement('div');
+                srcBox.className = 'sources';
+                const title = document.createElement('div');
+                title.className = 'src-title';
+                title.textContent = '📚 Sources:';
+                srcBox.appendChild(title);
+                const ul = document.createElement('ul');
+                srcs.forEach(s => {
+                    const li = document.createElement('li');
+                    const score = s.score !== undefined ? ` | similarity=${s.score.toFixed(2)}` : '';
+                    li.textContent = `${s.source} (p.${s.page}) | Unit ${s.unit}${score}`;
+                    ul.appendChild(li);
+                });
+                srcBox.appendChild(ul);
+                turn.appendChild(srcBox);
+            }
+
+            $msgs.appendChild(turn);
+            scrollBottom();
+        }
+
+        // ---------------------------------------------------------------------------
+        // Send
+        // ---------------------------------------------------------------------------
         async function send() {
             const input = document.getElementById('input');
             const btn = document.getElementById('btn');
             const query = input.value.trim();
-
             if (!query) return;
 
-            addMessage(query, 'user');
-
-            chatHistory.push({
-                role: "user",
-                content: query
-            });
-
+            appendUser(query);
+            chatHistory.push({ role: 'user', content: query });
             input.value = '';
             btn.disabled = true;
-            btn.textContent = 'Thinking...';
+            btn.textContent = 'Thinking…';
+            appendThinking();
 
             try {
                 const res = await fetch('/api/query', {
@@ -195,40 +426,41 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         query: query,
-                        history: chatHistory
-                    })
+                        history: chatHistory,
+                        subject: sessionSubject,   // send locked subject (mirrors session_subject in CLI)
+                    }),
                 });
 
                 const data = await res.json();
+
                 if (!res.ok) {
-                    addMessage(data.error || 'Server error occurred.', 'assistant');
-                    btn.disabled = false;
-                    btn.textContent = 'Send';
+                    const thinking = document.getElementById('thinking');
+                    if (thinking) thinking.remove();
+                    appendInfo('⚠ Error: ' + (data.error || 'Server error.'));
                     return;
                 }
 
-
-                let ansText = data.answer || '⚠ No response received from server.';
-                if (data.expanded_query && data.expanded_query !== query.toLowerCase() && data.expanded_query !== query) {
-                    ansText = `<small style="color: gray;"><em>Expanded search: ${data.expanded_query}</em></small>\n\n` + ansText;
+                // Mirror CLI: lock subject after first successful detection
+                if (isFirstQuery && data.subject && !sessionSubject) {
+                    setSessionSubject(data.subject);
+                    appendInfo(`[Session] Locked to subject: ${data.subject}`);
                 }
+                isFirstQuery = false;
 
-                addMessage(ansText, 'assistant');
+                appendAssistant({ ...data, query });
 
-                chatHistory.push({
-                    role: "assistant",
-                    content: data.answer
-                });
+                chatHistory.push({ role: 'assistant', content: data.answer });
 
             } catch (e) {
-                addMessage('Error: ' + e.message, 'assistant');
+                const thinking = document.getElementById('thinking');
+                if (thinking) thinking.remove();
+                appendInfo('⚠ Network error: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Send';
             }
-
-            btn.disabled = false;
-            btn.textContent = 'Send';
         }
     </script>
-
 </body>
 
 </html>

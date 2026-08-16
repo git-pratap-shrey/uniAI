@@ -3,15 +3,20 @@ import os
 import sys
 import pickle
 
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# ── ensure project root and source_code/ are on the path ──────────────────────
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
+# Also add source_code/ for direct imports
+SOURCE_DIR = os.path.join(ROOT_DIR, "source_code")
+if SOURCE_DIR not in sys.path:
+    sys.path.append(SOURCE_DIR)
 
 from source_code.config import CONFIG
-from pipeline.embeddings.local_embedding import embed
+from source_code.pipeline.embeddings.local_embedding import embed
 
 def build_unit_texts():
-    keywords_file = os.path.join(ROOT_DIR, "data", "subject_keywords.json")
+    keywords_file = os.path.join(ROOT_DIR, "source_code", "data", "subject_keywords.json")
     with open(keywords_file, "r") as f:
         data = json.load(f)
         

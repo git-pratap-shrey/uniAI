@@ -1,5 +1,4 @@
 import os
-import re
 import json
 
 from django.http import JsonResponse
@@ -10,18 +9,14 @@ from django.views.decorators.http import require_http_methods
 # --- Ensure imports work regardless of working directory ---
 import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
-uni_ai_root = os.path.abspath(os.path.join(current_dir, "../../.."))
+uni_ai_root = os.path.abspath(os.path.join(current_dir, "../.."))
 if uni_ai_root not in sys.path:
-    sys.path.append(uni_ai_root)
+    sys.path.insert(0, uni_ai_root)
 
-try:
-    from source_code import config
-    from source_code.rag.rag_pipeline import answer_query
-    from source_code.rag.search import collection_exists
-except ImportError:
-    import config
-    from rag.rag_pipeline import answer_query
-    from rag.search import collection_exists
+from source_code.config.main import CONFIG
+from source_code.rag.rag_pipeline import answer_query
+from source_code.rag.search import collection_exists
+from source_code.rag.router import list_subjects
 
 
 # ------------------------------------------------------------------
@@ -54,7 +49,6 @@ def query_view(request):
         if not query:
             return JsonResponse({"answer": "Please enter a question."})
 
-        # Guard against oversized inputs to prevent prompt bloat / slow LLM calls
         MAX_QUERY_LENGTH = 1000
         if len(query) > MAX_QUERY_LENGTH:
             return JsonResponse({
@@ -62,39 +56,38 @@ def query_view(request):
             })
 
         history = data.get("history", [])
-
-        # The frontend isn't currently sending a locked session_subject, 
-        # but if it does in the future, we can extract it here.
-
-                                                                            # TEMPORARY!!!!!
-                                                                            # session_subject = "DIGITAL_ELECTRONICS"
-
         session_subject = data.get("subject", None)
 
         print(f"ROUTING => Provided Subject: {session_subject}")
 
-        # Run the full RAG pipeline
         result = answer_query(
             query=query,
             history=history,
-            session_subject=session_subject
+            session_subject=session_subject,
         )
 
-        # Build frontend-compatible sources directly from chunks
-        sources = [
-            {
-                "source": chunk.get("metadata", {}).get("source", "unknown"),
-                "unit": chunk.get("metadata", {}).get("unit", "?"),
-                "page_start": chunk.get("metadata", {}).get("page_start", "?")
-            }
-            for chunk in result.get("chunks", [])[:3]
-        ]
+        # Build frontend-compatible sources (mirrors CLI _print_answer)
+        sources = []
+        for chunk in result.get("chunks", []):
+            meta = chunk.get("metadata", {})
+            src = meta.get("source", "unknown")
+            page = meta.get("page_start", "?")
+            unit = meta.get("unit", "?")
+            score = chunk.get("final_score", chunk.get("similarity", 0))
+            sources.append({
+                "source": src,
+                "page": page,
+                "unit": unit,
+                "score": round(score, 2),
+            })
 
         return JsonResponse({
             "query": query,
-            "expanded_query": result.get("expanded_query", query),
             "answer": result["answer"],
             "mode": result["mode"],
+            "subject": result.get("subject"),
+            "unit": result.get("unit"),
+            "expanded_query": result.get("expanded_query", query),
             "sources": sources,
         })
 
@@ -105,18 +98,21 @@ def query_view(request):
 
 
 @require_http_methods(["GET"])
+def subjects_view(request):
+    """Return known subjects — mirrors the CLI /subjects command."""
+    subjects = list_subjects()
+    return JsonResponse({"subjects": subjects})
+
+
+@require_http_methods(["GET"])
 def health_view(request):
     try:
-        # Check if the primary notes collection is accessible
-        if collection_exists("notes"):
-            status = "healthy"
-        else:
-            status = "unhealthy: Notes collection not found."
+        status = "healthy" if collection_exists("notes") else "unhealthy: Notes collection not found."
     except Exception as e:
         status = f"unhealthy: {str(e)}"
 
     return JsonResponse({
         "status": status,
-        "model": config.MODEL_CHAT,
-        "chroma_path": config.CHROMA_DB_PATH,
+        "model": CONFIG["model"].get("model", "unknown"),
+        "chroma_path": str(CONFIG["paths"].get("chroma", "unknown")),
     })
