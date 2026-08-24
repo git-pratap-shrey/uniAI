@@ -23,7 +23,7 @@ The architectural core. Every module calls `models.chat()`, `models.embed()`, `m
 
 **`chat(prompt, system_prompt, messages, model, provider, **kwargs) -> str`**
 - Resolves provider/model from CONFIG if not overridden. Supports simple prompt, system+prompt, or full messages array.
-- **Gemini:** `client.models.generate_contents()` with config_args (temperature, max_output_tokens, top_p). Returns `response.text`.
+- **Gemini:** `client.models.generate_content()` with config_args (temperature, max_output_tokens, top_p). Returns `response.text`.
 - **Ollama:** `client.chat()` with full_messages (system prepended if provided), options (temperature, num_ctx, top_p). Returns `response["message"]["content"]`.
 - **Groq:** `client.chat.completions.create()` with messages, temperature, max_tokens. Returns `completion.choices[0].message.content`.
 - On error returns error string instead of raising.

@@ -15,7 +15,8 @@ The test suite validates every layer of the uniAI system — from individual com
 | `ci/` | CI/CD pipeline tests (syntax checks, Django health, pytest) |
 | `db/` | ChromaDB audit and dump utilities |
 | `others/` | Miscellaneous unit tests (parsing, query expander, chunking, config verification) |
-| `api/` | Individual API provider smoke tests (Gemini, Groq) |
+| `api/` | Individual API provider smoke tests (Gemini, Groq, OpenRouter) |
+| `wiki/` | Wiki context fetching and LLM summarization testing |
 | `test_glm.py` | Standalone GLM-OCR connectivity and capability smoke test |
 
 ---
@@ -211,6 +212,23 @@ Standalone tests for individual LLM providers to verify API key validity and con
 
 - **`groq_api_test.py`** — Simple smoke test for Groq API.
   - Same pattern as Gemini test, validates Groq connectivity
+
+- **`open_router_test.py`** — Simple smoke test for OpenRouter API.
+  - Validates OpenAI SDK compatibility with OpenRouter base URL
+  - Tests streaming response format with Qwen3 models
+
+---
+
+### `wiki/` — Wiki Testing
+
+Tests integrating local markdown wiki files directly into the context window for generative tasks.
+
+#### Files
+
+- **`test_wiki_gemini.py`** — Wiki context compilation and generation test.
+  - Collects markdown files from a specific subject's wiki directory
+  - Concatenates them with separators for injection into the prompt
+  - Tests `models.chat()` capability to digest full multi-file wiki context using Gemini
 
 ---
 

@@ -133,7 +133,8 @@ uniAI/
 │       ├── ci/                    # CI/CD tests (syntax, Django, pytest)
 │       ├── db/                    # ChromaDB audit and dump utilities
 │       ├── others/                # Miscellaneous unit tests
-│       └── api/                   # API provider smoke tests
+│       ├── api/                   # API provider smoke tests
+│       └── wiki/                  # Wiki context fetching and LLM summarization tests
 │
 ├── rag_project/                   # Django backend
 │   └── rag_api/
@@ -252,7 +253,7 @@ CHROMA_DB_PATH=/path/to/your/chroma
 GEMINI_API_KEY=...                       # if using Gemini for generation
 OPENROUTER_API_KEY=...                   # if using OpenRouter for vision fallback
 HF_TOKEN=...                             # if using HuggingFace for vision or reranking
-USE_OLLAMA_CLOUD=true                    # true = use OLLAMA_BASE_URL, false = OLLAMA_LOCAL_URL
+USE_OLLAMA_CLOUD=false                   # true = use OLLAMA_BASE_URL, false = OLLAMA_LOCAL_URL
 ```
 
 Make sure Ollama is running locally (`ollama serve`) and required models are pulled.
@@ -330,11 +331,16 @@ All tuneable parameters live in `source_code/config/rag.py`.
 |---|---|---|
 | `similarity_threshold` | `0.35` | Min cosine similarity to keep a retrieval result |
 | `min_strong_sim` | `0.6` | Min similarity the top chunk must have |
+| `notes_k_default` | `8` | Default chunks retrieved for notes |
+| `syllabus_k_default` | `7` | Default chunks retrieved for syllabus |
+| `pyq_k_default` | `5` | Default chunks retrieved for PYQs |
 | `cross_encoder.model` | `tomaarsen/Qwen3-Reranker-0.6B-seq-cls` | Reranker model |
 | `cross_encoder.min_score` | `0.65` | Below this score → Generic AI Tutor Mode |
 | `cross_encoder.candidates` | `6` | Max chunks sent to cross-encoder |
 | `cross_encoder.pipeline_top_n` | `4` | Chunks kept after reranking |
 | `history_limit` | `4` | Conversation turns injected into context |
+| `router_temperature` | `0.0` | Temperature for the LLM router |
+| `router_num_predict` | `50` | Max tokens for the LLM router |
 | `keywords.min_score` | `2` | Min keyword score to trust Tier 2 routing |
 | `embedding_router_threshold` | `0.55` | Min similarity to trust Tier 3 routing |
 
@@ -363,7 +369,7 @@ The cross-encoder loads on first call and blocks until it is warm, meaning the f
 
 ## Roadmap
 
-Answer citations with source page references so students can trace answers back to their notes. A background warm-up thread for the cross-encoder to eliminate cold-start latency. Automated ingestion triggers for new subject data. Unit-level summaries and topic index generation. Fix zero-yield PYQ PDFs (fill-in-the-blank regex). College-wide deployment once the system is hardened.
+A background warm-up thread for the cross-encoder to eliminate cold-start latency. Automated ingestion triggers for new subject data. Unit-level summaries and topic index generation. Fix zero-yield PYQ PDFs (fill-in-the-blank regex). College-wide deployment once the system is hardened.
 
 ---
 

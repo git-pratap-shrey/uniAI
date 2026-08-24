@@ -179,9 +179,9 @@ The `rag/` module is the core query runtime of uniAI. It orchestrates every stag
 - `retrieve_all(query, subject, unit, notes_k, syllabus_k, threshold) -> list[Chunk]` — combines notes + syllabus results for unit overview queries
 
 #### Configuration Defaults
-- Notes: `k=8`, `threshold=0.35`
-- Syllabus: `k=7`, `threshold=0.35`
-- PYQ: `k=5`, `threshold=0.60`
+- Notes: `k` defaults to `CONFIG["rag"]["notes_k_default"]`, `threshold` defaults to `CONFIG["rag"]["similarity_threshold"]`
+- Syllabus: `k` defaults to `CONFIG["rag"]["syllabus_k_default"]`, `threshold` defaults to `CONFIG["rag"]["similarity_threshold"]`
+- PYQ: `k` defaults to `CONFIG["rag"]["pyq_k_default"]`, `threshold` defaults to `CONFIG["rag"]["pyq_threshold"]`
 
 ---
 
