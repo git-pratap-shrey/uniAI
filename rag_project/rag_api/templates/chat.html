@@ -14,7 +14,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #1a1a2e;
+            background: #0a0a0a;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -23,8 +23,8 @@
         /* ── Header ── */
         .header {
             padding: 14px 20px;
-            background: #16213e;
-            border-bottom: 1px solid #0f3460;
+            background: #111;
+            border-bottom: 1px solid #222;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -33,12 +33,12 @@
 
         .header h1 {
             font-size: 1.1rem;
-            color: #e2e8f0;
+            color: #e0e0e0;
             letter-spacing: 0.03em;
         }
 
         .header h1 span {
-            color: #63b3ed;
+            color: #fff;
         }
 
         /* Session badge shown once subject is locked */
@@ -46,32 +46,32 @@
             display: none;
             align-items: center;
             gap: 8px;
-            background: #0f3460;
-            border: 1px solid #2b6cb0;
+            background: #1a1a1a;
+            border: 1px solid #333;
             border-radius: 20px;
             padding: 4px 12px;
             font-size: 0.8rem;
-            color: #90cdf4;
+            color: #aaa;
         }
 
         #session-badge .dot {
             width: 7px;
             height: 7px;
             border-radius: 50%;
-            background: #48bb78;
+            background: #888;
         }
 
         #session-badge button {
             background: none;
             border: none;
-            color: #718096;
+            color: #666;
             cursor: pointer;
             padding: 0;
             font-size: 0.85rem;
             line-height: 1;
         }
 
-        #session-badge button:hover { color: #e53e3e; }
+        #session-badge button:hover { color: #ccc; }
 
         /* ── Messages ── */
         .messages {
@@ -89,7 +89,7 @@
         /* Meta line (mirrors CLI: [MODE]  Subject: X  Unit: Y  Expanded: '...') */
         .meta {
             font-size: 0.72rem;
-            color: #718096;
+            color: #666;
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
@@ -97,8 +97,8 @@
         }
 
         .meta .badge {
-            background: #0f3460;
-            color: #63b3ed;
+            background: #1a1a1a;
+            color: #aaa;
             border-radius: 4px;
             padding: 1px 6px;
             font-weight: 600;
@@ -107,7 +107,7 @@
 
         .meta .expanded {
             font-style: italic;
-            color: #4a5568;
+            color: #555;
         }
 
         /* Message bubbles */
@@ -120,15 +120,15 @@
         }
 
         .user {
-            background: #2b6cb0;
-            color: #ebf8ff;
+            background: #e0e0e0;
+            color: #111;
             align-self: flex-end;
         }
 
         .assistant {
-            background: #1e293b;
-            border: 1px solid #2d3748;
-            color: #e2e8f0;
+            background: #161616;
+            border: 1px solid #252525;
+            color: #d4d4d4;
             align-self: flex-start;
         }
 
@@ -136,17 +136,17 @@
         .sources {
             margin-top: 8px;
             padding: 8px 12px;
-            background: #0d1b2a;
-            border-left: 3px solid #0f3460;
+            background: #111;
+            border-left: 3px solid #333;
             border-radius: 0 6px 6px 0;
             font-size: 0.75rem;
-            color: #4a5568;
+            color: #555;
             align-self: flex-start;
             max-width: 82%;
         }
 
         .sources .src-title {
-            color: #718096;
+            color: #888;
             margin-bottom: 4px;
             font-weight: 600;
         }
@@ -158,13 +158,13 @@
             gap: 2px;
         }
 
-        .sources li::before { content: "• "; color: #2b6cb0; }
+        .sources li::before { content: "• "; color: #555; }
 
         /* Thinking indicator */
         .thinking {
-            background: #1e293b;
-            border: 1px solid #2d3748;
-            color: #4a5568;
+            background: #161616;
+            border: 1px solid #252525;
+            color: #555;
             padding: 10px 16px;
             border-radius: 10px;
             font-style: italic;
@@ -174,7 +174,7 @@
 
         /* ── Markdown inside assistant bubbles ── */
         .assistant pre {
-            background: #0d1117;
+            background: #0e0e0e;
             padding: 12px;
             border-radius: 6px;
             overflow-x: auto;
@@ -185,8 +185,8 @@
 
         .assistant p code,
         .assistant li code {
-            background: #0f3460;
-            color: #90cdf4;
+            background: #1a1a1a;
+            color: #ccc;
             padding: 1px 5px;
             border-radius: 4px;
             font-family: monospace;
@@ -194,21 +194,25 @@
 
         .assistant ul, .assistant ol { padding-left: 20px; margin: 6px 0; }
         .assistant li { margin-bottom: 4px; }
-        .assistant h3, .assistant h4 { color: #90cdf4; margin: 10px 0 4px; }
+        .assistant h3, .assistant h4 { color: #e0e0e0; margin: 10px 0 4px; }
         .assistant table { border-collapse: collapse; width: 100%; margin: 8px 0; }
         .assistant th, .assistant td {
-            border: 1px solid #2d3748;
+            border: 1px solid #252525;
             padding: 6px 10px;
             text-align: left;
             font-size: 0.88rem;
         }
-        .assistant th { background: #0f3460; color: #90cdf4; }
+        .assistant th { background: #1a1a1a; color: #ccc; }
+
+        /* KaTeX math rendering */
+        .assistant .katex { font-size: 1.05em; color: #d4d4d4; }
+        .assistant .katex-display { margin: 10px 0; padding: 8px 12px; background: #0e0e0e; border-radius: 6px; overflow-x: auto; }
 
         /* ── Input bar ── */
         .input-area {
             padding: 14px 20px;
-            background: #16213e;
-            border-top: 1px solid #0f3460;
+            background: #111;
+            border-top: 1px solid #222;
             display: flex;
             gap: 10px;
             flex-shrink: 0;
@@ -217,32 +221,33 @@
         #input {
             flex: 1;
             padding: 11px 14px;
-            background: #1e293b;
-            border: 1px solid #2d3748;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
             border-radius: 8px;
-            color: #e2e8f0;
+            color: #e0e0e0;
             font-size: 0.95rem;
             outline: none;
             transition: border-color 0.15s;
         }
 
-        #input:focus { border-color: #2b6cb0; }
-        #input::placeholder { color: #4a5568; }
+        #input:focus { border-color: #555; }
+        #input::placeholder { color: #555; }
 
         #btn {
             padding: 11px 22px;
-            background: #2b6cb0;
-            color: white;
+            background: #e0e0e0;
+            color: #111;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 0.95rem;
+            font-weight: 500;
             transition: background 0.15s;
             white-space: nowrap;
         }
 
-        #btn:hover { background: #2c5282; }
-        #btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        #btn:hover { background: #ccc; }
+        #btn:disabled { opacity: 0.35; cursor: not-allowed; }
     </style>
 </head>
 
@@ -264,6 +269,9 @@
         <button onclick="send()" id="btn">Send</button>
     </div>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script>
@@ -378,6 +386,18 @@
             const msg = document.createElement('div');
             msg.className = 'message assistant';
             msg.innerHTML = marked.parse(data.answer || '⚠ No response received.');
+            // Render LaTeX math notation ($...$ and $$...$$)
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(msg, {
+                    delimiters: [
+                        { left: '$$', right: '$$', display: true },
+                        { left: '$', right: '$', display: false },
+                        { left: '\\(', right: '\\)', display: false },
+                        { left: '\\[', right: '\\]', display: true },
+                    ],
+                    throwOnError: false,
+                });
+            }
             turn.appendChild(msg);
 
             // ── Sources (mirrors 📚 Sources: block) ──
