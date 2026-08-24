@@ -13,14 +13,14 @@ from .env import GEMINI_API_KEY, GROQ_API_KEY
 
 MODEL_CONFIGS = {
     "gemini": {
-        "model": "gemini-3.1-flash-lite-preview",
+        "model": "gemma4:cloud",
         "temperature": 0.3,
         "top_p": 0.9,
         "max_tokens": 4096,
         "api_key": GEMINI_API_KEY,
     },
     "ollama": {
-        "model": "qwen3.5:2b",
+        "model": "gemma4:cloud",
         "temperature": 0.25,
         "top_p": 0.95,
         "num_ctx": 8192,
@@ -34,7 +34,7 @@ MODEL_CONFIGS = {
     }
 }
 
-ACTIVE_CHAT_MODEL = "gemini"
+ACTIVE_CHAT_MODEL = "ollama"
 
 
 def get_active_model_config():
@@ -56,7 +56,7 @@ EMBEDDING_CONFIG = {
 
 ROUTER_CONFIG = {
     "provider": "ollama",
-    "model": "gemini-3-flash-preview:latest",
+    "model": "gemma4:cloud",
     "temperature": 0.0,
     "num_predict": 50,
 }

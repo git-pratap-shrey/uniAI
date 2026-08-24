@@ -4,7 +4,6 @@ import json
 import re
 from collections import Counter
 import chromadb
-import ollama
 
 # --- Ensure project root and source_code/ are on the path ──────────────────────
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -16,6 +15,7 @@ if SOURCE_DIR not in sys.path:
     sys.path.append(SOURCE_DIR)
 
 from source_code.config import CONFIG
+import source_code.models as models
 import prompts
 
 # -----------------------------------------------------------------
@@ -23,7 +23,8 @@ import prompts
 # -----------------------------------------------------------------
 
 CHROMA_PATH = CONFIG["paths"]["chroma"]
-MODEL       = CONFIG["providers"]["router"]
+MODEL       = CONFIG["providers"]["router_model"]
+PROVIDER    = CONFIG["providers"]["router"]
 OUTPUT_FILE = os.path.join(ROOT_DIR, "source_code", "data", "subject_keywords.json")
 
 COLLECTIONS = {
@@ -228,7 +229,6 @@ def collect_pyq(metadatas: list[dict], documents: list[str]) -> dict[str, set]:
 # -----------------------------------------------------------------
 
 def extract_keywords_for_unit(
-    ollama_client: ollama.Client,
     subject: str,
     items: set,
     unit: str | None,
@@ -240,13 +240,14 @@ def extract_keywords_for_unit(
     prompt    = prompts.keyword_extraction(subject=subject, items_list=items_str, unit=unit)
 
     try:
-        response = ollama_client.chat(
+        response = models.chat(
+            prompt=prompt,
             model=MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            think=False,
-            options={"num_predict": 150, "temperature": 0.1},
+            provider=PROVIDER,
+            num_predict=150,
+            temperature=0.1,
         )
-        return clean_llm_output(response.message.content.strip())
+        return clean_llm_output(response.strip())
     except Exception as e:
         print(f"    [ERROR] LLM failed: {e} — using raw items as fallback")
         return clean_llm_output(", ".join(str(i) for i in capped))
@@ -289,7 +290,6 @@ def generate_keyword_map():
     )
     print(f"\nFound {len(all_subjects)} unique subjects across all collections.")
 
-    ollama_client = ollama.Client(host=CONFIG["OLLAMA_LOCAL_URL"], timeout=90)
     final_map     = load_checkpoint()
 
     for subject in all_subjects:
@@ -308,7 +308,7 @@ def generate_keyword_map():
             for unit_label, titles in sorted(units.items()):
                 print(f"    unit {unit_label}: {len(titles)} titles")
                 kws = extract_keywords_for_unit(
-                    ollama_client, subject, titles, unit=unit_label, max_items=MAX_ITEMS_PER_UNIT
+                    subject, titles, unit=unit_label, max_items=MAX_ITEMS_PER_UNIT
                 )
                 raw_unit_kws[unit_label] = dedupe(kws)
                 print(f"      → {len(raw_unit_kws[unit_label])}: {raw_unit_kws[unit_label][:4]}...")
@@ -323,7 +323,7 @@ def generate_keyword_map():
             for unit_label, titles in sorted(units.items()):
                 print(f"    unit {unit_label}: {len(titles)} titles")
                 kws = extract_keywords_for_unit(
-                    ollama_client, subject, titles, unit=unit_label, max_items=MAX_ITEMS_PER_UNIT
+                    subject, titles, unit=unit_label, max_items=MAX_ITEMS_PER_UNIT
                 )
                 raw_unit_kws[unit_label] = dedupe(kws)
                 print(f"      → {len(raw_unit_kws[unit_label])}: {raw_unit_kws[unit_label][:4]}...")
@@ -335,7 +335,7 @@ def generate_keyword_map():
             items = pyq_grouped[subject]
             print(f"  pyq: {len(items)} question snippets")
             kws = extract_keywords_for_unit(
-                ollama_client, subject, items, unit=None, max_items=MAX_ITEMS_PER_SUBJECT
+                subject, items, unit=None, max_items=MAX_ITEMS_PER_SUBJECT
             )
             subject_entry["pyq"] = dedupe(kws)
             print(f"    → {len(subject_entry['pyq'])}: {subject_entry['pyq'][:4]}...")
